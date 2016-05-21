@@ -449,8 +449,8 @@ shinyServer(function(input,output,session){
          mu=mean(x[input$L:input$U]) # in-control process mean
          sd=sd(x[input$L:input$U]) # in-control process variance
          z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-         plots[[2*j-1]] <<- CUSUM_plot1(prodata, z,j,input$L,input$U,"Retention Time")
-         plots[[2*j]] <<- CUSUM_plot2(prodata, z,j,input$L,input$U,"Retention Time")
+         plots[[2*j-1]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMm", 1) #CUSUM_plot1(prodata, z,j,input$L,input$U,"Retention Time")
+         plots[[2*j]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMv", 2)  #CUSUM_plot2(prodata, z,j,input$L,input$U,"Retention Time")
        })
       
        do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
@@ -466,8 +466,8 @@ shinyServer(function(input,output,session){
      sd=sd(x[input$L:input$U]) # in-control process variance
      z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
 
-      plot1 <- CUSUM_plot1(prodata, z,j,input$L,input$U, "Retention Time")
-      plot2 <- CUSUM_plot2(prodata, z,j,input$L,input$U, "Retention Time")
+      plot1 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMm", 1) #CUSUM_plot1(prodata, z,j,input$L,input$U, "Retention Time")
+      plot2 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMv", 2) #CUSUM_plot2(prodata, z,j,input$L,input$U, "Retention Time")
       
       subplot(plot1,plot2) %>% layout(title = levels(prodata$Precursor)[j])
      }
