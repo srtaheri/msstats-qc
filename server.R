@@ -11,6 +11,7 @@ library(RecordLinkage)
 library(plotly)
 library(gridExtra)
 source("CUSUM-Plot-functions.R")
+source("CP-Plot-functions.R")
 
 shinyServer(function(input,output,session){
   
@@ -95,158 +96,11 @@ shinyServer(function(input,output,session){
      return(input$tab)
    })
    outputOptions(output, 'activeTab', suspendWhenHidden=FALSE)
-########################################################################################
-   # base <- reactive({
-   #   prodata <- prodata()
-   #   if(output$PA_CUSUM) {
-   #     print("Hello")
-   #   }
-   # })
+
  #############################################################################################################################
   #################################################### Function  #############################################################
   ############################################################################################################################
-##### multiplot function ###################################################################################################
-  # multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
-  #   library(grid)
-  #   
-  #   # Make a list from the ... arguments and plotlist
-  #   plots <- c(list(...), plotlist)
-  #   
-  #   numPlots = length(plots)
-  #   
-  #   # If layout is NULL, then use 'cols' to determine layout
-  #   if (is.null(layout)) {
-  #     # Make the panel
-  #     # ncol: Number of columns of plots
-  #     # nrow: Number of rows needed, calculated from # of cols
-  #     layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
-  #                      ncol = cols, nrow = ceiling(numPlots/cols))
-  #   }
-  #   
-  #   if (numPlots==1) {
-  #     print(plots[[1]])
-  #     
-  #   } else {
-  #     # Set up the page
-  #     grid.newpage()
-  #     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-  #     
-  #     # Make each plot, in the correct location
-  #     for (i in 1:numPlots) {
-  #       # Get the i,j matrix positions of the regions that contain this subplot
-  #       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-  #       
-  #       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
-  #                                       layout.pos.col = matchidx$col))
-  #     }
-  #   }
-  # }
 
-
-#### CP plot1 function ######################################################################################################
-  CP_plot1 <- function(z,j,Main.title) {
-    prodata <- prodata()
-    #title <- title()
-    ## Create variables 
-    Ct<- numeric(length(z)-1)     
-    Dt<- numeric(length(z)-1)
-    SS<- numeric(length(z)-1)
-    SST<- numeric(length(z)-1)
-    
-    ###################
-    
-    ## Change point analysis for mean (Single step change model)    
-    for(i in 1:length(z)-1)
-    {
-      Ct[i]=(length(z)-i)*(((1/(length(z)-i))*sum(z[(i+1):length(z)]))-0)^2 #change point function
-    }
-    QCno=1:(length(z)-1) 
-    tho.hat.1=which(Ct==max(Ct)) #change point estimate
-    plot.data=data.frame(QCno,Ct,tho.hat.1) # dataframe for change point plot
-    y.max=max(plot.data$Ct) # y axis upper limit
-    y.min=0 # y axis lower limit
-    #plot.subtitle=title[j]                             
-    Main = Main.title
-    #####################
-    x <- list(
-      #title = "QCno"
-      title = paste("QCno - ", levels(prodata$Precursor)[j])
-    )
-    y <- list(
-      title = "Ci"
-    )
-    
-    plot_ly(plot.data, x = QCno, y = Ct
-            ,type = "scatter"
-            ,line = list(shape = "linear")
-            ,showlegend = FALSE
-            ) %>%
-      layout(xaxis = x,yaxis = y) %>%
-      add_trace( x = c(tho.hat.1,tho.hat.1), y = c(0, (max(Ct)+2)) 
-                 ,marker=list(color="red", size=4, opacity=0.5)
-                 , mode = "lines"
-                 ,showlegend = FALSE
-                 ) %>%
-      add_trace(x = QCno, y =  Ct
-                ,mode = "markers"
-                , marker=list(color="blue" , size=8 , opacity=0.5)
-                ,showlegend = FALSE
-                )
-  }
-#### CP plot2 function ######################################################################################
-  CP_plot2 <- function(z,j,Main.title) {
-    prodata <- prodata()
-    #title <- title()
-    ## Create variables 
-    Ct<- numeric(length(z)-1)     
-    Dt<- numeric(length(z)-1)
-    SS<- numeric(length(z)-1)
-    SST<- numeric(length(z)-1)
-    Main = Main.title
-    ## Change point analysis for variance (Single step change model)  
-    for(i in 1:length(z))
-    {
-      SS[i]=z[i]^2
-    }
-    for(i in 1:length(z))
-    {
-      SST[i]=sum(SS[i:length(z)])
-      Dt[i]=((SST[i]/2)-((length(z)-i+1)/2)*log(SST[i]/(length(z)-i+1))-(length(z)-i+1)/2) #change point function
-    }
-    QCno=1:length(z)
-    tho.hat.2=which(Dt==max(Dt)) # change point estimate
-    plot.data=data.frame(QCno,Dt,tho.hat.2) # dataframe for change point plot
-    y.max=max(plot.data$Dt) # y axis upper limit
-    y.min=0 # y axis lower limit
-    #plot.subtitle=title[j]                                     
-    ########################  
-    
-    x <- list(
-      #title = "QCno"
-      title = paste("QCno - ", levels(prodata$Precursor)[j])
-    )
-    y <- list(
-      title = "Di"
-    )
-    
-    plot_ly(plot.data, x = QCno, y = Dt
-            ,type = "scatter"
-            ,line = list(shape = "linear")
-            ,showlegend = FALSE
-            ) %>%
-    layout(xaxis = x,yaxis = y) %>%
-      add_trace( x = c(tho.hat.2,tho.hat.2), y = c(0, (max(Dt)+2)) 
-                 ,marker=list(color="red" , size=4 , opacity=0.5)
-                 ,mode = "lines"
-                 ,showlegend = FALSE
-                 ) %>%
-      add_trace(x = QCno, y =  Dt
-                ,mode = "markers"
-                , marker=list(color="blue" , size=8 , opacity=0.5)
-                ,showlegend = FALSE
-                )
-    
-  }
 #### IMR plot 1 ###########################################################################################################
   IMR_plot1 <- function(z,j,L,U,Main.title) {
     
@@ -432,17 +286,16 @@ shinyServer(function(input,output,session){
 
      prodata <- prodata()
      plots <- list()
-     input$act_button   # if user doesn't press "click to see plots" button, nothing is shown
+     #input$act_button   # if user doesn't press "click to see plots" button, nothing is shown
      #prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # order precursors in increasing order based on RT
 
-     if (input$act_button == 0)
-        return()
+     #if (input$act_button == 0)
+        #return()
 
      
      if(input$pep1.1 == "all peptides") {
-       input$act_button
+       #input$act_button
        
-
        results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
          precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
          x=precursdata$Best.RT # raw data for retention time
@@ -458,14 +311,14 @@ shinyServer(function(input,output,session){
      }
 
      else{
-       input$act_button
+       #input$act_button
      j = which(levels(prodata$Precursor) == input$pep1.1)
      precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
      x=precursdata$Best.RT # raw data for retention time
      mu=mean(x[input$L:input$U]) # in-control process mean
      sd=sd(x[input$L:input$U]) # in-control process variance
      z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-
+    
       plot1 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMm", 1) #CUSUM_plot1(prodata, z,j,input$L,input$U, "Retention Time")
       plot2 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMv", 2) #CUSUM_plot2(prodata, z,j,input$L,input$U, "Retention Time")
       
@@ -484,34 +337,20 @@ shinyServer(function(input,output,session){
     prodata <- prodata()
     plots <- list()
     #prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # order precursors in increasing order based on RT
-    input$act_button
-    if (input$act_button == 0)
-      return()
+    #input$act_button
+    #if (input$act_button == 0)
+    #  return()
     
     if(input$pep1.1 == "all peptides") {
       
-      
-      
-      # for (j in 1:nlevels(prodata$Precursor)) {
-      #   precursdata<-prodata[prodata$Precursor==levels(prodata$PrecursorRT)[j],] # subset for a particular precursor
-      #   x=precursdata$Best.RT # raw data for retention time
-      #   mu=mean(x[input$L:input$U]) # in-control process mean
-      #   sd=sd(x[input$L:input$U]) # in-control process variance
-      #   z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-      #   plots[[2*j-1]] <- CP_plot1(z,j,"Retention Time") 
-      #   #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorRT)[j]), "")))
-      #   plots[[2*j]] <- CP_plot2(z,j,"Retention Time") 
-      #   #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorRT)[j]), "")))
-      #   
-      # }
       results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
         precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
         x=precursdata$Best.RT # raw data for retention time
         mu=mean(x[input$L:input$U]) # in-control process mean
         sd=sd(x[input$L:input$U]) # in-control process variance
         z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-        plots[[2*j-1]] <<- CP_plot1(z,j,"Retention Time")
-        plots[[2*j]] <<- CP_plot2(z,j,"Retention Time")
+        plots[[2*j-1]] <<- CP_plot(prodata, z,j,"Retention Time",1,"Ci")
+        plots[[2*j]] <<- CP_plot(prodata, z,j,"Retention Time", 2, "Di")
       })
 
       do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
@@ -526,8 +365,8 @@ shinyServer(function(input,output,session){
     sd=sd(x[input$L:input$U]) # in-control process variance
     z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
     
-    plot1 <- CP_plot1(z,j, "Retention Time")
-    plot2 <- CP_plot2(z,j, "Retention Time")
+    plot1 <- CP_plot(prodata, z,j,"Retention Time",1,"Ci")
+    plot2 <- CP_plot(prodata, z,j,"Retention Time", 2, "Di")
     subplot(plot1,plot2)
     }
     }
