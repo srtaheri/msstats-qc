@@ -183,6 +183,14 @@ shinyServer(function(input,output,session){
      x <- 0
      if(method == "Best.RT"){
        x = precursdata$Best.RT # raw data for retention time
+     } else if(method == "Peak Assymetry") {
+       x = precursdata$Max.End.Time-precursdata$Min.Start.Time # raw data for peak assymetry
+     } else if(method == "FWHM") {
+       x=precursdata$Max.FWHM
+     } else if(method == "Total Area") {
+       x=precursdata$Total.Area # raw data for total area
+     } else {
+       print("Error")
      }
      
      mu=mean(x[L:U]) # in-control process mean
@@ -248,11 +256,7 @@ shinyServer(function(input,output,session){
     if(input$pep1.1 == "all peptides") {
       
       results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-        precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-        x=precursdata$Best.RT # raw data for retention time
-        mu=mean(x[input$L:input$U]) # in-control process mean
-        sd=sd(x[input$L:input$U]) # in-control process variance
-        z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+        z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
         plots[[2*j-1]] <<- CP_plot(prodata, z,j,"Retention Time",1,"Ci")
         plots[[2*j]] <<- CP_plot(prodata, z,j,"Retention Time", 2, "Di")
       })
@@ -263,11 +267,7 @@ shinyServer(function(input,output,session){
     else{
     
     j = which(levels(prodata$Precursor) == input$pep1.1)
-    precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-    x=precursdata$Best.RT # raw data for retention time
-    mu=mean(x[input$L:input$U]) # in-control process mean
-    sd=sd(x[input$L:input$U]) # in-control process variance
-    z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+    z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
     
     plot1 <- CP_plot(prodata, z,j,"Retention Time",1,"Ci")
     plot2 <- CP_plot(prodata, z,j,"Retention Time", 2, "Di")
@@ -291,11 +291,7 @@ shinyServer(function(input,output,session){
         if(input$pep1.1 == "all peptides") {
 
           results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-            precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-            x=precursdata$Best.RT # raw data for retention time
-            mu=mean(x[input$L:input$U]) # in-control process mean
-            sd=sd(x[input$L:input$U]) # in-control process variance
-            z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+            z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
             plots[[2*j-1]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",1,"Individual Value") 
             plots[[2*j]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",2,"Moving Range") 
           })
@@ -308,11 +304,7 @@ shinyServer(function(input,output,session){
         else{
         #j = as.numeric(input$pep1.1)
         j = which(levels(prodata$Precursor) == input$pep1.1)
-        precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-        x=precursdata$Best.RT # raw data for retention time
-        mu=mean(x[input$L:input$U]) # in-control process mean
-        sd=sd(x[input$L:input$U]) # in-control process variance
-        z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+        z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
         
         plot1 <- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",1,"Individual Value") 
         plot2 <- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",2,"Moving Range") 
@@ -337,27 +329,19 @@ shinyServer(function(input,output,session){
          if(input$pep1.1 == "all peptides") {
            
            results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-             precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-             x=precursdata$Max.End.Time-precursdata$Min.Start.Time # raw data for peak assymetry
-             mu=mean(x[input$L:input$U]) # in-control process mean
-             sd=sd(x[input$L:input$U]) # in-control process variance
-             z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-             plots[[2*j-1]] <<- CUSUM_plot1(z,j,input$L,input$U,"Peak Assymetry")
-             plots[[2*j]] <<- CUSUM_plot2(z,j,input$L,input$U,"Peak Assymetry")
+             z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
+             plots[[2*j-1]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Peak Assymetry", "CUSUMm", 1) 
+             plots[[2*j]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Peak Assymetry", "CUSUMv", 2)
            })
 
            do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% layout(autosize = F, width = 1500, height = my_height())
          }
          else{
          j = which(levels(prodata$Precursor) == input$pep1.1)
-         precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-         x=precursdata$Max.End.Time-precursdata$Min.Start.Time  # raw data for peak assymetry               
-         mu=mean(x[input$L:input$U]);
-         sd=sd(x[input$L:input$U]);
-         z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+         z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
          
-         plot1 <- CUSUM_plot1(z,j,input$L,input$U, "Peak Assymetry")
-         plot2 <- CUSUM_plot2(z,j,input$L,input$U, "Peak Assymetry")
+         plot1 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Peak Assymetry", "CUSUMm", 1) 
+         plot2 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Peak Assymetry", "CUSUMv", 2)
          subplot(plot1,plot2)
          }
        }
@@ -379,15 +363,9 @@ shinyServer(function(input,output,session){
           plots <- list()
           
           for (j in 1:nlevels(prodata$Precursor)) {
-            precursdata<-prodata[prodata$Precursor==levels(prodata$PrecursorPA)[j],] # subset for a particular precursor
-            x=precursdata$Max.End.Time-precursdata$Min.Start.Time # raw data for peak assymetry 
-            mu=mean(x[input$L:input$U]) # in-control process mean
-            sd=sd(x[input$L:input$U]) # in-control process variance
-            z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-            plots[[2*j-1]] <- CP_plot1(z,j,"Peak Assymetry") 
-            #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorPA)[j]), "")))
-            plots[[2*j]] <- CP_plot2(z,j,"Peak Assymetry") 
-            #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorPA)[j]), "")))
+            z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
+            plots[[2*j-1]] <- CP_plot(prodata, z,j,"Peak Assymetry",1,"Ci")  
+            plots[[2*j]] <- CP_plot(prodata, z,j,"Peak Assymetry",2,"Di")  
             
           }
           # number_of_plots <- 2*nlevels(prodata$Precursor)
@@ -400,14 +378,10 @@ shinyServer(function(input,output,session){
         else{
         #j = as.numeric(input$pep1.1)
         j = which(levels(prodata$Precursor) == input$pep1.1)
-        precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-        x=precursdata$Max.End.Time-precursdata$Min.Start.Time  # raw data for peak assymetry             
-        mu=mean(x[input$L:input$U]);
-        sd=sd(x[input$L:input$U]);
-        z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+        z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
          
-        plot1 <- CP_plot1(z,j, "Peak Assymetry")
-        plot2 <- CP_plot2(z,j, "Peak Assymetry")
+        plot1 <- CP_plot(prodata, z,j,"Peak Assymetry",1,"Ci")
+        plot2 <- CP_plot(prodata, z,j,"Peak Assymetry",2,"Di")
         subplot(plot1,plot2)
         }
        }
@@ -431,14 +405,10 @@ shinyServer(function(input,output,session){
            
            for (j in 1:nlevels(prodata$Precursor)) {
              precursdata<-prodata[prodata$Precursor==levels(prodata$PrecursorPA)[j],] # subset for a particular precursor
-             x=precursdata$Max.End.Time-precursdata$Min.Start.Time  # raw data for peak assymetry
-             mu=mean(x[input$L:input$U]) # in-control process mean
-             sd=sd(x[input$L:input$U]) # in-control process variance
-             z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-             plots[[2*j-1]] <- IMR_plot1(z,j,input$L,input$U,"Peak Assymetry") 
-             #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorPA)[j]), "")))
-             plots[[2*j]] <- IMR_plot2(z,j,input$L,input$U,"Peak Assymetry") 
-             #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorPA)[j]), "")))
+             z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
+             plots[[2*j-1]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Peak Assymetry",1,"Individual Value") 
+             plots[[2*j]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Peak Assymetry",2,"Moving Range") 
+             
              
            }
            # number_of_plots <- 2*nlevels(prodata$Precursor)
@@ -450,14 +420,10 @@ shinyServer(function(input,output,session){
          else{
          #j = as.numeric(input$pep1.1)
          j = which(levels(prodata$Precursor) == input$pep1.1)
-         precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-         x=precursdata$Max.End.Time-precursdata$Min.Start.Time  # raw data for peak assymetry             
-         mu=mean(x[input$L:input$U]);
-         sd=sd(x[input$L:input$U]);
-         z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+         z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
          
-         plot1 <- IMR_plot1(z,j,input$L,input$U, "Peak Assymetry")
-         plot2 <- IMR_plot2(z,j,input$L,input$U, "Peak Assymetry")
+         plot1 <- IMR_plot(prodata,z,j,input$L,input$U,"Peak Assymetry",1,"Individual Value") 
+         plot2 <- IMR_plot(prodata,z,j,input$L,input$U,"Peak Assymetry",2,"Moving Range")
          subplot(plot1,plot2)
          }
         }
@@ -481,13 +447,9 @@ shinyServer(function(input,output,session){
           if(input$pep1.1 == "all peptides") {
             
             results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-              precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-              x=precursdata$Max.FWHM # raw data for fwhm
-              mu=mean(x[input$L:input$U]) # in-control process mean
-              sd=sd(x[input$L:input$U]) # in-control process variance
-              z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-              plots[[2*j-1]] <<- CUSUM_plot1(z,j,input$L,input$U,"FWHM")
-              plots[[2*j]] <<- CUSUM_plot2(z,j,input$L,input$U,"FWHM")
+              z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
+              plots[[2*j-1]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"FWHM", "CUSUMm", 1)
+              plots[[2*j]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"FWHM", "CUSUMv", 2)
             })
             
             do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% layout(autosize = F, width = 1500, height = my_height())
@@ -495,14 +457,10 @@ shinyServer(function(input,output,session){
           else{
           
           j = which(levels(prodata$Precursor) == input$pep1.1)
-          precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-          x=precursdata$Max.FWHM; # raw data for fwhm
-          mu=mean(x[input$L:input$U]); # in-control process mean
-          sd=sd(x[input$L:input$U]); # in-control process variance
-          z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+          z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
           
-          plot1 <- CUSUM_plot1(z,j,input$L,input$U, "Peak Assymetry")
-          plot2 <- CUSUM_plot2(z,j,input$L,input$U, "Peak Assymetry")
+          plot1 <- CUSUM_plot(prodata, z,j,input$L,input$U,"FWHM", "CUSUMm", 1)
+          plot2 <- CUSUM_plot(prodata, z,j,input$L,input$U,"FWHM", "CUSUMv", 2)
           subplot(plot1,plot2)
           }
         }
@@ -525,15 +483,9 @@ shinyServer(function(input,output,session){
             plots <- list()
             
             for (j in 1:nlevels(prodata$Precursor)) {
-              precursdata<-prodata[prodata$Precursor==levels(prodata$PrecursorFWHM)[j],] # subset for a particular precursor
-              x=precursdata$Max.FWHM # raw data for fwhm
-              mu=mean(x[input$L:input$U]) # in-control process mean
-              sd=sd(x[input$L:input$U]) # in-control process variance
-              z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-              plots[[2*j-1]] <- CP_plot1(z,j,"FWHM") 
-              #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorFWHM)[j]), "")))
-              plots[[2*j]] <- CP_plot2(z,j,"FWHM") 
-              #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorFWHM)[j]), "")))
+              z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
+              plots[[2*j-1]] <- CP_plot(prodata, z,j,"FWHM",1,"Ci")
+              plots[[2*j]] <- CP_plot(prodata, z,j,"FWHM",2,"Di")
               
             }
             # number_of_plots <- 2*nlevels(prodata$Precursor)
@@ -545,15 +497,10 @@ shinyServer(function(input,output,session){
           else{
           #j = as.numeric(input$pep1.1)
           j = which(levels(prodata$Precursor) == input$pep1.1)
-          #prodata$Max.FWHM <- as.numeric(gsub(",","",prodata$Max.FWHM))
-          precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-          x=precursdata$Max.FWHM; # raw data for fwhm
-          mu=mean(x[input$L:input$U]); # in-control process mean
-          sd=sd(x[input$L:input$U]); # in-control process variance
-          z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+          z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
           
-          plot1 <- CP_plot1(z,j, "FWHM")
-          plot2 <- CP_plot2(z,j, "FWHM")
+          plot1 <- CP_plot(prodata, z,j,"FWHM",1,"Ci")
+          plot2 <- CP_plot(prodata, z,j,"FWHM",2,"Di")
           subplot(plot1,plot2)
           }
         }
@@ -578,15 +525,9 @@ shinyServer(function(input,output,session){
             
             plots <- list()
             for (j in 1:nlevels(prodata$Precursor)) {
-              precursdata<-prodata[prodata$Precursor==levels(prodata$PrecursorFWHM)[j],] # subset for a particular precursor
-              x=precursdata$Max.FWHM  # raw data for fwhm
-              mu=mean(x[input$L:input$U]) # in-control process mean
-              sd=sd(x[input$L:input$U]) # in-control process variance
-              z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-              plots[[2*j-1]] <- IMR_plot1(z,j,input$L,input$U,"FWHM") 
-              #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorFWHM)[j]), "")))
-              plots[[2*j]] <- IMR_plot2(z,j,input$L,input$U,"FWHM") 
-              #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorFWHM)[j]), "")))
+              z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
+              plots[[2*j-1]] <<- IMR_plot(prodata,z,j,input$L,input$U,"FWHM",1,"Individual Value") 
+              plots[[2*j]] <<- IMR_plot(prodata,z,j,input$L,input$U,"FWHM",2,"Moving Range") 
               
             }
             # number_of_plots <- 2*nlevels(prodata$Precursor)
@@ -596,17 +537,12 @@ shinyServer(function(input,output,session){
               layout(autosize = F, width = 1500, height = my_height())
           }
           else{
-          #j = as.numeric(input$pep1.1)
-          j = which(levels(prodata$Precursor) == input$pep1.1)
-          #prodata$Max.FWHM <- as.numeric(gsub(",","",prodata$Max.FWHM))
-          precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-          x=precursdata$Max.FWHM; # raw data for fwhm
-          mu=mean(x[input$L:input$U]); # in-control process mean
-          sd=sd(x[input$L:input$U]); # in-control process variance
-          z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
           
-          plot1 <- IMR_plot1(z,j,input$L,input$U, "FWHM")
-          plot2 <- IMR_plot2(z,j,input$L,input$U, "FWHM")
+          j = which(levels(prodata$Precursor) == input$pep1.1)
+          z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
+          
+          plot1 <-  IMR_plot(prodata,z,j,input$L,input$U,"FWHM",1,"Individual Value") 
+          plot2 <- IMR_plot(prodata,z,j,input$L,input$U,"FWHM",2,"Moving Range") 
           subplot(plot1,plot2)
           }
         }
@@ -630,13 +566,9 @@ shinyServer(function(input,output,session){
            if(input$pep1.1 == "all peptides") {
              
              results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-               precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-               x=precursdata$Total.Area # raw data for total area
-               mu=mean(x[input$L:input$U]) # in-control process mean
-               sd=sd(x[input$L:input$U]) # in-control process variance
-               z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-               plots[[2*j-1]] <<- CUSUM_plot1(z,j,input$L,input$U,"Total Area")
-               plots[[2*j]] <<- CUSUM_plot2(z,j,input$L,input$U,"Total Area")
+               z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
+               plots[[2*j-1]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Total Area", "CUSUMm", 1)
+               plots[[2*j]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Total Area", "CUSUMv", 2)
              })
 
              do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% layout(autosize = F, width = 1500, height = my_height())
@@ -644,14 +576,10 @@ shinyServer(function(input,output,session){
            }
            else{
            j = which(levels(prodata$Precursor) == input$pep1.1)
-           precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-           x=precursdata$Total.Area; # raw data for total area
-           mu=mean(x[input$L:input$U]); # in-control process mean
-           sd=sd(x[input$L:input$U]); # in-control process variance
-           z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+           z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
            
-           plot1 <- CUSUM_plot1(z,j,input$L,input$U, "Peak Assymetry")
-           plot2 <- CUSUM_plot2(z,j,input$L,input$U, "Peak Assymetry")
+           plot1 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Total Area", "CUSUMm", 1)
+           plot2 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Total Area", "CUSUMv", 2)
            subplot(plot1,plot2)
            }
          }
@@ -676,15 +604,9 @@ shinyServer(function(input,output,session){
              plots <- list()
              #prodata$Max.FWHM <- as.numeric(gsub(",","",prodata$Max.FWHM))
              for (j in 1:nlevels(prodata$Precursor)) {
-               precursdata<-prodata[prodata$Precursor==levels(prodata$PrecursorTA)[j],] # subset for a particular precursor
-               x=precursdata$Total.Area # raw data for total area
-               mu=mean(x[input$L:input$U]) # in-control process mean
-               sd=sd(x[input$L:input$U]) # in-control process variance
-               z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-               plots[[2*j-1]] <- CP_plot1(z,j,"Total Area") 
-               #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorTA)[j]), "")))
-               plots[[2*j]] <- CP_plot2(z,j,"Total Area") 
-               #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorTA)[j]), "")))
+               z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
+               plots[[2*j-1]] <- CP_plot(prodata, z,j,"Total Area",1,"Ci")
+               plots[[2*j]] <- CP_plot(prodata, z,j,"Total Area",2,"Di") 
                
              }
              # number_of_plots <- 2*nlevels(prodata$Precursor)
@@ -694,18 +616,12 @@ shinyServer(function(input,output,session){
                layout(autosize = F, width = 1500, height = my_height())
            }
            else{
-           #j = as.numeric(input$pep1.1)
+           
            j = which(levels(prodata$Precursor) == input$pep1.1)
-           #prodata$Total.Area <- as.numeric(gsub(",","",prodata$Total.Area))
-           precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-           x=precursdata$Total.Area; # raw data for total area
-           #Main.title="Total Area" # main title of each plot
-           mu=mean(x[input$L:input$U]); # in-control process mean
-           sd=sd(x[input$L:input$U]); # in-control process variance
-           z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+           z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
         
-           plot1 <- CP_plot1(z,j, "Total Area")
-           plot2 <- CP_plot2(z,j, "Total Area")
+           plot1 <- CP_plot(prodata, z,j,"Total Area",1,"Ci")
+           plot2 <- CP_plot(prodata, z,j,"Total Area",2,"Di")
            subplot(plot1,plot2)
            }
          }
@@ -730,13 +646,9 @@ shinyServer(function(input,output,session){
              plots <- list()
              
              for (j in 1:nlevels(prodata$Precursor)) {
-               precursdata<-prodata[prodata$Precursor==levels(prodata$PrecursorTA)[j],] # subset for a particular precursor
-               x=precursdata$Total.Area  # raw data for total area
-               mu=mean(x[input$L:input$U]) # in-control process mean
-               sd=sd(x[input$L:input$U]) # in-control process variance
-               z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-               plots[[2*j-1]] <- IMR_plot1(z,j,input$L,input$U,"Total Area") +  ggtitle(bquote(atop(.(levels(prodata$PrecursorTA)[j]), "")))
-               plots[[2*j]] <- IMR_plot2(z,j,input$L,input$U,"Total Area") +  ggtitle(bquote(atop(.(levels(prodata$PrecursorTA)[j]), "")))
+               z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
+               plots[[2*j-1]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Total Area",1,"Individual Value") 
+               plots[[2*j]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Total Area",2,"Moving Range") 
                
              }
              # number_of_plots <- 2*nlevels(prodata$Precursor)
@@ -749,16 +661,10 @@ shinyServer(function(input,output,session){
            else{
            #j = as.numeric(input$pep1.1)
            j = which(levels(prodata$Precursor) == input$pep1.1)
-           #prodata$Total.Area <- as.numeric(gsub(",","",prodata$Total.Area))
-           precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-           x=precursdata$Total.Area; # raw data for total area
-           #Main.title="Total Area" # main title of each plot
-           mu=mean(x[input$L:input$U]); # in-control process mean
-           sd=sd(x[input$L:input$U]); # in-control process variance
-           z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+           z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
            
-           plot1 <- IMR_plot1(z,j,input$L,input$U, "Total Area")
-           plot2 <- IMR_plot2(z,j,input$L,input$U, "Total Area")
+           plot1 <- IMR_plot(prodata,z,j,input$L,input$U,"Total Area",1,"Individual Value") 
+           plot2 <- IMR_plot(prodata,z,j,input$L,input$U,"Total Area",2,"Moving Range") 
            subplot(plot1,plot2)
            
            }
