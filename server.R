@@ -178,7 +178,7 @@ shinyServer(function(input,output,session){
 ###########################################################################################################################
 ###########################################################################################################################
 ################################################################# plots ###################################################
-   normalize <- function(prodata,j, L, U, method) {
+   normalize <- function(prodata, j, L, U, method) {
      precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
      x <- 0
      if(method == "Best.RT"){
@@ -198,482 +198,86 @@ shinyServer(function(input,output,session){
      z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
      return(z)
    }
-  ########################################################## plot CUSUM_chart  for RT####################
-  output$RT_CUSUM <- renderPlotly({
-    
+   
+   render.tab <- function(normalize.method, plot.method, main.title, y.title1, y.title2){
      validate(
        need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
      )
-
      prodata <- prodata()
      plots <- list()
-     #input$act_button   # if user doesn't press "click to see plots" button, nothing is shown
-     #prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # order precursors in increasing order based on RT
-
-     #if (input$act_button == 0)
-        #return()
-
+     
      if(input$pep1.1 == "all peptides") {
-       #input$act_button
        
-       results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-         z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
-         plots[[2*j-1]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMm", 1) #CUSUM_plot1(prodata, z,j,input$L,input$U,"Retention Time")
-         plots[[2*j]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMv", 2)  #CUSUM_plot2(prodata, z,j,input$L,input$U,"Retention Time")
+       results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
+         z <- normalize(prodata, j, input$L, input$U, method = normalize.method)
+         plots[[2*j-1]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
+         plots[[2*j]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
        })
-      
+       
        do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
          layout(autosize = F, width = 1500, height = my_height())
      }
-
-     else{
-       #input$act_button
-     j = which(levels(prodata$Precursor) == input$pep1.1)
-     z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
-    
-      plot1 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMm", 1) #CUSUM_plot1(prodata, z,j,input$L,input$U, "Retention Time")
-      plot2 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMv", 2) #CUSUM_plot2(prodata, z,j,input$L,input$U, "Retention Time")
-      
-      subplot(plot1,plot2) %>% layout(title = levels(prodata$Precursor)[j])
+     
+     else {
+       j = which(levels(prodata$Precursor) == input$pep1.1)
+       z <- normalize(prodata, j, input$L, input$U, method = normalize.method)
+       
+       plot1 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
+       plot2 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
+       
+       subplot(plot1,plot2) %>% layout(title = levels(prodata$Precursor)[j])
      }
-
    }
-  
-   )
-  ########################################################## plot CP for RT #############################
-  output$RT_CP <- renderPlotly({
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-    
-    prodata <- prodata()
-    plots <- list()
-    #prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # order precursors in increasing order based on RT
-    #input$act_button
-    #if (input$act_button == 0)
-    #  return()
-    
-    if(input$pep1.1 == "all peptides") {
-      
-      results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-        z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
-        plots[[2*j-1]] <<- CP_plot(prodata, z,j,"Retention Time",1,"Ci")
-        plots[[2*j]] <<- CP_plot(prodata, z,j,"Retention Time", 2, "Di")
-      })
-
-      do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-        layout(autosize = F, width = 1500, height = my_height())
-    }
-    else{
-    
-    j = which(levels(prodata$Precursor) == input$pep1.1)
-    z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
-    
-    plot1 <- CP_plot(prodata, z,j,"Retention Time",1,"Ci")
-    plot2 <- CP_plot(prodata, z,j,"Retention Time", 2, "Di")
-    subplot(plot1,plot2)
-    }
-    }
-    )
+  ########################################################## plot CUSUM_chart  for RT####################
+   output$RT_CUSUM <- renderPlotly({
+     render.tab(normalize.method = "Best.RT", plot.method = "CUSUM", main.title = "Retention Time", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
+   })
+   ########################################################## plot CP for RT #############################
+   output$RT_CP <- renderPlotly({
+     render.tab(normalize.method = "Best.RT", plot.method = "CP", main.title = "Retention Time", y.title1 = "Ci", y.title2 = "Di")
+   })
   ####################################################### plot ZMR for RT ##############################
-  output$RT_ZMR <- renderPlotly({
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-    
-        prodata <- prodata()
-        plots <- list()
-        #prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # order precursors in increasing order based on RT
-        #input$act_button
-        #if (input$act_button == 0)
-        #  return()
-        
-        if(input$pep1.1 == "all peptides") {
-
-          results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-            z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
-            plots[[2*j-1]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",1,"Individual Value") 
-            plots[[2*j]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",2,"Moving Range") 
-          })
-          #number_of_plots <- 2*nlevels(prodata$Precursor)
-          #layout <- matrix(1:number_of_plots, ncol=2, byrow = TRUE)
-          #isolate(multiplot(plotlist = plots, cols = 2, layout = layout))
-          do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-            layout(autosize = F, width = 1500, height = my_height())
-        }
-        else{
-        #j = as.numeric(input$pep1.1)
-        j = which(levels(prodata$Precursor) == input$pep1.1)
-        z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
-        
-        plot1 <- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",1,"Individual Value") 
-        plot2 <- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",2,"Moving Range") 
-        subplot(plot1,plot2)
-        }
-      }
-    #, height = my_height
-    )
+   output$RT_ZMR <- renderPlotly({
+     render.tab(normalize.method = "Best.RT", plot.method = "ZMR", main.title = "Retention Time", y.title1 = "Individual Value", y.title2 = "Moving Range")
+   })
   ########################################################plot CUSUM for Peak assymetry ################
-  output$PA_CUSUM <- renderPlotly({
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-    
-         prodata <- prodata()
-         plots <- list()
-         #prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time)
-         input$act_button
-         if (input$act_button == 0)
-           return()
-         
-         if(input$pep1.1 == "all peptides") {
-           
-           results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-             z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
-             plots[[2*j-1]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Peak Assymetry", "CUSUMm", 1) 
-             plots[[2*j]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Peak Assymetry", "CUSUMv", 2)
-           })
-
-           do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% layout(autosize = F, width = 1500, height = my_height())
-         }
-         else{
-         j = which(levels(prodata$Precursor) == input$pep1.1)
-         z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
-         
-         plot1 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Peak Assymetry", "CUSUMm", 1) 
-         plot2 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Peak Assymetry", "CUSUMv", 2)
-         subplot(plot1,plot2)
-         }
-       }
-    )
+   output$PA_CUSUM <- renderPlotly({
+     render.tab(normalize.method = "Peak Assymetry", plot.method = "CUSUM", main.title = "Peak Assymetry", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
+   })
  ######################################################## plot Change Point for Peak assymetry ###########
-  output$PA_CP <- renderPlotly({
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-    
-        prodata <- prodata()
-        prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time)
-        input$act_button
-        if (input$act_button == 0)
-          return()
-        
-        if(input$pep1.1 == "all peptides") {
-          
-          plots <- list()
-          
-          for (j in 1:nlevels(prodata$Precursor)) {
-            z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
-            plots[[2*j-1]] <- CP_plot(prodata, z,j,"Peak Assymetry",1,"Ci")  
-            plots[[2*j]] <- CP_plot(prodata, z,j,"Peak Assymetry",2,"Di")  
-            
-          }
-          # number_of_plots <- 2*nlevels(prodata$Precursor)
-          # layout <- matrix(1:number_of_plots, ncol=2, byrow = TRUE)
-          # isolate(multiplot(plotlist = plots, cols = 2, layout = layout))
-          do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-            layout(autosize = F, width = 1500, height = my_height())
-          
-        }
-        else{
-        #j = as.numeric(input$pep1.1)
-        j = which(levels(prodata$Precursor) == input$pep1.1)
-        z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
-         
-        plot1 <- CP_plot(prodata, z,j,"Peak Assymetry",1,"Ci")
-        plot2 <- CP_plot(prodata, z,j,"Peak Assymetry",2,"Di")
-        subplot(plot1,plot2)
-        }
-       }
-    #, height = my_height
-    )
+   output$PA_CP <- renderPlotly({
+     render.tab(normalize.method = "Peak Assymetry", plot.method = "CP", main.title = "Peak Assymetry", y.title1 = "Ci", y.title2 = "Di")
+   })
  ########################################################## plot ZMR for Peak assymetry ###################################
-  output$PA_ZMR <- renderPlotly({
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-    
-         prodata <- prodata()
-         prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time)
-         input$act_button
-         if (input$act_button == 0)
-           return()
-         
-         if(input$pep1.1 == "all peptides") {
-           
-           plots <- list()
-           
-           for (j in 1:nlevels(prodata$Precursor)) {
-             precursdata<-prodata[prodata$Precursor==levels(prodata$PrecursorPA)[j],] # subset for a particular precursor
-             z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
-             plots[[2*j-1]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Peak Assymetry",1,"Individual Value") 
-             plots[[2*j]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Peak Assymetry",2,"Moving Range") 
-             
-             
-           }
-           # number_of_plots <- 2*nlevels(prodata$Precursor)
-           # layout <- matrix(1:number_of_plots, ncol=2, byrow = TRUE)
-           # isolate(multiplot(plotlist = plots, cols = 2, layout = layout))
-           do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-             layout(autosize = F, width = 1500, height = my_height())
-         }
-         else{
-         #j = as.numeric(input$pep1.1)
-         j = which(levels(prodata$Precursor) == input$pep1.1)
-         z <- normalize(prodata, j, input$L, input$U, method = "Peak Assymetry")
-         
-         plot1 <- IMR_plot(prodata,z,j,input$L,input$U,"Peak Assymetry",1,"Individual Value") 
-         plot2 <- IMR_plot(prodata,z,j,input$L,input$U,"Peak Assymetry",2,"Moving Range")
-         subplot(plot1,plot2)
-         }
-        }
-    #, height = my_height
-    )
+   output$PA_ZMR <- renderPlotly({
+     render.tab(normalize.method = "Peak Assymetry", plot.method = "ZMR", main.title = "Peak Assymetry", y.title1 = "Individual Value", y.title2 = "Moving Range")
+   })
   ########################################################### plot CUSUM FOR Max.FWHM ####################################
-  output$Max_CUSUM <- renderPlotly({
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-        
-          prodata <- prodata()
-          plots <- list()
-          prodata$Max.FWHM <- as.numeric(gsub(",","",prodata$Max.FWHM))
-          #prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata$Max.FWHM) 
-          input$act_button
-          
-          if (input$act_button == 0)
-            return()
-          
-          if(input$pep1.1 == "all peptides") {
-            
-            results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-              z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
-              plots[[2*j-1]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"FWHM", "CUSUMm", 1)
-              plots[[2*j]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"FWHM", "CUSUMv", 2)
-            })
-            
-            do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% layout(autosize = F, width = 1500, height = my_height())
-          }
-          else{
-          
-          j = which(levels(prodata$Precursor) == input$pep1.1)
-          z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
-          
-          plot1 <- CUSUM_plot(prodata, z,j,input$L,input$U,"FWHM", "CUSUMm", 1)
-          plot2 <- CUSUM_plot(prodata, z,j,input$L,input$U,"FWHM", "CUSUMv", 2)
-          subplot(plot1,plot2)
-          }
-        }
-    )
+   output$Max_CUSUM <- renderPlotly({
+     render.tab(normalize.method = "FWHM", plot.method = "CUSUM", main.title = "FWHM", y.title1 = "CUSUMm", y.title2 = "CUSUMv")    
+   })
 ########################################################## plot Change Point FOR Max.FWHM ####################################
-  output$Max_CP <- renderPlotly({
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-    
-          prodata <- prodata()
-          prodata$Max.FWHM <- as.numeric(gsub(",","",prodata$Max.FWHM))
-          prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata$Max.FWHM) 
-          input$act_button
-          if (input$act_button == 0)
-            return()
-          
-          if(input$pep1.1 == "all peptides") {
-            
-            plots <- list()
-            
-            for (j in 1:nlevels(prodata$Precursor)) {
-              z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
-              plots[[2*j-1]] <- CP_plot(prodata, z,j,"FWHM",1,"Ci")
-              plots[[2*j]] <- CP_plot(prodata, z,j,"FWHM",2,"Di")
-              
-            }
-            # number_of_plots <- 2*nlevels(prodata$Precursor)
-            # layout <- matrix(1:number_of_plots, ncol=2, byrow = TRUE)
-            # isolate(multiplot(plotlist = plots, cols = 2, layout = layout))
-            do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-              layout(autosize = F, width = 1500, height = my_height())
-          }
-          else{
-          #j = as.numeric(input$pep1.1)
-          j = which(levels(prodata$Precursor) == input$pep1.1)
-          z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
-          
-          plot1 <- CP_plot(prodata, z,j,"FWHM",1,"Ci")
-          plot2 <- CP_plot(prodata, z,j,"FWHM",2,"Di")
-          subplot(plot1,plot2)
-          }
-        }
-    #, height = my_height
-    )
+   output$Max_CP <- renderPlotly({
+     render.tab(normalize.method = "FWHM", plot.method = "CP", main.title = "FWHM", y.title1 = "Ci", y.title2 = "Di")    
+   })
 ########################################################## plot ZMR FOR Max.FWHM ####################################
-  output$Max_ZMR <- renderPlotly({
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-    
-          prodata <- prodata()
-          prodata$Max.FWHM <- as.numeric(gsub(",","",prodata$Max.FWHM))
-          prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata$Max.FWHM) 
-          input$act_button
-          if (input$act_button == 0)
-            return()
-         
-          
-          if(input$pep1.1 == "all peptides") {
-            
-            
-            plots <- list()
-            for (j in 1:nlevels(prodata$Precursor)) {
-              z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
-              plots[[2*j-1]] <<- IMR_plot(prodata,z,j,input$L,input$U,"FWHM",1,"Individual Value") 
-              plots[[2*j]] <<- IMR_plot(prodata,z,j,input$L,input$U,"FWHM",2,"Moving Range") 
-              
-            }
-            # number_of_plots <- 2*nlevels(prodata$Precursor)
-            # layout <- matrix(1:number_of_plots, ncol=2, byrow = TRUE)
-            # isolate(multiplot(plotlist = plots, cols = 2, layout = layout))
-            do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-              layout(autosize = F, width = 1500, height = my_height())
-          }
-          else{
-          
-          j = which(levels(prodata$Precursor) == input$pep1.1)
-          z <- normalize(prodata, j, input$L, input$U, method = "FWHM")
-          
-          plot1 <-  IMR_plot(prodata,z,j,input$L,input$U,"FWHM",1,"Individual Value") 
-          plot2 <- IMR_plot(prodata,z,j,input$L,input$U,"FWHM",2,"Moving Range") 
-          subplot(plot1,plot2)
-          }
-        }
-    #, height = my_height
-    )
+   output$Max_ZMR <- renderPlotly({
+     render.tab(normalize.method = "FWHM", plot.method = "ZMR", main.title = "FWHM", y.title1 = "Individual Value", y.title2 = "Moving Range")
+   })
 ############################################################ plot CUSUM FOR total area ####################################
-  output$TA_CUSUM <- renderPlotly({
-    
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-           prodata <- prodata()
-           plots <- list()
-           prodata$Total.Area <- as.numeric(gsub(",","",prodata$Total.Area))
-           #prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$Total.Area) # order precursors in increasing order based on Total Area
-           input$act_button
-           
-           if (input$act_button == 0)
-             return()
-           
-           if(input$pep1.1 == "all peptides") {
-             
-             results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-               z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
-               plots[[2*j-1]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Total Area", "CUSUMm", 1)
-               plots[[2*j]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Total Area", "CUSUMv", 2)
-             })
-
-             do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% layout(autosize = F, width = 1500, height = my_height())
-             
-           }
-           else{
-           j = which(levels(prodata$Precursor) == input$pep1.1)
-           z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
-           
-           plot1 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Total Area", "CUSUMm", 1)
-           plot2 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Total Area", "CUSUMv", 2)
-           subplot(plot1,plot2)
-           }
-         }
-    )
+   output$TA_CUSUM <- renderPlotly({
+     render.tab(normalize.method = "Total Area", plot.method = "CUSUM", main.title = "Total Area", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
+   })
 ########################################################## plot Change Point FOR total area ##################################
-  output$TA_CP <- renderPlotly({
-    
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-           prodata <- prodata()
-           input$act_button
-           prodata$Total.Area <- as.numeric(gsub(",","",prodata$Total.Area))
-           prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$Total.Area) # order precursors in increasing order based on Total Area
-           
-           if (input$act_button == 0)
-             return()
-           
-          
-            if(input$pep1.1 == "all peptides") {
-             
-             plots <- list()
-             #prodata$Max.FWHM <- as.numeric(gsub(",","",prodata$Max.FWHM))
-             for (j in 1:nlevels(prodata$Precursor)) {
-               z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
-               plots[[2*j-1]] <- CP_plot(prodata, z,j,"Total Area",1,"Ci")
-               plots[[2*j]] <- CP_plot(prodata, z,j,"Total Area",2,"Di") 
-               
-             }
-             # number_of_plots <- 2*nlevels(prodata$Precursor)
-             # layout <- matrix(1:number_of_plots, ncol=2, byrow = TRUE)
-             # isolate(multiplot(plotlist = plots, cols = 2, layout = layout))
-             do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-               layout(autosize = F, width = 1500, height = my_height())
-           }
-           else{
-           
-           j = which(levels(prodata$Precursor) == input$pep1.1)
-           z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
-        
-           plot1 <- CP_plot(prodata, z,j,"Total Area",1,"Ci")
-           plot2 <- CP_plot(prodata, z,j,"Total Area",2,"Di")
-           subplot(plot1,plot2)
-           }
-         }
-    #, height = my_height
-    )
+   output$TA_CP <- renderPlotly({
+     render.tab(normalize.method = "Total Area", plot.method = "CP", main.title = "Total Area", y.title1 = "Ci", y.title2 = "Di")
+   })
 ########################################################## plot ZMR FOR total area ##########################################
-  output$TA_ZMR <- renderPlotly({
-    
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-           prodata <- prodata()
-           prodata$Total.Area <- as.numeric(gsub(",","",prodata$Total.Area))
-           input$act_button
-           prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$Total.Area) # order precursors in increasing order based on Total Area
-           
-           if (input$act_button == 0)
-             return()
-           
-           if(input$pep1.1 == "all peptides") {
-             
-             plots <- list()
-             
-             for (j in 1:nlevels(prodata$Precursor)) {
-               z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
-               plots[[2*j-1]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Total Area",1,"Individual Value") 
-               plots[[2*j]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Total Area",2,"Moving Range") 
-               
-             }
-             # number_of_plots <- 2*nlevels(prodata$Precursor)
-             # layout <- matrix(1:number_of_plots, ncol=2, byrow = TRUE)
-             # isolate(multiplot(plotlist = plots, cols = 2, layout = layout))
-             do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-               layout(autosize = F, width = 1500, height = my_height())
-             
-           }
-           else{
-           #j = as.numeric(input$pep1.1)
-           j = which(levels(prodata$Precursor) == input$pep1.1)
-           z <- normalize(prodata, j, input$L, input$U, method = "Total Area")
-           
-           plot1 <- IMR_plot(prodata,z,j,input$L,input$U,"Total Area",1,"Individual Value") 
-           plot2 <- IMR_plot(prodata,z,j,input$L,input$U,"Total Area",2,"Moving Range") 
-           subplot(plot1,plot2)
-           
-           }
-         }
-    #, height = my_height
-    )
+   output$TA_ZMR <- renderPlotly({
+     render.tab(normalize.method = "Total Area", plot.method = "ZMR", main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
+   })
 ########################################################## box plot in Summary tab ##########################################
   output$box_plot <- renderPlotly({
-    
     validate(
       need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
     )

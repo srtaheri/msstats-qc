@@ -203,3 +203,16 @@ IMR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
     )
 }
 
+#################################################################################################################
+#################################################################################################################
+#################################################################################################################
+
+do.plot <- function(prodata, z, j, L, U, method, main.title, y.title, type) {
+  if(method=="CUSUM") {
+    CUSUM_plot(prodata, z, j, L, U, main.title, y.title, type)
+  } else if(method=="CP") {
+    CP_plot(prodata, z, j, main.title, type, y.title)
+  } else if(method=="ZMR") {
+    IMR_plot(prodata, z, j, L, U,main.title, type, y.title)
+  }
+}
