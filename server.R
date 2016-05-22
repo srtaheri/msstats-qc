@@ -10,9 +10,8 @@ library(GGally)
 library(RecordLinkage)
 library(plotly)
 library(gridExtra)
-source("CUSUM-Plot-functions.R")
-source("CP-Plot-functions.R")
-source("IMR-Plot-functions.R")
+source("plot-functions.R")
+
 
 shinyServer(function(input,output,session){
   

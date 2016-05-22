@@ -1,0 +1,205 @@
+CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
+  k=0.5 
+  h=5  
+  
+  v <- numeric(length(z))
+  
+  Cpoz <- numeric(length(z))
+  Cneg <- numeric(length(z))
+  
+  for(i in 2:length(z)) {
+    Cpoz[i]=max(0,(z[i]-(k)+Cpoz[i-1]))
+    Cneg[i]=max(0,((-k)-z[i]+Cneg[i-1]))
+  }
+  
+  if(type==2) {
+    for(i in 2:length(z)) {
+      v[i]=(sqrt(abs(z[i]))-0.822)/0.349
+    }
+    for(i in 2:length(z)) {
+      Cpoz[i]=max(0,(v[i]-(k)+Cpoz[i-1]))
+      Cneg[i]=max(0,((-k)-v[i]+Cneg[i-1]))
+    }
+  }
+  
+  QCno = rep(1:length(z),2)
+  group = c(rep('CUSUM+',length(z)),rep('CUSUM-',length(z)))
+  plot.data = data.frame(QCno,group,CUSUM=c(Cpoz,-Cneg),h)
+  
+  ymax=ifelse(max(plot.data$CUSUM)>=h,(max(plot.data$CUSUM)),h)
+  ymin=ifelse(min(plot.data$CUSUM)<=-h,(min(plot.data$CUSUM)),-h)
+  
+  Main=Main.title
+  
+  x <- list(
+    title =  paste("QCno - ", levels(prodata$Precursor)[j])
+  )
+  y <- list(
+    title = ytitle
+  )
+  
+  p <- plot_ly(plot.data,
+               x = plot.data[which(group == "CUSUM+"),"QCno"], 
+               y = plot.data[which(group == "CUSUM+"),"CUSUM"], 
+               line = list(color = "dodgerblue")
+               , name = "CUSUM+"
+               ,showlegend = FALSE
+  ) %>%
+    add_trace(x = plot.data[which(group == "CUSUM-"),"QCno"], 
+              y = plot.data[which(group == "CUSUM-"),"CUSUM"], 
+              line = list(color = "blue")
+              , name = "CUSUM-"
+              ,showlegend = FALSE
+    ) %>%
+    layout(xaxis = x,yaxis = y) %>%
+    add_trace(y = h, marker=list(color="red" , size=4 , opacity=0.5), name = "UCL",showlegend = FALSE) %>%
+    add_trace(y = -h, marker=list(color="red" , size=4 , opacity=0.5), name = "LCL",showlegend = FALSE) %>%
+    add_trace(x = plot.data[CUSUM < h & CUSUM > -h, ]$QCno,
+              y = plot.data[CUSUM < h & CUSUM > -h, ]$CUSUM, 
+              mode = "markers",
+              marker=list(color="blue" , size=5 , opacity=0.5)
+              #,name = levels(prodata$Precursor)[j]
+              ,showlegend = FALSE
+    ) %>%
+    add_trace(x = plot.data[CUSUM <= -h, ]$QCno,
+              y = plot.data[CUSUM <= -h, ]$CUSUM,
+              mode = "markers",
+              marker=list(color="red" , size=5 , opacity=0.5),
+              showlegend = FALSE
+    ) %>%
+    add_trace(x = plot.data[CUSUM >= h, ]$QCno,
+              y = plot.data[CUSUM >= h, ]$CUSUM,
+              mode = "markers",
+              marker=list(color="red" , size=5 , opacity=0.5),
+              showlegend = FALSE
+    ) 
+  
+  return(p)
+}
+#########################################################################################################################
+#########################################################################################################################
+#########################################################################################################################
+CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
+  ## Create variables 
+  
+  Et <-  numeric(length(z)-1) # this is Ct in type 1, and Dt in type 2.
+  SS<- numeric(length(z)-1)
+  SST<- numeric(length(z)-1)
+  tho.hat <- 0
+  
+  Main = Main.title
+  
+  if(type == 1) {
+    ## Change point analysis for mean (Single step change model)
+    for(i in 1:length(z)-1) {
+      Et[i]=(length(z)-i)*(((1/(length(z)-i))*sum(z[(i+1):length(z)]))-0)^2 #change point function
+    }
+    QCno=1:(length(z)-1) 
+  } else if(type == 2) {
+    ## Change point analysis for variance (Single step change model)  
+    for(i in 1:length(z)) {
+      SS[i]=z[i]^2
+    }
+    for(i in 1:length(z)) {
+      SST[i]=sum(SS[i:length(z)])
+      Et[i]=((SST[i]/2)-((length(z)-i+1)/2)*log(SST[i]/(length(z)-i+1))-(length(z)-i+1)/2) #change point function
+    }
+    QCno=1:length(z)
+  }
+  
+  tho.hat = which(Et==max(Et)) # change point estimate
+  plot.data=data.frame(QCno,Et,tho.hat) # dataframe for change point plot
+  y.max=max(plot.data$Et) # y axis upper limit
+  y.min=0 # y axis lower limit
+  
+  x <- list(
+    #title = "QCno"
+    title = paste("QCno - ", levels(prodata$Precursor)[j])
+  )
+  y <- list(
+    title = ytitle
+  )
+  
+  plot_ly(plot.data, x = QCno, y = Et
+          ,type = "scatter"
+          ,line = list(shape = "linear")
+          ,showlegend = FALSE
+  ) %>%
+    layout(xaxis = x,yaxis = y) %>%
+    add_trace( x = c(tho.hat,tho.hat), y = c(0, (max(Et)+2)) 
+               ,marker=list(color="red", size=4, opacity=0.5)
+               , mode = "lines"
+               ,showlegend = FALSE
+    ) %>%
+    add_trace(x = QCno, y =  Et
+              ,mode = "markers"
+              , marker=list(color="blue" , size=8 , opacity=0.5)
+              ,showlegend = FALSE
+    )
+}
+
+#########################################################################################################################
+#########################################################################################################################
+#########################################################################################################################
+IMR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
+  
+  t <- numeric(length(z)-1) # z in plot 1, MR in plot 2
+  
+  ## Calculate X chart statistics and limits 
+  UCL = 0
+  LCL = 0
+  #UCLI=MRmean+2.66*sd(MR[L:U])
+  #LCLI=MRmean-2.66*sd(MR[L:U])
+  
+  Main=Main.title
+  
+  QCno=1:length(z)
+  
+  if(type == 1) {
+    UCL=3
+    LCL=-3
+    t <- z
+  } else if(type == 2) {
+    ## Calculate MR chart statistics and limits
+    for(i in 2:length(z)) {
+      t[i]=abs(z[i]-z[i-1]) # Compute moving range of z
+    }
+    UCL=3.267*sd(t[1:L-U])
+    LCL=0
+  }
+  plot.data=data.frame(QCno,z,t,UCL,LCL)
+  
+  y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
+  y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
+  
+  x <- list(
+    title = paste("QCno - ", levels(prodata$Precursor)[j])
+  )
+  y <- list(
+    title = ytitle
+  )
+  plot_ly(plot.data, x = QCno, y = t, type = "scatter",
+          name = "linear",  line = list(shape = "linear"),
+          marker=list(color="dodgerblue" , size=4 , opacity=0.5)
+          ,showlegend = FALSE
+  ) %>%
+    layout(xaxis = x,yaxis = y) %>%
+    add_trace( y = UCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
+    add_trace(y = LCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
+    add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
+              , mode = "markers"
+              , marker=list(color="red" , size=8 , opacity=0.5)
+              ,showlegend = FALSE
+    ) %>%
+    add_trace(x = plot.data[t >= UCL, ]$QCno, y = plot.data[t >= UCL, ]$t
+              , mode = "markers"
+              , marker=list(color="red" , size=8 , opacity=0.5)
+              ,showlegend = FALSE
+    ) %>%
+    add_trace(x = plot.data[t > LCL & t < UCL, ]$QCno, y = plot.data[t > LCL & t < UCL, ]$t
+              , mode = "markers"
+              , marker=list(color="blue" , size=8 , opacity=0.5)
+              ,showlegend = FALSE
+    )
+}
+
