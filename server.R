@@ -12,6 +12,7 @@ library(plotly)
 library(gridExtra)
 source("CUSUM-Plot-functions.R")
 source("CP-Plot-functions.R")
+source("IMR-Plot-functions.R")
 
 shinyServer(function(input,output,session){
   
@@ -101,105 +102,8 @@ shinyServer(function(input,output,session){
   #################################################### Function  #############################################################
   ############################################################################################################################
 
-#### IMR plot 1 ###########################################################################################################
-  IMR_plot1 <- function(z,j,L,U,Main.title) {
-    
-    #title <- title()
-    prodata <- prodata()
-    MR<- numeric(length(z)-1)
-    ###################
-    
-    ## Calculate X chart statistics and limits 
-    UCLI=3
-    LCLI=-3
-    #UCLI=MRmean+2.66*sd(MR[L:U])
-    #LCLI=MRmean-2.66*sd(MR[L:U])
-    QCno=1:length(z)
-    plot.data=data.frame(QCno,z,UCLI,LCLI)
-    y.max=ifelse(max(plot.data$z)>=UCLI,(max(plot.data$z)),UCLI)
-    y.min=ifelse(min(plot.data$z)<=LCLI,(min(plot.data$z)),LCLI)
-    #plot.subtitle=title[j]
-    Main=Main.title
-    #####################
-    x <- list(
-      title = paste("QCno - ", levels(prodata$Precursor)[j])
-    )
-    y <- list(
-      title = "Individual Value"
-    )
-    
-    plot_ly(plot.data, x = QCno, y = z
-            ,type = "scatter"
-            ,line = list(shape = "linear")
-            ,marker=list(color="dodgerblue" , size=4 , opacity=0.5)
-            ,showlegend = FALSE
-            ) %>%
-      layout(xaxis = x,yaxis = y) %>%
-      add_trace( y = UCLI, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
-      add_trace(y = LCLI, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
-      add_trace(x = plot.data[z <= LCLI, ]$QCno, y = plot.data[z <= LCLI, ]$z
-                , mode = "markers"
-                , marker=list(color="red" , size=8 , opacity=0.5)
-                ,showlegend = FALSE
-                ) %>%
-      add_trace(x = plot.data[z >= UCLI, ]$QCno, y = plot.data[z >= UCLI, ]$z
-                , mode = "markers"
-                , marker=list(color="red" , size=8 , opacity=0.5)
-                ,showlegend = FALSE
-                ) %>%
-      add_trace(x = plot.data[z > LCLI & z < UCLI, ]$QCno, y = plot.data[z > LCLI & z < UCLI, ]$z
-                , mode = "markers"
-                , marker=list(color="blue" , size=8 , opacity=0.5)
-                ,showlegend = FALSE
-                )
-  }
-#### IMR plot 2 ###########################################################################################################
-  IMR_plot2 <- function(z,j,L,U,Main.title) {
-    
-    #title <- title()
-    prodata <- prodata()
-    MR<- numeric(length(z)-1)
-    ###################
-    
-    ## Calculate X chart statistics and limits 
-    
-    ##UCLI=MRmean+2.66*sd(MR[L:U])
-    ##LCLI=MRmean-2.66*sd(MR[L:U])
 
-    #plot.subtitle=title[j]
-    Main=Main.title
-    #####################
-    #####################
-    ## Calculate MR chart statistics and limits
-    for(i in 2:length(z))
-    {
-      MR[i]=abs(z[i]-z[i-1]) # Compute moving range of z
-    }
-    UCLMR=3.267*sd(MR[1:L-U])
-    LCLMR=0
-    QCno=1:length(z)
-    plot.data=data.frame(QCno,z,MR,UCLMR,LCLMR)
-    ymax=ifelse(max(plot.data$MR)>=UCLMR,(max(plot.data$MR)),UCLMR)
-    ymin=ifelse(min(plot.data$MR)<=LCLMR,(min(plot.data$MR)),LCLMR)
-    ######################
-    
-    x <- list(
-      title = paste("QCno - ", levels(prodata$Precursor)[j])
-    )
-    y <- list(
-      title = "Moving Range"
-    )
-    
-    plot_ly(plot.data, x = QCno, y = MR, type = "scatter",
-            name = "linear",  line = list(shape = "linear"),
-            marker=list(color="dodgerblue" , size=4 , opacity=0.5)) %>%
-      layout(xaxis = x,yaxis = y) %>%
-      add_trace( y = UCLMR, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines") %>%
-      add_trace(y = LCLMR, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines") %>%
-      add_trace(x = plot.data[MR <= LCLMR, ]$QCno, y = plot.data[MR <= LCLMR, ]$MR, mode = "markers", marker=list(color="red" , size=8 , opacity=0.5)) %>%
-      add_trace(x = plot.data[MR >= UCLMR, ]$QCno, y = plot.data[MR >= UCLMR, ]$MR, mode = "markers", marker=list(color="red" , size=8 , opacity=0.5)) %>%
-      add_trace(x = plot.data[MR > LCLMR & MR < UCLMR, ]$QCno, y = plot.data[MR > LCLMR & MR < UCLMR, ]$MR, mode = "markers", marker=list(color="blue" , size=8 , opacity=0.5))
-  }
+
 #### Panel.cor for drawing scatter plot matrix ############################################################################
   panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
     usr <- par("usr"); on.exit(par(usr))
@@ -380,34 +284,20 @@ shinyServer(function(input,output,session){
         prodata <- prodata()
         plots <- list()
         #prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # order precursors in increasing order based on RT
-        input$act_button
-        if (input$act_button == 0)
-          return()
+        #input$act_button
+        #if (input$act_button == 0)
+        #  return()
         
         if(input$pep1.1 == "all peptides") {
-          
-          
-          
-          # for (j in 1:nlevels(prodata$Precursor)) {
-          #   precursdata<-prodata[prodata$Precursor==levels(prodata$PrecursorRT)[j],] # subset for a particular precursor
-          #   x=precursdata$Best.RT # raw data for retention time
-          #   mu=mean(x[input$L:input$U]) # in-control process mean
-          #   sd=sd(x[input$L:input$U]) # in-control process variance
-          #   z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-          #   plots[[2*j-1]] <- IMR_plot1(z,j,input$L,input$U,"Retention Time") 
-          #   #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorRT)[j]), "")))
-          #   plots[[2*j]] <- IMR_plot2(z,j,input$L,input$U,"Retention Time") 
-          #   #+  ggtitle(bquote(atop(.(levels(prodata$PrecursorRT)[j]), "")))
-          #   
-          # }
+
           results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
             precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
             x=precursdata$Best.RT # raw data for retention time
             mu=mean(x[input$L:input$U]) # in-control process mean
             sd=sd(x[input$L:input$U]) # in-control process variance
             z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-            plots[[2*j-1]] <<- IMR_plot1(z,j,input$L,input$U,"Retention Time") 
-            plots[[2*j]] <<- IMR_plot2(z,j,input$L,input$U,"Retention Time") 
+            plots[[2*j-1]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",1,"Individual Value") 
+            plots[[2*j]] <<- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",2,"Moving Range") 
           })
           #number_of_plots <- 2*nlevels(prodata$Precursor)
           #layout <- matrix(1:number_of_plots, ncol=2, byrow = TRUE)
@@ -424,8 +314,8 @@ shinyServer(function(input,output,session){
         sd=sd(x[input$L:input$U]) # in-control process variance
         z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
         
-        plot1 <- IMR_plot1(z,j,input$L,input$U, "Retention Time")
-        plot2 <- IMR_plot2(z,j,input$L,input$U, "Retention Time")
+        plot1 <- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",1,"Individual Value") 
+        plot2 <- IMR_plot(prodata,z,j,input$L,input$U,"Retention Time",2,"Moving Range") 
         subplot(plot1,plot2)
         }
       }
