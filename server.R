@@ -178,11 +178,21 @@ shinyServer(function(input,output,session){
 ###########################################################################################################################
 ###########################################################################################################################
 ################################################################# plots ###################################################
-   
+   normalize <- function(prodata,j, L, U, method) {
+     precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
+     x <- 0
+     if(method == "Best.RT"){
+       x = precursdata$Best.RT # raw data for retention time
+     }
+     
+     mu=mean(x[L:U]) # in-control process mean
+     sd=sd(x[L:U]) # in-control process variance
+     z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+     return(z)
+   }
   ########################################################## plot CUSUM_chart  for RT####################
   output$RT_CUSUM <- renderPlotly({
-
-
+    
      validate(
        need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
      )
@@ -195,16 +205,11 @@ shinyServer(function(input,output,session){
      #if (input$act_button == 0)
         #return()
 
-     
      if(input$pep1.1 == "all peptides") {
        #input$act_button
        
        results <- lapply(c(1:nlevels(prodata$Precursor)), function(j){
-         precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-         x=precursdata$Best.RT # raw data for retention time
-         mu=mean(x[input$L:input$U]) # in-control process mean
-         sd=sd(x[input$L:input$U]) # in-control process variance
-         z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+         z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
          plots[[2*j-1]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMm", 1) #CUSUM_plot1(prodata, z,j,input$L,input$U,"Retention Time")
          plots[[2*j]] <<- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMv", 2)  #CUSUM_plot2(prodata, z,j,input$L,input$U,"Retention Time")
        })
@@ -216,11 +221,7 @@ shinyServer(function(input,output,session){
      else{
        #input$act_button
      j = which(levels(prodata$Precursor) == input$pep1.1)
-     precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-     x=precursdata$Best.RT # raw data for retention time
-     mu=mean(x[input$L:input$U]) # in-control process mean
-     sd=sd(x[input$L:input$U]) # in-control process variance
-     z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
+     z <- normalize(prodata, j, input$L, input$U, method = "Best.RT")
     
       plot1 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMm", 1) #CUSUM_plot1(prodata, z,j,input$L,input$U, "Retention Time")
       plot2 <- CUSUM_plot(prodata, z,j,input$L,input$U,"Retention Time", "CUSUMv", 2) #CUSUM_plot2(prodata, z,j,input$L,input$U, "Retention Time")
