@@ -40,7 +40,7 @@ shinyServer(function(input,output,session) {
       })
       
       do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-        layout(autosize = F, width = 1500, height = nlevels(prodata$Precursor)*200)
+        layout(autosize = F, width = 1500, height = nlevels(prodata$Precursor)*250)
     }
     
     else {
@@ -50,7 +50,7 @@ shinyServer(function(input,output,session) {
       plot1 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
       plot2 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
       
-      subplot(plot1,plot2) %>% layout(title = levels(prodata$Precursor)[j])
+      subplot(plot1,plot2)
     }
   }
   ########################################################## plot CUSUM_chart  for RT####################
