@@ -12,6 +12,7 @@ library(plotly)
 library(gridExtra)
 source("plot-functions.R")
 source("data-validation.R")
+source("helper-functions.R")
 
 
 shinyServer(function(input,output,session) {
@@ -27,114 +28,27 @@ shinyServer(function(input,output,session) {
     
     # read.xlsx2(file1$path , sheetName = "data")
   })
-### Read sample data in "Functions and Sample Data" tab ###########################################################
-  # sample_data <- reactive({
-  #   read.csv('/Users/sarataheri/Desktop/updated\ ui\ and\ server/AutoQCdata.csv') # put your own path 
-  # })
+
 ##### Precursor type selection #####################################################################################
-  output$pep1 <- renderUI({
+  output$pepSelect <- renderUI({
     prodata <- prodata()
-    #selectInput("pep1.1","choose precursor type", choices = 1:nlevels(prodata$Precursor))
-    selectInput("pep1.1","Choose precursor type", choices = c(levels(prodata$Precursor),"all peptides"))
+    selectInput("pepSelection","Choose precursor type", choices = c(levels(prodata$Precursor),"all peptides"))
   })
   
-#### plot height ##################################################################################################
-   my_height <- reactive({
-     prodata <- prodata()
-     if(input$pep1.1 == "all peptides") { 
-       if(nlevels(prodata$Precursor) > 0 && nlevels(prodata$Precursor) < 6) {
-         my_height <- 1000
-        
-       }
-       else if(nlevels(prodata$Precursor) > 5 && nlevels(prodata$Precursor) <11) {
-         my_height <- 2000
-         
-       }
-       else if(nlevels(prodata$Precursor) > 10 && nlevels(prodata$Precursor) <16) {
-         my_height <- 4000
-        
-       }
-       else if(nlevels(prodata$Precursor) > 15 && nlevels(prodata$Precursor) < 21) {
-         my_height <- 4800
-         
-       }
-       else if(nlevels(prodata$Precursor) > 20 && nlevels(prodata$Precursor) < 26) {
-         my_height <- 6000
-       } 
-       else {
-         print("hello")
-        
-       }
-       
-     } # end first if
-     
-     else {  # if all peptide is not chosen
-       my_height <- 300
-       
-     }
-     
-   })
 #### title ########################################################################################################
   title <- reactive({
     prodata <- prodata()
     levels(prodata$Precursor) # names of precursors
   })
- #############################################################################################################################
-  #################################################### Function  #############################################################
-  ############################################################################################################################
-
-
-
-#### Panel.cor for drawing scatter plot matrix ############################################################################
-  panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
-    usr <- par("usr"); on.exit(par(usr))
-    par(usr = c(0, 1, 0, 1))
-    # correlation coefficient
-    r <- cor(x, y)
-    txt <- format(c(r, 0.123456789), digits = digits)[1]
-    txt <- paste("r= ", txt, sep = "")
-    text(0.5, 0.6, txt)
-    
-    # p-value calculation
-    p <- cor.test(x, y)$p.value
-    txt2 <- format(c(p, 0.123456789), digits = digits)[1]
-    txt2 <- paste("p= ", txt2, sep = "")
-    if(p<0.01) txt2 <- paste("p= ", "<0.01", sep = "")
-    text(0.5, 0.4, txt2)
-  }
 
 ###########################################################################################################################
 ###########################################################################################################################
 ################################################################# plots ###################################################
-   normalize <- function(prodata, j, L, U, method) {
-     precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-     x <- 0
-     if(method == "Best.RT"){
-       x = precursdata$Best.RT # raw data for retention time
-     } else if(method == "Peak Assymetry") {
-       x = precursdata$Max.End.Time-precursdata$Min.Start.Time # raw data for peak assymetry
-     } else if(method == "FWHM") {
-       x=precursdata$Max.FWHM
-     } else if(method == "Total Area") {
-       x=precursdata$Total.Area # raw data for total area
-     } else {
-       print("Error")
-     }
-     
-     mu=mean(x[L:U]) # in-control process mean
-     sd=sd(x[L:U]) # in-control process variance
-     z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-     return(z)
-   }
-   
-   render.tab <- function(normalize.method, plot.method, main.title, y.title1, y.title2){
-     validate(
-       need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-     )
+ render.tab <- function(normalize.method, plot.method, main.title, y.title1, y.title2){
      prodata <- prodata()
      plots <- list()
      
-     if(input$pep1.1 == "all peptides") {
+     if(input$pepSelection == "all peptides") {
        
        results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
          z <- normalize(prodata, j, input$L, input$U, method = normalize.method)
@@ -143,11 +57,11 @@ shinyServer(function(input,output,session) {
        })
        
        do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-         layout(autosize = F, width = 1500, height = my_height())
+         layout(autosize = F, width = 1500, height = nlevels(prodata$Precursor)*200)#my_height())
      }
      
      else {
-       j = which(levels(prodata$Precursor) == input$pep1.1)
+       j = which(levels(prodata$Precursor) == input$pepSelection)
        z <- normalize(prodata, j, input$L, input$U, method = normalize.method)
        
        plot1 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
@@ -245,17 +159,8 @@ shinyServer(function(input,output,session) {
 ########################################################## scatterplot matrix in Summary tab #################################
   output$scatter_plot <- renderPlot({
     
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-    
     prodata <- prodata()
-    input$act_button
-    if (input$act_button == 0)
-      return()
-    prodata$Total.Area <- as.numeric(gsub(",","",prodata$Total.Area))
-    prodata$Max.FWHM <- as.numeric(gsub(",","",prodata$Max.FWHM))
-    
+
     if(input$metric_precursor == "Peak Assymetry") {
       multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
       

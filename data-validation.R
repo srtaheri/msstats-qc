@@ -26,7 +26,7 @@ clearString <- function(x){
 }
 #### guessColumnName function ###########################################################################################
 guessColumnName <- function(x){
-  best_colnames <- best_colnames()
+  # best_colnames <- best_colnames()
   # This function receives the data and check the column names of data and changes the column names if it is not the
   # same names as our suggested sample data to fit our suggested sample data.
   a <- clearString(x)
@@ -55,6 +55,8 @@ guessColumnName <- function(x){
 input_checking <- function(data){
   data[data==""] <- NA
   colnames(data) <- unlist(lapply(colnames(data), function(x)guessColumnName(x)))
+  data$Max.FWHM <- as.numeric(gsub(",","",data$Max.FWHM))
+  data$Total.Area <- as.numeric(gsub(",","",data$Total.Area))
   #print(is.logical(colnames(data)[c(1,2)] == c("Precursor","Sample.File")) )
   #print(colnames(sample_data()))
   #print(colnames(data))

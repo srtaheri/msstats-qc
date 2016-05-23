@@ -15,7 +15,7 @@ shinyUI(fluidPage(
                            numericInput("L","Lower bound of guide set",value = 1, min = 1, step = 1),
                            numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
                            p("Please select a precursor or select all"),
-                           uiOutput("pep1"),
+                           uiOutput("pepSelect"),
                            p("If you have uploaded your data set, selected the guidset and chosen your precursor type
                              , click on this button to see the plots"),
                            actionButton("act_button", "click to see plots"),
