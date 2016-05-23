@@ -1,215 +1,163 @@
-library(ggplot2)
 library(shiny)
-library(geometry)
-library(car)
-library(qcc)
-library(cowplot) # for plot_grid()
-library(Rmisc) # for multiplot() function
-library(rsconnect)
-library(GGally)
-library(RecordLinkage)
 library(plotly)
-library(gridExtra)
+library(RecordLinkage)
+
 source("plot-functions.R")
 source("data-validation.R")
 source("helper-functions.R")
 
-
 shinyServer(function(input,output,session) {
   
-#### Read data  ##################################################################################################
+  #### Read data  ##################################################################################################
   prodata <- reactive({ # data is what user, upload in the app
-     validate(
-       need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-     )
+    validate(
+      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
+    )
     file1 <- input$filein
     if(is.null(file1)){return()} 
     input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
     
     # read.xlsx2(file1$path , sheetName = "data")
   })
-
-##### Precursor type selection #####################################################################################
+  
+  ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
     prodata <- prodata()
     selectInput("pepSelection","Choose precursor type", choices = c(levels(prodata$Precursor),"all peptides"))
   })
-###########################################################################################################################
-###########################################################################################################################
-################################################################# plots ###################################################
- render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){
-     prodata <- prodata()
-     plots <- list()
-     
-     if(input$pepSelection == "all peptides") {
-       
-       results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
-         z <- normalize(prodata, j, input$L, input$U, metric = normalize.metric)
-         plots[[2*j-1]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
-         plots[[2*j]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
-       })
-       
-       do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-         layout(autosize = F, width = 1500, height = nlevels(prodata$Precursor)*200)#my_height())
-     }
-     
-     else {
-       j = which(levels(prodata$Precursor) == input$pepSelection)
-       z <- normalize(prodata, j, input$L, input$U, metric = normalize.metric)
-       
-       plot1 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
-       plot2 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
-       
-       subplot(plot1,plot2) %>% layout(title = levels(prodata$Precursor)[j])
-     }
-   }
-  ########################################################## plot CUSUM_chart  for RT####################
-   output$RT_CUSUM <- renderPlotly({
-     render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", main.title = "Retention Time", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
-   })
-   ########################################################## plot CP for RT #############################
-   output$RT_CP <- renderPlotly({
-     render.tab(normalize.metric = "Retention Time", plot.method = "CP", main.title = "Retention Time", y.title1 = "Ci", y.title2 = "Di")
-   })
-  ####################################################### plot ZMR for RT ##############################
-   output$RT_ZMR <- renderPlotly({
-     render.tab(normalize.metric = "Retention Time", plot.method = "ZMR", main.title = "Retention Time", y.title1 = "Individual Value", y.title2 = "Moving Range")
-   })
-  ########################################################plot CUSUM for Peak assymetry ################
-   output$PA_CUSUM <- renderPlotly({
-     render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", main.title = "Peak Assymetry", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
-   })
- ######################################################## plot Change Point for Peak assymetry ###########
-   output$PA_CP <- renderPlotly({
-     render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", main.title = "Peak Assymetry", y.title1 = "Ci", y.title2 = "Di")
-   })
- ########################################################## plot ZMR for Peak assymetry ###################################
-   output$PA_ZMR <- renderPlotly({
-     render.tab(normalize.metric = "Peak Assymetry", plot.method = "ZMR", main.title = "Peak Assymetry", y.title1 = "Individual Value", y.title2 = "Moving Range")
-   })
-  ########################################################### plot CUSUM FOR Max.FWHM ####################################
-   output$Max_CUSUM <- renderPlotly({
-     render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", main.title = "FWHM", y.title1 = "CUSUMm", y.title2 = "CUSUMv")    
-   })
-########################################################## plot Change Point FOR Max.FWHM ####################################
-   output$Max_CP <- renderPlotly({
-     render.tab(normalize.metric = "FWHM", plot.method = "CP", main.title = "FWHM", y.title1 = "Ci", y.title2 = "Di")    
-   })
-########################################################## plot ZMR FOR Max.FWHM ####################################
-   output$Max_ZMR <- renderPlotly({
-     render.tab(normalize.metric = "FWHM", plot.method = "ZMR", main.title = "FWHM", y.title1 = "Individual Value", y.title2 = "Moving Range")
-   })
-############################################################ plot CUSUM FOR total area ####################################
-   output$TA_CUSUM <- renderPlotly({
-     render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", main.title = "Total Area", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
-   })
-########################################################## plot Change Point FOR total area ##################################
-   output$TA_CP <- renderPlotly({
-     render.tab(normalize.metric = "Total Area", plot.method = "CP", main.title = "Total Area", y.title1 = "Ci", y.title2 = "Di")
-   })
-########################################################## plot ZMR FOR total area ##########################################
-   output$TA_ZMR <- renderPlotly({
-     render.tab(normalize.metric = "Total Area", plot.method = "ZMR", main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
-   })
-########################################################## box plot in Summary tab ##########################################
-  output$box_plot <- renderPlotly({
-    validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
-    )
-    prodata <- prodata()
-    input$act_button
-    if (input$act_button == 0)
-      return()
-    
-    prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # to plot boxplots in decreasing order
-    RT <- plot_ly(prodata, y = Best.RT, color = PrecursorRT, type = "box") %>% layout(showlegend = FALSE)
-    
-    prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time) # to plot boxplots in increasing order
-    PA <- plot_ly(prodata, y = (Max.End.Time-Min.Start.Time), color = PrecursorPA, type = "box") %>% layout(showlegend = FALSE)
-      #ylab("Peak Assymetry")+
-                              
-    prodata$Total.Area <- as.numeric(gsub(",","",prodata$Total.Area))
-    prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$Total.Area) # to plot boxplots in decreasing order
-    TPA <- plot_ly(prodata, y = Total.Area, color = PrecursorTA, type = "box") %>% layout(showlegend = FALSE)
-      #ylab("Total Peak Area")+
-      
-    
-    prodata$Max.FWHM <- as.numeric(gsub(",","",prodata$Max.FWHM))
-    prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata$Max.FWHM) 
-    FWHM <- plot_ly(prodata, y = Max.FWHM, color = PrecursorFWHM, type = "box") %>% layout(showlegend = FALSE)
-      #ylab("FWHM")+
-      
-    
-    
   
-    #isolate(plot_grid(RT, TPA, FWHM,PA,  ncol = 1, nrow = 4))
-    subplot(RT, PA, TPA, FWHM, nrows = 4) 
- 
+  ################################################################# plots ###################################################
+  render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){
+    prodata <- prodata()
+    plots <- list()
     
+    if(input$pepSelection == "all peptides") {
+      
+      results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
+        z <- normalize(prodata, j, input$L, input$U, metric = normalize.metric)
+        plots[[2*j-1]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
+        plots[[2*j]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
+      })
+      
+      do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
+        layout(autosize = F, width = 1500, height = nlevels(prodata$Precursor)*200)
+    }
+    
+    else {
+      j = which(levels(prodata$Precursor) == input$pepSelection)
+      z <- normalize(prodata, j, input$L, input$U, metric = normalize.metric)
+      
+      plot1 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
+      plot2 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
+      
+      subplot(plot1,plot2) %>% layout(title = levels(prodata$Precursor)[j])
+    }
   }
-  #,height = 1500    # I set the height in ui.R for plotly
-  )
-########################################################## scatterplot matrix in Summary tab #################################
+  ########################################################## plot CUSUM_chart  for RT####################
+  output$RT_CUSUM <- renderPlotly({
+    render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", main.title = "Retention Time", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
+  })
+  ########################################################## plot CP for RT #############################
+  output$RT_CP <- renderPlotly({
+    render.tab(normalize.metric = "Retention Time", plot.method = "CP", main.title = "Retention Time", y.title1 = "Ci", y.title2 = "Di")
+  })
+  ####################################################### plot ZMR for RT ##############################
+  output$RT_ZMR <- renderPlotly({
+    render.tab(normalize.metric = "Retention Time", plot.method = "ZMR", main.title = "Retention Time", y.title1 = "Individual Value", y.title2 = "Moving Range")
+  })
+  ########################################################plot CUSUM for Peak assymetry ################
+  output$PA_CUSUM <- renderPlotly({
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", main.title = "Peak Assymetry", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
+  })
+  ######################################################## plot Change Point for Peak assymetry ###########
+  output$PA_CP <- renderPlotly({
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", main.title = "Peak Assymetry", y.title1 = "Ci", y.title2 = "Di")
+  })
+  ########################################################## plot ZMR for Peak assymetry ###################################
+  output$PA_ZMR <- renderPlotly({
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "ZMR", main.title = "Peak Assymetry", y.title1 = "Individual Value", y.title2 = "Moving Range")
+  })
+  ########################################################### plot CUSUM FOR Max.FWHM ####################################
+  output$Max_CUSUM <- renderPlotly({
+    render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", main.title = "FWHM", y.title1 = "CUSUMm", y.title2 = "CUSUMv")    
+  })
+  ########################################################## plot Change Point FOR Max.FWHM ####################################
+  output$Max_CP <- renderPlotly({
+    render.tab(normalize.metric = "FWHM", plot.method = "CP", main.title = "FWHM", y.title1 = "Ci", y.title2 = "Di")    
+  })
+  ########################################################## plot ZMR FOR Max.FWHM ####################################
+  output$Max_ZMR <- renderPlotly({
+    render.tab(normalize.metric = "FWHM", plot.method = "ZMR", main.title = "FWHM", y.title1 = "Individual Value", y.title2 = "Moving Range")
+  })
+  ############################################################ plot CUSUM FOR total area ####################################
+  output$TA_CUSUM <- renderPlotly({
+    render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", main.title = "Total Area", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
+  })
+  ########################################################## plot Change Point FOR total area ##################################
+  output$TA_CP <- renderPlotly({
+    render.tab(normalize.metric = "Total Area", plot.method = "CP", main.title = "Total Area", y.title1 = "Ci", y.title2 = "Di")
+  })
+  ########################################################## plot ZMR FOR total area ##########################################
+  output$TA_ZMR <- renderPlotly({
+    render.tab(normalize.metric = "Total Area", plot.method = "ZMR", main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
+  })
+  ########################################################## box plot in Summary tab ##########################################
+  output$box_plot <- renderPlotly({
+    prodata <- prodata()
+    metrics_box.plot(prodata)
+  })
+  ########################################################## scatterplot matrix in Summary tab #################################
   output$scatter_plot <- renderPlot({
     prodata <- prodata()
-    multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
-    for (j in 1:nlevels(prodata$Precursor)) {
-      z <- normalize(prodata, j, input$L, input$U, metric = input$metric_precursor)
-      multidata[1:length(z),j]<-z
-    }
-    colnames(multidata) <- levels(prodata$Precursor)
-    multidata=data.frame(multidata)
-    pairs(multidata, upper.panel = panel.cor, col = "blue")
-  }
-  , height = 1000
-  )
-
-###########################################################################################################################
-###########################################################################################################################
-########################################################## "help" tab ################################
-
-
-########################################################## sample data set in "help" tab ###############
+    metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor)
+  }, height = 1000)
   
-########################################################## upload video ####################################
-output$video <- renderUI({
-  tags$video(src='reactive.mp4', type="video/mp4", width="800px", 
-             height="800px", controls='controls')
-})
-##############################################################################################################   
-
-#### Text messages in empty places - This part will be removed in future, when the metrics codes is complete ######
-   output$EWMA_txt <- renderText({
-     paste0("This part is not complete yet, we will complete it in near future.")
-   })
-   
-   output$Short_run_SPC_txt <- renderText({
-     paste0("This part is not complete yet, we will complete it in near future.")
-   })
-   
-   output$Multivariate_Control_Charts_txt <- renderText({
-     paste0("This part is not complete yet, we will complete it in near future.")
-   })
-   
-   output$Capability_Analysis_txt <- renderText({
-     paste0("This part is not complete yet, we will complete it in near future.")
-   })
-   
-   output$MA_ZMR_txt <- renderText({
-     paste0("This part is not complete yet, we will complete it in near future.")
-   })
-   
-   output$MA_CUSUM_txt <- renderText({
-     paste0("This part is not complete yet, we will complete it in near future.")
-   })
-   
-   output$CP_MA_txt <- renderText({
-     paste0("This part is not complete yet, we will complete it in near future.")
-   })
-   
-   output$CA_MA_txt <- renderText({
-     paste0("This part is not complete yet, we will complete it in near future.")
-   })
-
-############################################################################################################################
+  ###########################################################################################################################
+  ###########################################################################################################################
+  ########################################################## "help" tab ################################
+  
+  
+  ########################################################## sample data set in "help" tab ###############
+  
+  ########################################################## upload video ####################################
+  output$video <- renderUI({
+    tags$video(src='reactive.mp4', type="video/mp4", width="800px", 
+               height="800px", controls='controls')
+  })
+  ##############################################################################################################   
+  
+  #### Text messages in empty places - This part will be removed in future, when the metrics codes is complete ######
+  output$EWMA_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
+  
+  output$Short_run_SPC_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
+  
+  output$Multivariate_Control_Charts_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
+  
+  output$Capability_Analysis_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
+  
+  output$MA_ZMR_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
+  
+  output$MA_CUSUM_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
+  
+  output$CP_MA_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
+  
+  output$CA_MA_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
+  
+  ############################################################################################################################
 })

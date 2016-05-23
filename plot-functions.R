@@ -234,3 +234,33 @@ panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
   if(p<0.01) txt2 <- paste("p= ", "<0.01", sep = "")
   text(0.5, 0.4, txt2)
 }
+#########################################################################################################################
+metrics_scatter.plot <- function(prodata, L, U, metric) {
+  multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
+  for (j in 1:nlevels(prodata$Precursor)) {
+    z <- normalize(prodata, j, L, U, metric)
+    multidata[1:length(z),j]<-z
+  }
+  colnames(multidata) <- levels(prodata$Precursor)
+  multidata=data.frame(multidata)
+  pairs(multidata, upper.panel = panel.cor, col = "blue")
+}
+#########################################################################################################################
+metrics_box.plot <- function(prodata) {
+  prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # to plot boxplots in decreasing order
+  RT <- plot_ly(prodata, y = Best.RT, color = PrecursorRT, type = "box") %>% layout(showlegend = FALSE)
+  
+  prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time) # to plot boxplots in increasing order
+  PA <- plot_ly(prodata, y = (Max.End.Time-Min.Start.Time), color = PrecursorPA, type = "box") %>% layout(showlegend = FALSE)
+  #ylab("Peak Assymetry")+
+  
+  prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$Total.Area) # to plot boxplots in decreasing order
+  TPA <- plot_ly(prodata, y = Total.Area, color = PrecursorTA, type = "box") %>% layout(showlegend = FALSE)
+  #ylab("Total Peak Area")+
+  
+  prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata$Max.FWHM) 
+  FWHM <- plot_ly(prodata, y = Max.FWHM, color = PrecursorFWHM, type = "box") %>% layout(showlegend = FALSE)
+  #ylab("FWHM")+
+  
+  return(subplot(RT, PA, TPA, FWHM, nrows = 4))
+}
