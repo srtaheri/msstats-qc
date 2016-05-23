@@ -1,13 +1,13 @@
-normalize <- function(prodata, j, L, U, method) {
+normalize <- function(prodata, j, L, U, metric) {
   precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
   x <- 0
-  if(method == "Best.RT"){
+  if(metric == "Retention Time"){
     x = precursdata$Best.RT # raw data for retention time
-  } else if(method == "Peak Assymetry") {
+  } else if(metric == "Peak Assymetry") {
     x = precursdata$Max.End.Time-precursdata$Min.Start.Time # raw data for peak assymetry
-  } else if(method == "FWHM") {
+  } else if(metric == "FWHM") {
     x=precursdata$Max.FWHM
-  } else if(method == "Total Area") {
+  } else if(metric == "Total Area") {
     x=precursdata$Total.Area # raw data for total area
   } else {
     print("Error")

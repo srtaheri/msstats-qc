@@ -34,24 +34,17 @@ shinyServer(function(input,output,session) {
     prodata <- prodata()
     selectInput("pepSelection","Choose precursor type", choices = c(levels(prodata$Precursor),"all peptides"))
   })
-  
-#### title ########################################################################################################
-  title <- reactive({
-    prodata <- prodata()
-    levels(prodata$Precursor) # names of precursors
-  })
-
 ###########################################################################################################################
 ###########################################################################################################################
 ################################################################# plots ###################################################
- render.tab <- function(normalize.method, plot.method, main.title, y.title1, y.title2){
+ render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){
      prodata <- prodata()
      plots <- list()
      
      if(input$pepSelection == "all peptides") {
        
        results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
-         z <- normalize(prodata, j, input$L, input$U, method = normalize.method)
+         z <- normalize(prodata, j, input$L, input$U, metric = normalize.metric)
          plots[[2*j-1]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
          plots[[2*j]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
        })
@@ -62,7 +55,7 @@ shinyServer(function(input,output,session) {
      
      else {
        j = which(levels(prodata$Precursor) == input$pepSelection)
-       z <- normalize(prodata, j, input$L, input$U, method = normalize.method)
+       z <- normalize(prodata, j, input$L, input$U, metric = normalize.metric)
        
        plot1 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
        plot2 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
@@ -72,51 +65,51 @@ shinyServer(function(input,output,session) {
    }
   ########################################################## plot CUSUM_chart  for RT####################
    output$RT_CUSUM <- renderPlotly({
-     render.tab(normalize.method = "Best.RT", plot.method = "CUSUM", main.title = "Retention Time", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
+     render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", main.title = "Retention Time", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
    })
    ########################################################## plot CP for RT #############################
    output$RT_CP <- renderPlotly({
-     render.tab(normalize.method = "Best.RT", plot.method = "CP", main.title = "Retention Time", y.title1 = "Ci", y.title2 = "Di")
+     render.tab(normalize.metric = "Retention Time", plot.method = "CP", main.title = "Retention Time", y.title1 = "Ci", y.title2 = "Di")
    })
   ####################################################### plot ZMR for RT ##############################
    output$RT_ZMR <- renderPlotly({
-     render.tab(normalize.method = "Best.RT", plot.method = "ZMR", main.title = "Retention Time", y.title1 = "Individual Value", y.title2 = "Moving Range")
+     render.tab(normalize.metric = "Retention Time", plot.method = "ZMR", main.title = "Retention Time", y.title1 = "Individual Value", y.title2 = "Moving Range")
    })
   ########################################################plot CUSUM for Peak assymetry ################
    output$PA_CUSUM <- renderPlotly({
-     render.tab(normalize.method = "Peak Assymetry", plot.method = "CUSUM", main.title = "Peak Assymetry", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
+     render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", main.title = "Peak Assymetry", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
    })
  ######################################################## plot Change Point for Peak assymetry ###########
    output$PA_CP <- renderPlotly({
-     render.tab(normalize.method = "Peak Assymetry", plot.method = "CP", main.title = "Peak Assymetry", y.title1 = "Ci", y.title2 = "Di")
+     render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", main.title = "Peak Assymetry", y.title1 = "Ci", y.title2 = "Di")
    })
  ########################################################## plot ZMR for Peak assymetry ###################################
    output$PA_ZMR <- renderPlotly({
-     render.tab(normalize.method = "Peak Assymetry", plot.method = "ZMR", main.title = "Peak Assymetry", y.title1 = "Individual Value", y.title2 = "Moving Range")
+     render.tab(normalize.metric = "Peak Assymetry", plot.method = "ZMR", main.title = "Peak Assymetry", y.title1 = "Individual Value", y.title2 = "Moving Range")
    })
   ########################################################### plot CUSUM FOR Max.FWHM ####################################
    output$Max_CUSUM <- renderPlotly({
-     render.tab(normalize.method = "FWHM", plot.method = "CUSUM", main.title = "FWHM", y.title1 = "CUSUMm", y.title2 = "CUSUMv")    
+     render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", main.title = "FWHM", y.title1 = "CUSUMm", y.title2 = "CUSUMv")    
    })
 ########################################################## plot Change Point FOR Max.FWHM ####################################
    output$Max_CP <- renderPlotly({
-     render.tab(normalize.method = "FWHM", plot.method = "CP", main.title = "FWHM", y.title1 = "Ci", y.title2 = "Di")    
+     render.tab(normalize.metric = "FWHM", plot.method = "CP", main.title = "FWHM", y.title1 = "Ci", y.title2 = "Di")    
    })
 ########################################################## plot ZMR FOR Max.FWHM ####################################
    output$Max_ZMR <- renderPlotly({
-     render.tab(normalize.method = "FWHM", plot.method = "ZMR", main.title = "FWHM", y.title1 = "Individual Value", y.title2 = "Moving Range")
+     render.tab(normalize.metric = "FWHM", plot.method = "ZMR", main.title = "FWHM", y.title1 = "Individual Value", y.title2 = "Moving Range")
    })
 ############################################################ plot CUSUM FOR total area ####################################
    output$TA_CUSUM <- renderPlotly({
-     render.tab(normalize.method = "Total Area", plot.method = "CUSUM", main.title = "Total Area", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
+     render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", main.title = "Total Area", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
    })
 ########################################################## plot Change Point FOR total area ##################################
    output$TA_CP <- renderPlotly({
-     render.tab(normalize.method = "Total Area", plot.method = "CP", main.title = "Total Area", y.title1 = "Ci", y.title2 = "Di")
+     render.tab(normalize.metric = "Total Area", plot.method = "CP", main.title = "Total Area", y.title1 = "Ci", y.title2 = "Di")
    })
 ########################################################## plot ZMR FOR total area ##########################################
    output$TA_ZMR <- renderPlotly({
-     render.tab(normalize.method = "Total Area", plot.method = "ZMR", main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
+     render.tab(normalize.metric = "Total Area", plot.method = "ZMR", main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
    })
 ########################################################## box plot in Summary tab ##########################################
   output$box_plot <- renderPlotly({
@@ -158,39 +151,15 @@ shinyServer(function(input,output,session) {
   )
 ########################################################## scatterplot matrix in Summary tab #################################
   output$scatter_plot <- renderPlot({
-    
     prodata <- prodata()
-
-    if(input$metric_precursor == "Peak Assymetry") {
-      multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
-      
-      for (j in 1:nlevels(prodata$Precursor)) {
-        precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-        x= precursdata$Max.End.Time-precursdata$Min.Start.Time # raw data for peak assymetry
-        mu=mean(x[input$L:input$U]) # in-control process mean
-        sd=sd(x[input$L:input$U]) # in-control process variance
-        z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-        multidata[1:length(z),j]<-z
-      }
-      colnames(multidata) <- title()
-      multidata=data.frame(multidata)
-      isolate(pairs(multidata, upper.panel = panel.cor, col = "blue"))
-    } else {   
-      multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
-      
-      for (j in 1:nlevels(prodata$Precursor)) {
-        precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],] # subset for a particular precursor
-        x=precursdata[,which(colnames(prodata) == input$metric_precursor)]  # raw data for total area
-        mu=mean(x[input$L:input$U]) # in-control process mean
-        sd=sd(x[input$L:input$U]) # in-control process variance
-        z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-        multidata[1:length(z),j]<-z
-      }
-      colnames(multidata) <- title()
-      multidata=data.frame(multidata)
-      isolate(pairs(multidata, upper.panel = panel.cor, col = "blue"))
-      #pairs(multidata, upper.panel = panel.cor, col = "blue")
+    multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
+    for (j in 1:nlevels(prodata$Precursor)) {
+      z <- normalize(prodata, j, input$L, input$U, metric = input$metric_precursor)
+      multidata[1:length(z),j]<-z
     }
+    colnames(multidata) <- levels(prodata$Precursor)
+    multidata=data.frame(multidata)
+    pairs(multidata, upper.panel = panel.cor, col = "blue")
   }
   , height = 1000
   )

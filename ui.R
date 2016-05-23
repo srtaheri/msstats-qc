@@ -81,7 +81,7 @@ shinyUI(fluidPage(
                          ),
                          tabPanel("Scatterplot", #helpText(")
                                   selectInput("metric_precursor", "Choose the metric",
-                                              choices = c("Retention Time"= "Best.RT","Total Peak Area" = "Total.Area","FWHM" = "Max.FWHM","Peak Assymetry")),
+                                              choices = c("Retention Time","Total Area","FWHM","Peak Assymetry")),
                                   plotOutput("scatter_plot")
                          )
                        )),
