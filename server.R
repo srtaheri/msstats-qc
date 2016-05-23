@@ -116,16 +116,6 @@ shinyServer(function(input,output,session) {
   ###########################################################################################################################
   ########################################################## "help" tab ################################
   
-  
-  ########################################################## sample data set in "help" tab ###############
-  
-  ########################################################## upload video ####################################
-  output$video <- renderUI({
-    tags$video(src='reactive.mp4', type="video/mp4", width="800px", 
-               height="800px", controls='controls')
-  })
-  ##############################################################################################################   
-  
   #### Text messages in empty places - This part will be removed in future, when the metrics codes is complete ######
   output$EWMA_txt <- renderText({
     paste0("This part is not complete yet, we will complete it in near future.")
@@ -139,9 +129,9 @@ shinyServer(function(input,output,session) {
     paste0("This part is not complete yet, we will complete it in near future.")
   })
   
-  output$Capability_Analysis_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
+  # output$Capability_Analysis_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
   
   output$MA_ZMR_txt <- renderText({
     paste0("This part is not complete yet, we will complete it in near future.")
@@ -155,9 +145,16 @@ shinyServer(function(input,output,session) {
     paste0("This part is not complete yet, we will complete it in near future.")
   })
   
+  output$CA_RT_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
+  
   output$CA_MA_txt <- renderText({
     paste0("This part is not complete yet, we will complete it in near future.")
   })
   
+  output$OverallQC_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
   ############################################################################################################################
 })
