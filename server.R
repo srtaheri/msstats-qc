@@ -1,7 +1,6 @@
 library(shiny)
 library(plotly)
 library(RecordLinkage)
-library(ggplot2)
 
 source("plot-functions.R")
 source("data-validation.R")
