@@ -21,9 +21,6 @@ shinyServer(function(input,output,session) {
   })
 
 ######Show data############################################
-aab <- function(a) {
-  return(a+2)
-}
 
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
@@ -37,10 +34,6 @@ aab <- function(a) {
     DT::datatable(prodata(), options = list(pageLength = 25))
   )
   ################################################################# plots ###################################################
-  
-  myHello <- function(){
-    foo.bar("Hello and bye");
-  }
   
   render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){
     prodata <- prodata()
