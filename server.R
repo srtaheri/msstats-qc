@@ -37,6 +37,11 @@ shinyServer(function(input,output,session) {
     DT::datatable(prodata(), options = list(pageLength = 25))
   )
   ################################################################# plots ###################################################
+  
+  myHello <- function(){
+    
+  }
+  
   render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){
     prodata <- prodata()
     plots <- list()
