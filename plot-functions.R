@@ -32,7 +32,9 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   Main=Main.title
   
   x <- list(
-    title =  paste("QCno - ", levels(prodata$Precursor)[j])
+    #title = paste("hello", "world", sep="\n")
+    title =  paste("QCno - ", levels(prodata$Precursor)[j]),
+    range = c(0, max(plot.data$QCno))
   )
   y <- list(
     title = ytitle
@@ -247,20 +249,27 @@ metrics_scatter.plot <- function(prodata, L, U, metric) {
 }
 #########################################################################################################################
 metrics_box.plot <- function(prodata) {
-  prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # to plot boxplots in decreasing order
-  RT <- plot_ly(prodata, y = Best.RT, color = PrecursorRT, type = "box") %>% layout(showlegend = FALSE)
+  prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # to plot boxplots y axis (Retention Time) in decreasing order
+  RT <- plot_ly(prodata, y = Best.RT, color = PrecursorRT, type = "box") %>% 
+    layout(yaxis = list(title = "Retention Time"),showlegend = FALSE)
   
+<<<<<<< HEAD
   prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time) # to plot boxplots in increasing order
   PA <- plot_ly(prodata, y = (Max.End.Time-Min.Start.Time), color = PrecursorPA, type = "box") %>% layout(showlegend = FALSE)
   ylab("Peak Assymetry")+
+=======
+  prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time) # to plot boxplots y axis (P) in decreasing order
+  PA <- plot_ly(prodata, y = (Max.End.Time-Min.Start.Time), color = PrecursorPA, type = "box") %>% 
+    layout(yaxis = list(title = "Peak Assymetry"),showlegend = FALSE)
+>>>>>>> origin/master
   
   prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$Total.Area) # to plot boxplots in decreasing order
-  TPA <- plot_ly(prodata, y = Total.Area, color = PrecursorTA, type = "box") %>% layout(showlegend = FALSE)
-  #ylab("Total Peak Area")+
+  TPA <- plot_ly(prodata, y = Total.Area, color = PrecursorTA, type = "box") %>% 
+    layout(yaxis = list(title = "Total Peak Area"),showlegend = FALSE)
   
   prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata$Max.FWHM) 
-  FWHM <- plot_ly(prodata, y = Max.FWHM, color = PrecursorFWHM, type = "box") %>% layout(showlegend = FALSE)
-  #ylab("FWHM")+
+  FWHM <- plot_ly(prodata, y = Max.FWHM, color = PrecursorFWHM, type = "box") %>% 
+    layout(yaxis = list(title = "FWHM"),showlegend = FALSE)
   
   return(subplot(RT, PA, TPA, FWHM, nrows = 4))
 }

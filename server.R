@@ -15,8 +15,9 @@ shinyServer(function(input,output,session) {
     )
     file1 <- input$filein
     if(is.null(file1)){return()} 
-    input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
-    
+    prodata <- read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE)
+    input_checking(prodata)
+    #prodata
     # read.xlsx2(file1$path , sheetName = "data")
   })
   
@@ -40,7 +41,7 @@ shinyServer(function(input,output,session) {
       })
       
       do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-        layout(autosize = F, width = 1500, height = nlevels(prodata$Precursor)*200)
+        layout(autosize = F, width = 1500, height = nlevels(prodata$Precursor)*250)
     }
     
     else {
@@ -50,7 +51,7 @@ shinyServer(function(input,output,session) {
       plot1 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
       plot2 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
       
-      subplot(plot1,plot2) %>% layout(title = levels(prodata$Precursor)[j])
+      subplot(plot1,plot2)
     }
   }
   ########################################################## plot CUSUM_chart  for RT####################
@@ -116,16 +117,6 @@ shinyServer(function(input,output,session) {
   ###########################################################################################################################
   ########################################################## "help" tab ################################
   
-  
-  ########################################################## sample data set in "help" tab ###############
-  
-  ########################################################## upload video ####################################
-  output$video <- renderUI({
-    tags$video(src='reactive.mp4', type="video/mp4", width="800px", 
-               height="800px", controls='controls')
-  })
-  ##############################################################################################################   
-  
   #### Text messages in empty places - This part will be removed in future, when the metrics codes is complete ######
   output$EWMA_txt <- renderText({
     paste0("This part is not complete yet, we will complete it in near future.")
@@ -139,9 +130,9 @@ shinyServer(function(input,output,session) {
     paste0("This part is not complete yet, we will complete it in near future.")
   })
   
-  output$Capability_Analysis_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
+  # output$Capability_Analysis_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
   
   output$MA_ZMR_txt <- renderText({
     paste0("This part is not complete yet, we will complete it in near future.")
@@ -155,9 +146,16 @@ shinyServer(function(input,output,session) {
     paste0("This part is not complete yet, we will complete it in near future.")
   })
   
+  output$CA_RT_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
+  
   output$CA_MA_txt <- renderText({
     paste0("This part is not complete yet, we will complete it in near future.")
   })
   
+  output$OverallQC_txt <- renderText({
+    paste0("This part is not complete yet, we will complete it in near future.")
+  })
   ############################################################################################################################
 })

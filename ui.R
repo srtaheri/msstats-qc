@@ -1,6 +1,6 @@
 library(shiny)
 library(plotly)
-# library(ggplot2movies)
+
 shinyUI(fluidPage(
   titlePanel("MSstatsQC: Quality control tools for LC MS/MS proteomic experiments"),
   navbarPage( "",
@@ -176,29 +176,29 @@ shinyUI(fluidPage(
                                                               tags$div("It may take a while to load the plots, please wait...
                                                                        ",id="loadmessage"))
                                                               ),
-                                    tabPanel("Mass Accuracy" 
+                                    tabPanel("Mass Accuracy"
                                              , textOutput("MA_ZMR_txt")
-                                             # ,plotlyOutput("MA_ZMR")
-                                             # ,tags$head(tags$style(type="text/css", "
-                                             #                       #loadmessage
-                                             #                       {
-                                             #                       position: fixed;
-                                             #                       top: 0px;
-                                             #                       left: 0px;
-                                             #                       width: 100%;
-                                             #                       padding: 5px 0px 5px 0px;
-                                             #                       text-align: center;
-                                             #                       font-weight: bold;
-                                             #                       font-size: 100%;
-                                             #                       color: #000000;
-                                             #                       background-color: #CCFF66;
-                                             #                       z-index: 105;
-                                             #                       }
-                                             #                       ")),
-                                             # conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                             #                  tags$div("It may take a while to load the plots, please wait...
-                                             #                           ",id="loadmessage"))
-                                                               )
+                                             ,plotlyOutput("MA_ZMR")
+                                             ,tags$head(tags$style(type="text/css", "
+                                                                   #loadmessage 
+                                                                   {
+                                                                   position: fixed;
+                                                                   top: 0px;
+                                                                   left: 0px;
+                                                                   width: 100%;
+                                                                   padding: 5px 0px 5px 0px;
+                                                                   text-align: center;
+                                                                   font-weight: bold;
+                                                                   font-size: 100%;
+                                                                   color: #000000;
+                                                                   background-color: #CCFF66;
+                                                                   z-index: 105;
+                                                                   }
+                                                                   ")),
+                                             conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                              tags$div("It may take a while to load the plots, please wait...
+                                                                       ",id="loadmessage"))
+                                                              )
                                              )), # End "XMR" tabPanel and it's tabsetPanel
                          
                          tabPanel("CUSUM",
@@ -297,9 +297,8 @@ shinyUI(fluidPage(
                                                               tags$div("It may take a while to load the plots, please wait...
                                                                        ",id="loadmessage"))
                                                               ),
-                                    tabPanel("Mass Accuracy"
-                                             ,textOutput("MA_CUSUM_txt") 
-                                             
+                                    tabPanel("Mass Accuracy" 
+                                             , textOutput("MA_CUSUM_txt")
                                              ,plotlyOutput("MA_CUSUM")
                                              ,tags$head(tags$style(type="text/css", "
                                                                    #loadmessage 
@@ -324,8 +323,121 @@ shinyUI(fluidPage(
                                              )), # End tabpanle "CUSUM" and tabsetPanel of it
                          tabPanel("EWMA", textOutput("EWMA_txt")),
                          tabPanel("Short run SPC", textOutput("Short_run_SPC_txt")),
-                         tabPanel("Multivariate Control Charts", textOutput("Multivariate_Control_Charts_txt"))
-                                    ), # end navbarMenu
+                        # end navbarMenu
+                        tabPanel("Multivariate Control Charts"
+                                 , textOutput("Multivariate_Control_Charts_txt"),
+                                 tabsetPanel(
+                                   tabPanel("Retention Time",
+                                            plotlyOutput("RT_Multi")
+                                            ,tags$head(tags$style(type="text/css", "
+                                                                  #loadmessage 
+                                                                  {
+                                                                  position: fixed;
+                                                                  top: 0px;
+                                                                  left: 0px;
+                                                                  width: 100%;
+                                                                  padding: 5px 0px 5px 0px;
+                                                                  text-align: center;
+                                                                  font-weight: bold;
+                                                                  font-size: 100%;
+                                                                  color: #000000;
+                                                                  background-color: #CCFF66;
+                                                                  z-index: 105;
+                                                                  }
+                                                                  ")),
+                                            conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                             tags$div("It may take a while to load the plots, please wait...
+                                                                      ",id="loadmessage"))
+                                                             ),
+                                   tabPanel("Total Peak Area", 
+                                            plotlyOutput("TA_Multi")
+                                            ,tags$head(tags$style(type="text/css", "
+                                                                  #loadmessage 
+                                                                  {
+                                                                  position: fixed;
+                                                                  top: 0px;
+                                                                  left: 0px;
+                                                                  width: 100%;
+                                                                  padding: 5px 0px 5px 0px;
+                                                                  text-align: center;
+                                                                  font-weight: bold;
+                                                                  font-size: 100%;
+                                                                  color: #000000;
+                                                                  background-color: #CCFF66;
+                                                                  z-index: 105;
+                                                                  }
+                                                                  ")),
+                                            conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                             tags$div("It may take a while to load the plots, please wait...
+                                                                      ",id="loadmessage"))
+                                                             ),
+                                   tabPanel("Full Width at Half Maximum (FWHM)", 
+                                            plotlyOutput("Max_Multi")
+                                            ,tags$head(tags$style(type="text/css", "
+                                                                  #loadmessage 
+                                                                  {
+                                                                  position: fixed;
+                                                                  top: 0px;
+                                                                  left: 0px;
+                                                                  width: 100%;
+                                                                  padding: 5px 0px 5px 0px;
+                                                                  text-align: center;
+                                                                  font-weight: bold;
+                                                                  font-size: 100%;
+                                                                  color: #000000;
+                                                                  background-color: #CCFF66;
+                                                                  z-index: 105;
+                                                                  }
+                                                                  ")),
+                                            conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                             tags$div("It may take a while to load the plots, please wait...
+                                                                      ",id="loadmessage"))
+                                                             ),
+                                   tabPanel("Peak Assymetry", 
+                                            plotlyOutput("PA_Multi")
+                                            ,tags$head(tags$style(type="text/css", "
+                                                                  #loadmessage 
+                                                                  {
+                                                                  position: fixed;
+                                                                  top: 0px;
+                                                                  left: 0px;
+                                                                  width: 100%;
+                                                                  padding: 5px 0px 5px 0px;
+                                                                  text-align: center;
+                                                                  font-weight: bold;
+                                                                  font-size: 100%;
+                                                                  color: #000000;
+                                                                  background-color: #CCFF66;
+                                                                  z-index: 105;
+                                                                  }
+                                                                  ")),
+                                            conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                             tags$div("It may take a while to load the plots, please wait...
+                                                                      ",id="loadmessage"))
+                                                             ),
+                                   tabPanel("Mass Accuracy", 
+                                            plotlyOutput("MA_Multi")
+                                            ,tags$head(tags$style(type="text/css", "
+                                                                  #loadmessage 
+                                                                  {
+                                                                  position: fixed;
+                                                                  top: 0px;
+                                                                  left: 0px;
+                                                                  width: 100%;
+                                                                  padding: 5px 0px 5px 0px;
+                                                                  text-align: center;
+                                                                  font-weight: bold;
+                                                                  font-size: 100%;
+                                                                  color: #000000;
+                                                                  background-color: #CCFF66;
+                                                                  z-index: 105;
+                                                                  }
+                                                                  ")),
+                                            conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                             tags$div("It may take a while to load the plots, please wait...
+                                                                      ",id="loadmessage"))
+                                                             )
+                                            ))), # End "Multi" tabPanel and it's tabsetPanel
               
               tabPanel("Change Point Analysis",
                        tabsetPanel(
@@ -450,7 +562,7 @@ shinyUI(fluidPage(
               tabPanel("Capability Analysis",
                        tabsetPanel(
                          tabPanel("Retention Time"
-                                  #,downloadButton(outputId = "down_CA_RT", label = "Download the plots")
+                                  , textOutput("CA_RT_txt")
                                   , plotlyOutput("RT_CA")
                                   ,tags$head(tags$style(type="text/css", "
                                                         #loadmessage 
@@ -518,7 +630,7 @@ shinyUI(fluidPage(
                                   ),
                          
                          tabPanel("Plots"
-                                  #, plotlyOutput(" a name")
+                                  #, plotlyOutput("Exxx")
                                   ,h5(strong("CUSUMm and CUSUMv control charts")),
                                   
                                   h5(strong("Z and MR control charts")),

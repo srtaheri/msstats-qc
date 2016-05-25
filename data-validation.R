@@ -3,7 +3,11 @@
 # of each vector in the list, are our suggestion so we wrote them in the fisrt place.
 best_colnames <- list(
   c("Best.RT","best retention time", "retention time","rt","best ret time","intensity"),
-  c("Max.FWHM","fwhm")
+  c("Max.FWHM","fwhm"),
+  c("Total.Area","total area","TA","T.Area"),
+  c("Min.Start.Time","min start time"),
+  c("Max.End.Time", "max end time")
+  #c("Precursor")
 )
 #### camelCaseSplit function ##############################################################################################
 camelCaseSplit <- function(x) {
@@ -53,12 +57,54 @@ guessColumnName <- function(x){
 
 ### Input_checking function #########################################################################################
 input_checking <- function(data){
+
+  ## save process output in each step #### creating a log file ########### from Meena's code
+  allfiles <- list.files()
+  
+  num <- 0
+  filenaming <- "msstatsqc"
+  finalfile <- "msstatsqc.log"
+  
+  while(is.element(finalfile,allfiles)) {
+    num <- num+1
+    finalfile <- paste(paste(filenaming,num,sep="-"),".log",sep="")
+  }
+  
+  session <- sessionInfo()
+  sink("sessionInfo.txt")
+  print(session)
+  sink()
+  
+  processout <- as.matrix(read.table("sessionInfo.txt", header=T, sep="\t"))
+  write.table(processout, file=finalfile, row.names=FALSE)
+  
+  processout <- rbind(processout, as.matrix(c(" "," ","MSstatsqc - dataProcess function"," "),ncol=1))
+  ## preparing data
   data[data==""] <- NA
   colnames(data) <- unlist(lapply(colnames(data), function(x)guessColumnName(x)))
+  
   data$Max.FWHM <- as.numeric(gsub(",","",data$Max.FWHM))
   data$Total.Area <- as.numeric(gsub(",","",data$Total.Area))
-  #print(is.logical(colnames(data)[c(1,2)] == c("Precursor","Sample.File")) )
-  #print(colnames(sample_data()))
-  #print(colnames(data))
+  data$Best.RT <- as.numeric(gsub(",","",data$Best.RT))
+  data$Max.End.Time <- as.numeric(gsub(",","",data$Max.End.Time))
+  data$Min.Start.Time <- as.numeric(gsub(",","",data$Min.Start.Time))
+  # ## conditions
+  required_column_names <- c("Precursor","Best.RT","Max.FWHM","Total.Area","Min.Start.Time"
+                             ,"Max.End.Time")
+  provided_column_names <- colnames(data)
+  if(all(required_column_names %in% provided_column_names)) {
+    processout <- rbind(processout, c("The column names : provided - okay"))
+    write.table(processout, file = finalfile, row.names = FALSE)
+  } else if(!all(required_column_names %in% provided_column_names)) {
+    missedInput <- which(!(requiredInputUpper %in% providedInputUpper))
+    processout <- rbind(processout, c(paste("ERROR : The required input : ",
+                                            paste(required_column_names[missedInput], collapse = ", "),
+                                            " are not provided in input - stop")))
+    #paste0("ERROR : The required input :", required_column_names[missedInput], ",are not provided in input - stop")
+    write.table(processout, file = finalfile, row.names = FALSE)
+    stop("Please check the required input. The required input needs (Precursor, Best.RT, Max.FWHM, Total.Area, Min.Start.Time)")
+    
+  }
+  
   return(data)
 }
