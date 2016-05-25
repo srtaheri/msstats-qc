@@ -19,17 +19,25 @@ shinyServer(function(input,output,session) {
     # read.xlsx2(file1$path , sheetName = "data")
   })
   
+<<<<<<< HEAD
   ######Show data############################################
 # output$prodata_table <- renderTable({
 #   prodata <- prodata()
 #   prodata[1:ncol(prodata)]
 # })
+=======
+>>>>>>> origin/master
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
     prodata <- prodata()
     selectInput("pepSelection","Choose precursor type", choices = c(levels(prodata$Precursor),"all peptides"))
   })
+  ######Show data############################################
   
+  output$prodata_table <- DT::renderDataTable(
+    
+    DT::datatable(prodata(), options = list(pageLength = 25))
+  )
   ################################################################# plots ###################################################
   render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){
     prodata <- prodata()
