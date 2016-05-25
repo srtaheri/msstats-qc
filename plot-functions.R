@@ -255,7 +255,7 @@ metrics_box.plot <- function(prodata) {
   
 ##########HEAD
   prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time) # to plot boxplots in increasing order
-  PA <- plot_ly(prodata, y = (Max.End.Time-Min.Start.Time), color = PrecursorPA, type = "box") %>% layout(showlegend = FALSE)
+  PA <- plot_ly(prodata, y = (Max.End.Time-Min.Start.Time), color = PrecursorPA, type = "box") %>%
   layout(yaxis = list(title = "Peak Assymetry"),showlegend = FALSE)
 
 ##########origin/master
