@@ -54,8 +54,8 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
     layout(xaxis = x,yaxis = y) %>%
     add_trace(y = h, marker=list(color="red" , size=4 , opacity=0.5), name = "UCL",showlegend = FALSE) %>%
     add_trace(y = -h, marker=list(color="red" , size=4 , opacity=0.5), name = "LCL",showlegend = FALSE) %>%
-    add_trace(x = plot.data$QCno,
-              y = plot.data$CUSUM, 
+    add_trace(x =plot.data[which(group == "CUSUM-"),"QCno"],
+              y = plot.data[which(group == "CUSUM-"),"CUSUM"], 
               mode = "markers",
               marker=list(color="blue" , size=5 , opacity=0.5)
               #,name = levels(prodata$Precursor)[j]
