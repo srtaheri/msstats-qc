@@ -1,18 +1,19 @@
-R version 3.2.4 (2016-03-10)
+R version 3.2.3 (2015-12-10)
 Platform: x86_64-apple-darwin13.4.0 (64-bit)
-Running under: OS X 10.11.3 (El Capitan)
+Running under: OS X 10.10.5 (Yosemite)
 
 locale:
 [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
 attached base packages:
-[1] stats     graphics  grDevices utils     datasets  methods   base     
+[1] grid      stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] RecordLinkage_0.4-9 ffbase_0.12.3       ff_2.2-13           bit_1.1-12          RSQLite_1.0.0       DBI_0.4-1          
-[7] plotly_3.4.13       ggplot2_2.1.0       shiny_0.13.2       
+ [1] MSstats_3.3.11      reshape2_1.4.1      Rcpp_0.12.4         RecordLinkage_0.4-8 ffbase_0.12.3       ff_2.2-13          
+ [7] bit_1.1-12          RSQLite_1.0.0       DBI_0.3.1           plotly_3.4.13       ggplot2_2.1.0       shiny_0.13.2       
 
 loaded via a namespace (and not attached):
+<<<<<<< Updated upstream
  [1] Rcpp_0.12.4        RColorBrewer_1.1-2 plyr_1.8.3         viridis_0.3.4      base64enc_0.1-3    class_7.3-14      
  [7] tools_3.2.4        evd_2.3-2          ipred_0.9-5        rpart_4.1-10       digest_0.6.9       lattice_0.20-33   
 [13] jsonlite_0.9.20    gtable_0.2.0       Matrix_1.2-6       fastmatch_1.0-4    yaml_2.1.13        parallel_3.2.4    
@@ -21,3 +22,23 @@ loaded via a namespace (and not attached):
 [31] rmarkdown_0.9.6    lava_1.4.3         ada_2.0-3          tidyr_0.4.1        magrittr_1.5       splines_3.2.4     
 [37] MASS_7.3-45        scales_0.4.0       htmltools_0.3.5    rsconnect_0.4.3    assertthat_0.1     mime_0.4          
 [43] xtable_1.8-2       colorspace_1.2-6   httpuv_1.3.3       munsell_0.4.3      chron_2.3-47      
+=======
+ [1] nlme_3.1-127          ProtGenerics_1.2.1    bitops_1.0-6          RColorBrewer_1.1-2    doParallel_1.0.10    
+ [6] httr_1.1.0            evd_2.3-2             MSnbase_1.18.1        tools_3.2.3           R6_2.1.2             
+[11] affyio_1.40.0         rpart_4.1-10          KernSmooth_2.23-15    BiocGenerics_0.16.1   colorspace_1.2-6     
+[16] nnet_7.3-12           gridExtra_2.2.1       preprocessCore_1.32.0 chron_2.3-47          Biobase_2.30.0       
+[21] caTools_1.17.1        scales_0.4.0          affy_1.48.0           stringr_1.0.0         digest_0.6.9         
+[26] minqa_1.2.4           base64enc_0.1-3       htmltools_0.3.5       lme4_1.1-12           limma_3.26.9         
+[31] htmlwidgets_0.6       impute_1.44.0         BiocInstaller_1.20.3  jsonlite_0.9.19       mzID_1.8.0           
+[36] BiocParallel_1.4.3    gtools_3.5.0          dplyr_0.4.3           magrittr_1.5          futile.logger_1.4.1  
+[41] ada_2.0-3             MALDIquant_1.14       Matrix_1.2-5          munsell_0.4.3         S4Vectors_0.8.11     
+[46] viridis_0.3.4         vsn_3.38.0            stringi_1.0-1         yaml_2.1.13           MASS_7.3-45          
+[51] zlibbioc_1.16.0       gplots_3.0.1          plyr_1.8.3            parallel_3.2.3        gdata_2.17.0         
+[56] ggrepel_0.5           lattice_0.20-33       splines_3.2.3         mzR_2.4.1             codetools_0.2-14     
+[61] marray_1.48.0         stats4_3.2.3          futile.options_1.0.0  fastmatch_1.0-4       XML_3.98-1.4         
+[66] pcaMethods_1.60.0     lambda.r_1.1.7        data.table_1.9.6      nloptr_1.0.4          httpuv_1.3.3         
+[71] foreach_1.4.3         gtable_0.2.0          tidyr_0.4.1           reshape_0.8.5         assertthat_0.1       
+[76] mime_0.4              prodlim_1.5.7         xtable_1.8-2          e1071_1.6-7           rsconnect_0.4.2.1    
+[81] class_7.3-14          survival_2.39-2       minpack.lm_1.2-0      iterators_1.0.8       IRanges_2.4.8        
+[86] lava_1.4.3            ipred_0.9-5          
+>>>>>>> Stashed changes
