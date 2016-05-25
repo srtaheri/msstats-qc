@@ -624,7 +624,10 @@ shinyUI(fluidPage(
                                   #, plotOutput("help_metric", hover = "help_metric_hover")
                                   #, verbatimTextOutput("help_metric_info")
                                   ,h5(strong("Retention Time")),
-                                  p("Retention time apex of each targeted peptide"),
+                                  p("Retention time is the time it takes a solute to travel through the column. The retention time is assigned to 
+                                    the corresponding solute peak. The retention time is a measure of the amount of time a solute spends in a column. 
+                                    It is the sum of the time spent in the stationary phase and the mobile phase."
+                                    ,a("visit for more info",href="http://www.britannica.com/science/retention-time")),
                                   
                                   h5(strong("Total Peak Area")),
                                   
