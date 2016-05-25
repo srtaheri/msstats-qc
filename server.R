@@ -21,6 +21,11 @@ shinyServer(function(input,output,session) {
     # read.xlsx2(file1$path , sheetName = "data")
   })
   
+  ######Show data############################################
+  output$prodata_table <- renderDataTable(
+    #prodata <- prodata()
+    DT::datatable(prodata, options = list(pageLength = 25))
+  )
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
     prodata <- prodata()

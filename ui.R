@@ -4,8 +4,63 @@ library(plotly)
 shinyUI(fluidPage(
   titlePanel("MSstatsQC: Quality control tools for LC MS/MS proteomic experiments"),
   navbarPage( "",
+              tabPanel("Home", theme = "bootstrap.css",
+                       #mainPanel(
+                         tags$img(src='logo.png', height=200, width=200, style = "float: right"),
+                         
+                         #h1("MSstatsQC"),
+                         #br(),
+                         p("MSstatsQC is an open-source web-based software which provides longitudinal
+                           system suitability monitoring tools (control charts) for LC MS/MS proteomic experiments."),
+                         p("MSstatsQC uses control charts to monitor the chromatographic performance by tracking system
+                           suitability metrics including peak area, retention time and full width at half maximum (FWHM)."),
+                         p("MSstatsQC includes simultaneous monitoring tools for metric-wise mean and dispersion and presents
+                           alternative methods of monitoring such as time weighted control charts to ensure that various types
+                           of process disturbances are detected effectively. Simultaneous control charts used in this framework
+                           can be classified into two groups: individual-moving range (ZmR) control charts and mean and dispersion
+                           cumulative sum (CUSUM) control charts. To successfully identify the time of change, change point analysis
+                           is also included in this framework. Experiment specific control limits are provided with the control 
+                           charts to distinguish between random noise and systematic error."),
+                         p("The steps for generating results are as follows:"),
+                         ("1. Import your QC data "),
+                         br(),
+                         ("2.	Determine the guide set to estimate metric mean and variance "),
+                         br(),
+                         ("3.	Select specific precursor(s) or select all"),
+                         br(),
+                         ("4. Run and generate control charts"),
+                         br(),
+                         ("5.	Check with change point analysis for better reasoning"),
+                         br(),
+                         ("6.	Navigate results and download them for your QC reports"),
+                         br(),
+                         br(),
+                         tags$img(src='XmRchart.png', height=800, width=1000, style = "float: bottom"),
+                         p("Project Team: "),
+                         h5("Eralp Dogu,",span("e.dogu@neu.edu",style = "color:blue")),
+                         h5("Sara Taheri,",span("mohammadtaheri.s@husky.neu.edu",style = "color:blue")),
+                         h5("Olga Vitek,",span("o.vitek@neu.edu",style = "color:blue")),
+                         br(),
+                         br(),
+                         ("Olga Vitek Lab"),
+                         br(),
+                         ("College of Science"),
+                         br(),
+                         ("College of Computer and Information Science"),
+                         br(),
+                         ("360 Huntington Ave"),
+                         br(),
+                         ("Boston, Massachusetts 02115"),
+                         br(),
+                         br(),
+                         br()
+                         
+                         
+                         #)
+              ), # end mainPanel
               tabPanel("Data Import", theme = "bootstrap.css",
                        sidebarLayout(
+                         tabPanel('Data',  DT::dataTableOutput('prodata_table')), 
                          sidebarPanel(
                            
                            p("Please upload your data (Comma-separated (*.csv) 12 column QC file format)"),
@@ -21,60 +76,11 @@ shinyUI(fluidPage(
                            actionButton("act_button", "click to see plots"),
                            tags$style("body{background-color:linen; color:black}")
                            ),
-                         mainPanel(
-                           tags$img(src='logo.png', height=200, width=200, style = "float: right"),
-                           #h1("MSstatsQC"),
-                           #br(),
-                           p("MSstatsQC is an open-source web-based software which provides longitudinal
-                             system suitability monitoring tools (control charts) for LC MS/MS proteomic experiments."),
-                           p("MSstatsQC uses control charts to monitor the chromatographic performance by tracking system
-                             suitability metrics including peak area, retention time and full width at half maximum (FWHM)."),
-                           p("MSstatsQC includes simultaneous monitoring tools for metric-wise mean and dispersion and presents
-                             alternative methods of monitoring such as time weighted control charts to ensure that various types
-                             of process disturbances are detected effectively. Simultaneous control charts used in this framework
-                             can be classified into two groups: individual-moving range (ZmR) control charts and mean and dispersion
-                             cumulative sum (CUSUM) control charts. To successfully identify the time of change, change point analysis
-                             is also included in this framework. Experiment specific control limits are provided with the control 
-                             charts to distinguish between random noise and systematic error."),
-                           p("The steps for generating results are as follows:"),
-                           ("1. Import your QC data "),
-                           br(),
-                           ("2.	Determine the guide set to estimate metric mean and variance "),
-                           br(),
-                           ("3.	Select specific precursor(s) or select all"),
-                           br(),
-                           ("4. Run and generate control charts"),
-                           br(),
-                           ("5.	Check with change point analysis for better reasoning"),
-                           br(),
-                           ("6.	Navigate results and download them for your QC reports"),
-                           br(),
-                           br(),
-                           p("Project Team: "),
-                           h5("Eralp Dogu,",span("e.dogu@neu.edu",style = "color:blue")),
-                           h5("Sara Taheri,",span("mohammadtaheri.s@husky.neu.edu",style = "color:blue")),
-                           h5("Olga Vitek,",span("o.vitek@neu.edu",style = "color:blue")),
-                           br(),
-                           br(),
-                           ("Olga Vitek Lab"),
-                           br(),
-                           ("College of Science"),
-                           br(),
-                           ("College of Computer and Information Science"),
-                           br(),
-                           ("360 Huntington Ave"),
-                           br(),
-                           ("Boston, Massachusetts 02115"),
-                           br(),
-                           br(),
-                           br()
-                           
-                           
-                           ) # end mainPanel
-                           )
+                         
+                           position = "left")
                        ),
               
-              tabPanel("Summary",
+              tabPanel("Metric Summary",
                        tabsetPanel(
                          tabPanel("Boxplot",
                                   plotlyOutput("box_plot", height = 2000)
