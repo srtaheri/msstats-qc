@@ -79,7 +79,7 @@ input_checking <- function(data){
   write.table(processout, file=finalfile, row.names=FALSE)
   
   processout <- rbind(processout, as.matrix(c(" "," ","MSstatsqc - dataProcess function"," "),ncol=1))
-  #######################################
+  ## preparing data
   data[data==""] <- NA
   colnames(data) <- unlist(lapply(colnames(data), function(x)guessColumnName(x)))
   
@@ -88,13 +88,23 @@ input_checking <- function(data){
   data$Best.RT <- as.numeric(gsub(",","",data$Best.RT))
   data$Max.End.Time <- as.numeric(gsub(",","",data$Max.End.Time))
   data$Min.Start.Time <- as.numeric(gsub(",","",data$Min.Start.Time))
-  
+  # ## conditions
   required_column_names <- c("Precursor","Best.RT","Max.FWHM","Total.Area","Min.Start.Time"
-                         ,"Max.End.Time")
+                             ,"Max.End.Time")
   provided_column_names <- colnames(data)
   if(all(required_column_names %in% provided_column_names)) {
     processout <- rbind(processout, c("The column names : provided - okay"))
     write.table(processout, file = finalfile, row.names = FALSE)
+  } else if(!all(required_column_names %in% provided_column_names)) {
+    missedInput <- which(!(requiredInputUpper %in% providedInputUpper))
+    processout <- rbind(processout, c(paste("ERROR : The required input : ",
+                                            paste(required_column_names[missedInput], collapse = ", "),
+                                            " are not provided in input - stop")))
+    #paste0("ERROR : The required input :", required_column_names[missedInput], ",are not provided in input - stop")
+    write.table(processout, file = finalfile, row.names = FALSE)
+    stop("Please check the required input. The required input needs (Precursor, Best.RT, Max.FWHM, Total.Area, Min.Start.Time)")
+    
   }
+  
   return(data)
 }

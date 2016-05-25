@@ -15,8 +15,9 @@ shinyServer(function(input,output,session) {
     )
     file1 <- input$filein
     if(is.null(file1)){return()} 
-    input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
-    
+    prodata <- read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE)
+    input_checking(prodata)
+    #prodata
     # read.xlsx2(file1$path , sheetName = "data")
   })
   
