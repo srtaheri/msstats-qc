@@ -1,7 +1,5 @@
 library(shiny)
 library(plotly)
-library(RecordLinkage)
-
 source("plot-functions.R")
 source("data-validation.R")
 source("helper-functions.R")
@@ -22,10 +20,10 @@ shinyServer(function(input,output,session) {
   })
   
   ######Show data############################################
-  output$prodata_table <- renderDataTable(
-    #prodata <- prodata()
-    DT::datatable(prodata, options = list(pageLength = 25))
-  )
+# output$prodata_table <- renderTable({
+#   prodata <- prodata()
+#   prodata[1:ncol(prodata)]
+# })
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
     prodata <- prodata()

@@ -5,7 +5,6 @@ shinyUI(fluidPage(
   titlePanel("MSstatsQC: Quality control tools for LC MS/MS proteomic experiments"),
   navbarPage( "",
               tabPanel("Home", theme = "bootstrap.css",
-                       #mainPanel(
                          tags$img(src='logo.png', height=200, width=200, style = "float: right"),
                          
                          #h1("MSstatsQC"),
@@ -54,13 +53,10 @@ shinyUI(fluidPage(
                          br(),
                          br(),
                          br()
-                         
-                         
-                         #)
-              ), # end mainPanel
+              ),
               tabPanel("Data Import", theme = "bootstrap.css",
                        sidebarLayout(
-                         tabPanel('Data',  DT::dataTableOutput('prodata_table')), 
+                         
                          sidebarPanel(
                            
                            p("Please upload your data (Comma-separated (*.csv) 12 column QC file format)"),
@@ -76,7 +72,7 @@ shinyUI(fluidPage(
                            actionButton("act_button", "click to see plots"),
                            tags$style("body{background-color:linen; color:black}")
                            ),
-                         
+                         mainPanel(tableOutput("prodata_table")),
                            position = "left")
                        ),
               
