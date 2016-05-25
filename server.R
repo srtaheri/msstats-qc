@@ -39,7 +39,7 @@ aab <- function(a) {
   ################################################################# plots ###################################################
   
   myHello <- function(){
-    foo.bar();
+    foo.bar("Bye");
   }
   
   render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){
