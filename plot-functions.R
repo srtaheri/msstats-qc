@@ -33,7 +33,8 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   
   x <- list(
     #title = paste("hello", "world", sep="\n")
-    title =  paste("QCno - ", levels(prodata$Precursor)[j])
+    title =  paste("QCno - ", levels(prodata$Precursor)[j]),
+    range = c(0, max(plot.data$QCno))
   )
   y <- list(
     title = ytitle
