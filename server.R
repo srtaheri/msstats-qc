@@ -18,15 +18,13 @@ shinyServer(function(input,output,session) {
     #prodata
     # read.xlsx2(file1$path , sheetName = "data")
   })
-  
-<<<<<<< HEAD
-  ######Show data############################################
+
+######Show data############################################
 # output$prodata_table <- renderTable({
 #   prodata <- prodata()
 #   prodata[1:ncol(prodata)]
 # })
-=======
->>>>>>> origin/master
+
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
     prodata <- prodata()
