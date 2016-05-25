@@ -253,15 +253,12 @@ metrics_box.plot <- function(prodata) {
   RT <- plot_ly(prodata, y = Best.RT, color = PrecursorRT, type = "box") %>% 
     layout(yaxis = list(title = "Retention Time"),showlegend = FALSE)
   
-<<<<<<< HEAD
+##########HEAD
   prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time) # to plot boxplots in increasing order
   PA <- plot_ly(prodata, y = (Max.End.Time-Min.Start.Time), color = PrecursorPA, type = "box") %>% layout(showlegend = FALSE)
-  ylab("Peak Assymetry")+
-=======
-  prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time) # to plot boxplots y axis (P) in decreasing order
-  PA <- plot_ly(prodata, y = (Max.End.Time-Min.Start.Time), color = PrecursorPA, type = "box") %>% 
-    layout(yaxis = list(title = "Peak Assymetry"),showlegend = FALSE)
->>>>>>> origin/master
+  layout(yaxis = list(title = "Peak Assymetry"),showlegend = FALSE)
+
+##########origin/master
   
   prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$Total.Area) # to plot boxplots in decreasing order
   TPA <- plot_ly(prodata, y = Total.Area, color = PrecursorTA, type = "box") %>% 
