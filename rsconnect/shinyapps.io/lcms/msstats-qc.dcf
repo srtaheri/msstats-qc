@@ -1,0 +1,7 @@
+name: msstats-qc
+account: lcms
+server: shinyapps.io
+appId: 104399
+bundleId: 462951
+url: https://lcms.shinyapps.io/msstats-qc/
+when: 1464220879.01141

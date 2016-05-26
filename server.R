@@ -46,7 +46,7 @@ shinyServer(function(input,output,session) {
       })
       
       do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-        layout(autosize = F, width = 1500, height = nlevels(prodata$Precursor)*250)
+        layout(autosize = F, width = 1000, height = nlevels(prodata$Precursor)*200)
     }
     
     else {
@@ -116,7 +116,7 @@ shinyServer(function(input,output,session) {
   output$scatter_plot <- renderPlot({
     prodata <- prodata()
     metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor)
-  }, height = 1000)
+  }, height = 700)
   
   ###########################################################################################################################
   ###########################################################################################################################
