@@ -31,8 +31,10 @@ shinyUI(fluidPage(
                          ("6.	Navigate results and download them for your QC reports"),
                          br(),
                          br(),
-                         tags$img(src='XmRchart.png', height=800, width=1000, style = "float: bottom"),
-                         p("Project Team: "),
+                         tags$img(src='home.png', height=500, width=800, style = "float: bottom"),
+                         br(),
+                         br(),
+                         p ("Project Team: "),
                          h5("Eralp Dogu,",span("e.dogu@neu.edu",style = "color:blue")),
                          h5("Sara Taheri,",span("mohammadtaheri.s@husky.neu.edu",style = "color:blue")),
                          h5("Olga Vitek,",span("o.vitek@neu.edu",style = "color:blue")),
@@ -50,14 +52,23 @@ shinyUI(fluidPage(
                          br(),
                          br(),
                          br()
+######HEAD
               ), # end mainPanel
+#########
+#              ),
+#############origin/master
               tabPanel("Data Import", theme = "bootstrap.css",
-                       sidebarLayout( 
+                       sidebarLayout(
+                         
+                        #sidebarPanel(
+                           
+                       #sidebarLayout(
                          mainPanel(
                            tabsetPanel('Data',  DT::dataTableOutput('prodata_table'))
                            ), 
                       
                         sidebarPanel(
+
                            
                            p("Please upload your data (Comma-separated (*.csv) 12 column QC file format)"),
                            p("To see an acceptable sample data, look at", strong("Help"),"tab"),
@@ -72,9 +83,9 @@ shinyUI(fluidPage(
                            actionButton("act_button", "click to see plots"),
                            tags$style("body{background-color:linen; color:black}")
                            ),
-                         
-                           position = "left")
-                       ),
+                         #mainPanel(tableOutput("prodata_table")),
+                           position = "left"#)
+                       )),
               
               tabPanel("Metric Summary",
                        tabsetPanel(

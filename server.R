@@ -1,7 +1,6 @@
 library(shiny)
 library(plotly)
 library(RecordLinkage)
-
 source("plot-functions.R")
 source("data-validation.R")
 source("helper-functions.R")
@@ -20,7 +19,9 @@ shinyServer(function(input,output,session) {
     #prodata
     # read.xlsx2(file1$path , sheetName = "data")
   })
-  
+
+######Show data############################################
+
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
     prodata <- prodata()
@@ -33,6 +34,7 @@ shinyServer(function(input,output,session) {
     DT::datatable(prodata(), options = list(pageLength = 25))
   )
   ################################################################# plots ###################################################
+  
   render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){
     prodata <- prodata()
     plots <- list()
