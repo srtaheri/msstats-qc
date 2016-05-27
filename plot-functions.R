@@ -186,7 +186,7 @@ IMR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
           ,showlegend = FALSE
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
-    add_trace( y = UCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
+    add_trace(y = UCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
     add_trace(y = LCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
     add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
               , mode = "markers"
