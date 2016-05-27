@@ -19,20 +19,21 @@ shinyServer(function(input,output,session) {
     #prodata
     # read.xlsx2(file1$path , sheetName = "data")
   })
-
-######Show data############################################
-
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
     prodata <- prodata()
     selectInput("pepSelection","Choose precursor type", choices = c(levels(prodata$Precursor),"all peptides"))
   })
-  ######Show data############################################
+  #### selecting columns to view in Data Import section ##############################################################
+  output$prodata_column_select <- renderUI({
+    checkboxGroupInput("show_prodata_columns", "columns of your data", choices = colnames(prodata()), selected = colnames(prodata()))
+  })
+  ######Show data#####################################################################################################
   
-  output$prodata_table <- DT::renderDataTable(
-    
-    DT::datatable(prodata(), options = list(pageLength = 25))
-  )
+  output$prodata_table <- DT::renderDataTable({
+    input$act_button
+    isolate(DT::datatable(prodata(), options = list(pageLength = 25)))
+  })
   ################################################################# plots ###################################################
   
   render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){

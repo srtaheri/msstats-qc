@@ -64,7 +64,8 @@ shinyUI(fluidPage(
                            
                        #sidebarLayout(
                          mainPanel(
-                           tabsetPanel('Data',  DT::dataTableOutput('prodata_table'))
+                           #tabsetPanel('Data',  DT::dataTableOutput('prodata_table'))
+                           DT::dataTableOutput('prodata_table')
                            ), 
                       
                         sidebarPanel(
@@ -78,9 +79,12 @@ shinyUI(fluidPage(
                            numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
                            p("Please select a precursor or select all"),
                            uiOutput("pepSelect"),
-                           p("If you have uploaded your data set, selected the guidset and chosen your precursor type
-                             , click on this button to see the plots"),
-                           actionButton("act_button", "click to see plots"),
+                           #p("If you have uploaded your data set, selected the guidset and chosen your precursor type
+                             #, click on this button to see the plots"),
+                           p("if you have uploaded your data set, click on this button to view it."),
+                           actionButton("act_button", "click to see your data set"),
+                           helpText("please select the columns of your data that you need to see"),
+                           uiOutput("prodata_column_select"),
                            tags$style("body{background-color:linen; color:black}")
                            ),
                          #mainPanel(tableOutput("prodata_table")),
@@ -92,7 +96,7 @@ shinyUI(fluidPage(
                          tabPanel("Boxplot",
                                   plotlyOutput("box_plot", height = 2000)
                          ),
-                         tabPanel("Scatterplot", #helpText(")
+                         tabPanel("Scatterplot",
                                   selectInput("metric_precursor", "Choose the metric",
                                               choices = c("Retention Time","Total Area","FWHM","Peak Assymetry")),
                                   plotOutput("scatter_plot")
