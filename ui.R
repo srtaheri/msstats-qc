@@ -57,19 +57,10 @@ shinyUI(fluidPage(
 #########
 #              ),
 #############origin/master
-              tabPanel("Data Import", theme = "bootstrap.css",
+              tabPanel("Data Import", 
                        sidebarLayout(
-                         
-                        #sidebarPanel(
-                           
-                       #sidebarLayout(
-                         mainPanel(
-                           tabsetPanel('Data',  DT::dataTableOutput('prodata_table'))
-                           ), 
                       
                         sidebarPanel(
-
-                           
                            p("Please upload your data (Comma-separated (*.csv) 12 column QC file format)"),
                            p("To see an acceptable sample data, look at", strong("Help"),"tab"),
                            fileInput("filein", "Upload file"),
@@ -83,9 +74,13 @@ shinyUI(fluidPage(
                            actionButton("act_button", "click to see plots"),
                            tags$style("body{background-color:linen; color:black}")
                            ),
-                         #mainPanel(tableOutput("prodata_table")),
-                           position = "left"#)
-                       )),
+                        mainPanel(
+                           
+                          tabPanel("Data",  
+                                      DT::dataTableOutput('prodata_table'))
+                        ), 
+                           position = "left")
+                       ),
               
               tabPanel("Metric Summary",
                        tabsetPanel(

@@ -10,7 +10,7 @@ shinyServer(function(input,output,session) {
   #### Read data  ##################################################################################################
   prodata <- reactive({ # data is what user, upload in the app
     validate(
-      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
+      need(!is.null(input$filein), "No data is shown here, because you have not uploaded your data")
     )
     file1 <- input$filein
     if(is.null(file1)){return()} 
