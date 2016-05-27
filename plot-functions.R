@@ -183,10 +183,10 @@ IMR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
   plot_ly(plot.data, x = QCno, y = t, type = "scatter",
           name = "linear",  line = list(shape = "linear"),
           marker=list(color="dodgerblue" , size=4 , opacity=0.5)
-          ,showlegend = FALSE
+          ,showlegend = FALSE, text=prodata$Annotations
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
-    add_trace(y = UCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
+    add_trace( y = UCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
     add_trace(y = LCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
     add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
               , mode = "markers"
