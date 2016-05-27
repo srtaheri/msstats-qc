@@ -4,7 +4,7 @@ normalize <- function(prodata, j, L, U, metric) {
   if(metric == "Retention Time"){
     x = precursdata$Best.RT # raw data for retention time
   } else if(metric == "Peak Assymetry") {
-    x = precursdata$Max.End.Time-precursdata$Min.Start.Time # raw data for peak assymetry
+    x = 2*precursdata$Min.Start.Time/(precursdata$Max.End.Time+precursdata$Min.Start.Time) # raw data for peak assymetry
   } else if(metric == "FWHM") {
     x=precursdata$Max.FWHM
   } else if(metric == "Total Area") {
