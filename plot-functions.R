@@ -54,26 +54,25 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
               ,showlegend = FALSE
     ) %>%
     layout(xaxis = x,yaxis = y) %>%
-    add_trace(y = h, marker=list(color="red" , size=4 , opacity=0.5), name = "UCL",showlegend = FALSE) %>%
-    add_trace(y = -h, marker=list(color="red" , size=4 , opacity=0.5), name = "LCL",showlegend = FALSE) %>%
+    add_trace(y = h, marker=list(color="red" , size=4 , opacity=0.5), name = "UCL",showlegend = FALSE,name = "H") %>%
+    add_trace(y = -h, marker=list(color="red" , size=4 , opacity=0.5), name = "LCL",showlegend = FALSE,name = "-H") %>%
     add_trace(x =plot.data[which(group == "CUSUM-"),"QCno"],
               y = plot.data[which(group == "CUSUM-"),"CUSUM"], 
               mode = "markers",
               marker=list(color="blue" , size=5 , opacity=0.5)
-              #,name = levels(prodata$Precursor)[j]
-              ,showlegend = FALSE
+              ,showlegend = FALSE,name=""
     ) %>%
     add_trace(x = plot.data[CUSUM <= -h, ]$QCno,
               y = plot.data[CUSUM <= -h, ]$CUSUM,
               mode = "markers",
               marker=list(color="red" , size=5 , opacity=0.5),
-              showlegend = FALSE
+              showlegend = FALSE,name=""
     ) %>%
     add_trace(x = plot.data[CUSUM >= h, ]$QCno,
               y = plot.data[CUSUM >= h, ]$CUSUM,
               mode = "markers",
               marker=list(color="red" , size=5 , opacity=0.5),
-              showlegend = FALSE
+              showlegend = FALSE,name=""
     ) 
   
   return(p)
@@ -125,18 +124,18 @@ CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
   plot_ly(plot.data, x = QCno, y = Et
           ,type = "scatter"
           ,line = list(shape = "linear")
-          ,showlegend = FALSE
+          ,showlegend = FALSE,name=""
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
     add_trace( x = c(tho.hat,tho.hat), y = c(0, (max(Et)+2)) 
                ,marker=list(color="red", size=4, opacity=0.5)
                , mode = "lines"
-               ,showlegend = FALSE
+               ,showlegend = FALSE,name=""
     ) %>%
     add_trace(x = QCno, y =  Et
               ,mode = "markers"
               , marker=list(color="blue" , size=8 , opacity=0.5)
-              ,showlegend = FALSE
+              ,showlegend = FALSE,name=""
     )
 }
 
@@ -181,27 +180,27 @@ IMR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
     title = ytitle
   )
   plot_ly(plot.data, x = QCno, y = t, type = "scatter",
-          name = "linear",  line = list(shape = "linear"),
+          name = "",  line = list(shape = "linear"),
           marker=list(color="dodgerblue" , size=4 , opacity=0.5)
           ,showlegend = FALSE, text=prodata$Annotations
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
-    add_trace( y = UCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
-    add_trace(y = LCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE) %>%
+    add_trace(y = UCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE,name="UCL") %>%
+    add_trace(y = LCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE,name="LCL") %>%
     add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
               , mode = "markers"
               , marker=list(color="red" , size=8 , opacity=0.5)
-              ,showlegend = FALSE
+              ,showlegend = FALSE,name=""
     ) %>%
     add_trace(x = plot.data[t >= UCL, ]$QCno, y = plot.data[t >= UCL, ]$t
               , mode = "markers"
               , marker=list(color="red" , size=8 , opacity=0.5)
-              ,showlegend = FALSE
+              ,showlegend = FALSE,name=""
     ) %>%
     add_trace(x = plot.data[t > LCL & t < UCL, ]$QCno, y = plot.data[t > LCL & t < UCL, ]$t
               , mode = "markers"
               , marker=list(color="blue" , size=8 , opacity=0.5)
-              ,showlegend = FALSE
+              ,showlegend = FALSE,name=""
     )
 }
 
@@ -268,5 +267,6 @@ metrics_box.plot <- function(prodata) {
   FWHM <- plot_ly(prodata, y = Max.FWHM, color = PrecursorFWHM, type = "box") %>% 
     layout(yaxis = list(title = "FWHM"),showlegend = FALSE)
   
-  return(subplot(RT, PA, TPA, FWHM, nrows = 4))
+  return(subplot(RT, PA, TPA, FWHM, nrows = 4) %>%
+           layout(autosize = F, width = 700, height = 1000))
 }
