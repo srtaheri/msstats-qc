@@ -52,25 +52,14 @@ shinyUI(fluidPage(
                          br(),
                          br(),
                          br()
-######HEAD
+
               ), # end mainPanel
-#########
+
 #              ),
 #############origin/master
               tabPanel("Data Import", 
                        sidebarLayout(
-<<<<<<< HEAD
-                         
-                        #sidebarPanel(
-                           
-                       #sidebarLayout(
-                         mainPanel(
-                           #tabsetPanel('Data',  DT::dataTableOutput('prodata_table'))
-                           DT::dataTableOutput('prodata_table')
-                           ), 
-=======
->>>>>>> origin/master
-                      
+
                         sidebarPanel(
                            p("Please upload your data (Comma-separated (*.csv) 12 column QC file format)"),
                            p("To see an acceptable sample data, look at", strong("Help"),"tab"),

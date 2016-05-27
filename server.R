@@ -10,7 +10,7 @@ shinyServer(function(input,output,session) {
   #### Read data  ##################################################################################################
   prodata <- reactive({ # data is what user, upload in the app
     validate(
-      need(!is.null(input$filein), "Please upload your data")
+      need(!is.null(input$filein), "No plot is shown here, because you have not uploaded your data")
     )
     file1 <- input$filein
     if(is.null(file1)){return()} 
@@ -30,10 +30,10 @@ shinyServer(function(input,output,session) {
   })
   ######Show data#####################################################################################################
   
-  output$prodata_table <- DT::renderDataTable({
-    input$act_button
-    isolate(DT::datatable(prodata(), options = list(pageLength = 25)))
-  })
+  output$prodata_table <- DT::renderDataTable(
+    #input$act_button
+    DT::datatable(prodata(), options = list(pageLength = 25))
+  )
   ################################################################# plots ###################################################
   
   render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){
@@ -64,11 +64,11 @@ shinyServer(function(input,output,session) {
   }
   ########################################################## plot CUSUM_chart  for RT####################
   output$RT_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", main.title = "Retention Time", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", main.title = "Retention Time", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
   })
   ########################################################## plot CP for RT #############################
   output$RT_CP <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "CP", main.title = "Retention Time", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.tab(normalize.metric = "Retention Time", plot.method = "CP", main.title = "Retention Time", y.title1 = "Ci", y.title2 = "Di")
   })
   ####################################################### plot ZMR for RT ##############################
   output$RT_ZMR <- renderPlotly({
@@ -76,11 +76,11 @@ shinyServer(function(input,output,session) {
   })
   ########################################################plot CUSUM for Peak assymetry ################
   output$PA_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", main.title = "Peak Assymetry", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", main.title = "Peak Assymetry", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
   })
   ######################################################## plot Change Point for Peak assymetry ###########
   output$PA_CP <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", main.title = "Peak Assymetry", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", main.title = "Peak Assymetry", y.title1 = "Ci", y.title2 = "Di")
   })
   ########################################################## plot ZMR for Peak assymetry ###################################
   output$PA_ZMR <- renderPlotly({
@@ -88,11 +88,11 @@ shinyServer(function(input,output,session) {
   })
   ########################################################### plot CUSUM FOR Max.FWHM ####################################
   output$Max_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", main.title = "FWHM", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")    
+    render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", main.title = "FWHM", y.title1 = "CUSUMm", y.title2 = "CUSUMv")    
   })
   ########################################################## plot Change Point FOR Max.FWHM ####################################
   output$Max_CP <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "CP", main.title = "FWHM", y.title1 = "Change point for mean", y.title2 = "Change point for variation")    
+    render.tab(normalize.metric = "FWHM", plot.method = "CP", main.title = "FWHM", y.title1 = "Ci", y.title2 = "Di")    
   })
   ########################################################## plot ZMR FOR Max.FWHM ####################################
   output$Max_ZMR <- renderPlotly({
@@ -100,11 +100,11 @@ shinyServer(function(input,output,session) {
   })
   ############################################################ plot CUSUM FOR total area ####################################
   output$TA_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", main.title = "Total Area", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", main.title = "Total Area", y.title1 = "CUSUMm", y.title2 = "CUSUMv")
   })
   ########################################################## plot Change Point FOR total area ##################################
   output$TA_CP <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "CP", main.title = "Total Area", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.tab(normalize.metric = "Total Area", plot.method = "CP", main.title = "Total Area", y.title1 = "Ci", y.title2 = "Di")
   })
   ########################################################## plot ZMR FOR total area ##########################################
   output$TA_ZMR <- renderPlotly({
