@@ -669,6 +669,7 @@ shinyUI(fluidPage(
                          tabPanel("User Manual",
                         
                                  fluidRow(column(12, includeMarkdown("UserManual.md"))) 
+                                 #includeHTML("UserManual.html")
       
                          )
                          
