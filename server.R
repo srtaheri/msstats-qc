@@ -77,7 +77,7 @@ shinyServer(function(input,output,session) {
   })
   ########################################################plot CUSUM for Peak assymetry ################
   output$PA_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", normalization.type = FALSE, main.title = "Peak Assymetry", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Peak Assymetry", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
   ######################################################## plot Change Point for Peak assymetry ###########
   output$PA_CP <- renderPlotly({
@@ -89,7 +89,7 @@ shinyServer(function(input,output,session) {
   })
   ########################################################### plot CUSUM FOR MaxFWHM ####################################
   output$Max_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", normalization.type = FALSE, main.title = "FWHM", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")    
+    render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", normalization.type = TRUE, main.title = "FWHM", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")    
   })
   ########################################################## plot Change Point FOR MaxFWHM ####################################
   output$Max_CP <- renderPlotly({
@@ -101,7 +101,7 @@ shinyServer(function(input,output,session) {
   })
   ############################################################ plot CUSUM FOR total area ####################################
   output$TA_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", normalization.type = FALSE, main.title = "Total Area", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Total Area", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
   ########################################################## plot Change Point FOR total area ##################################
   output$TA_CP <- renderPlotly({
