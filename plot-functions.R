@@ -32,8 +32,7 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   Main=Main.title
   
   x <- list(
-    #title = paste("hello", "world", sep="\n")
-    title =  paste("QCno - ", levels(prodata$Precursor)[j]),
+    title =  paste("QCno - ", levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]),
     range = c(0, max(plot.data$QCno))
   )
   y <- list(
@@ -115,7 +114,7 @@ CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
   
   x <- list(
     #title = "QCno"
-    title = paste("QCno - ", levels(prodata$Precursor)[j])
+    title = paste("QCno - ", levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j])
   )
   y <- list(
     title = ytitle
@@ -147,24 +146,26 @@ IMR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
   t <- numeric(length(z)-1) # z in plot 1, MR in plot 2
   
   ## Calculate X chart statistics and limits 
-  UCL = 0
-  LCL = 0
-  #UCLI=MRmean+2.66*sd(MR[L:U])
-  #LCLI=MRmean-2.66*sd(MR[L:U])
-  
+  #UCL = 0
+  #LCL = 0
+  #UCLI=mean(z[L:U])+2.66*sd(MR[L:U])
+  #LCLI=mean(z[L:U])-2.66*sd(MR[L:U])
+  for(i in 2:length(z)) {
+    t[i]=abs(z[i]-z[i-1]) # Compute moving range of z
+  }
   Main=Main.title
   
   QCno=1:length(z)
   
   if(type == 1) {
-    UCL=3
-    LCL=-3
+    UCL=mean(z[L:U])+2.66*sd(t[L:U])
+    LCL=mean(z[L:U])-2.66*sd(t[L:U])
+    #UCL=3
+    #LCL=-3
     t <- z
   } else if(type == 2) {
     ## Calculate MR chart statistics and limits
-    for(i in 2:length(z)) {
-      t[i]=abs(z[i]-z[i-1]) # Compute moving range of z
-    }
+
     UCL=3.267*sd(t[1:L-U])
     LCL=0
   }
@@ -174,7 +175,7 @@ IMR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
   y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
   
   x <- list(
-    title = paste("QCno - ", levels(prodata$Precursor)[j])
+    title = paste("QCno - ", levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j])
   )
   y <- list(
     title = ytitle
@@ -248,23 +249,23 @@ metrics_scatter.plot <- function(prodata, L, U, metric) {
 }
 #########################################################################################################################
 metrics_box.plot <- function(prodata) {
-  prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$Best.RT) # to plot boxplots y axis (Retention Time) in decreasing order
-  RT <- plot_ly(prodata, y = Best.RT, color = PrecursorRT, type = "box") %>% 
+  prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$BestRetentionTime) # to plot boxplots y axis (Retention Time) in decreasing order
+  RT <- plot_ly(prodata, y = BestRetentionTime, color = PrecursorRT, type = "box") %>% 
     layout(yaxis = list(title = "Retention Time"),showlegend = FALSE)
   
 ##########HEAD
-  prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$Max.End.Time - prodata$Min.Start.Time) # to plot boxplots in increasing order
-  PA <- plot_ly(prodata, y = (Max.End.Time-Min.Start.Time), color = PrecursorPA, type = "box") %>%
+  prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$MaxEndTime - prodata$MinStartTime) # to plot boxplots in increasing order
+  PA <- plot_ly(prodata, y = (MaxEndTime-MinStartTime), color = PrecursorPA, type = "box") %>%
   layout(yaxis = list(title = "Peak Assymetry"),showlegend = FALSE)
 
 ##########origin/master
   
-  prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$Total.Area) # to plot boxplots in decreasing order
-  TPA <- plot_ly(prodata, y = Total.Area, color = PrecursorTA, type = "box") %>% 
+  prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$TotalArea) # to plot boxplots in decreasing order
+  TPA <- plot_ly(prodata, y = TotalArea, color = PrecursorTA, type = "box") %>% 
     layout(yaxis = list(title = "Total Peak Area"),showlegend = FALSE)
   
-  prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata$Max.FWHM) 
-  FWHM <- plot_ly(prodata, y = Max.FWHM, color = PrecursorFWHM, type = "box") %>% 
+  prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata$MaxFWHM) 
+  FWHM <- plot_ly(prodata, y = MaxFWHM, color = PrecursorFWHM, type = "box") %>% 
     layout(yaxis = list(title = "FWHM"),showlegend = FALSE)
   
   return(subplot(RT, PA, TPA, FWHM, nrows = 4) %>%

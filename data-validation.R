@@ -1,12 +1,12 @@
 # here we put a selection of most column names that users use. The first element of each vector should be the best name that
-# we suggest users to use and  which our code is based on. for example "Best.RT" and "Max FWHM" which are the first element
+# we suggest users to use and  which our code is based on. for example "BestRetentionTime" and "Max FWHM" which are the first element
 # of each vector in the list, are our suggestion so we wrote them in the fisrt place.
 best_colnames <- list(
-  c("Best.RT","best retention time", "retention time","rt","best ret time","intensity"),
-  c("Max.FWHM","fwhm"),
-  c("Total.Area","total area","TA","T.Area"),
-  c("Min.Start.Time","min start time"),
-  c("Max.End.Time", "max end time")
+  c("BestRetentionTime" ,"Best.RT","best retention time", "retention time","rt","best ret time","intensity"),
+  c("MaxFWHM","fwhm","max.fwhm"),
+  c("TotalArea","total area","TA","T.Area"),
+  c("MinStartTime","min start time"),
+  c("MaxEndTime", "max end time")
   #c("Precursor")
 )
 #### camelCaseSplit function ##############################################################################################
@@ -29,18 +29,19 @@ clearString <- function(x){
   return(tolower(punc_remove(camelCaseSplit(x))))
 }
 #### guessColumnName function ###########################################################################################
-guessColumnName <- function(x){
-  # best_colnames <- best_colnames()
-  # This function receives the data and check the column names of data and changes the column names if it is not the
-  # same names as our suggested sample data to fit our suggested sample data.
-  a <- clearString(x)
+
+# This function receives the data and check the column names of data and changes the column names if it is not the
+# same names as our suggested sample data to fit our suggested sample data.guessColumnName <- function(x){
+guessColumnName <- function(x){  
+ 
+a <- clearString(x)
   
   max_index <- 0
   max <- -1
   for(i in 1:length(best_colnames)){
     col <- best_colnames[[i]]
     for(j in 1:length(col)){
-      sim <- levenshteinSim(a,col[j])
+      sim <- levenshteinSim(a,clearString(col[j]))
       if(sim > max){
         max <- sim
         max_index <- i
@@ -83,14 +84,14 @@ input_checking <- function(data){
   data[data==""] <- NA
   colnames(data) <- unlist(lapply(colnames(data), function(x)guessColumnName(x)))
   
-  data$Max.FWHM <- as.numeric(gsub(",","",data$Max.FWHM))
-  data$Total.Area <- as.numeric(gsub(",","",data$Total.Area))
-  data$Best.RT <- as.numeric(gsub(",","",data$Best.RT))
-  data$Max.End.Time <- as.numeric(gsub(",","",data$Max.End.Time))
-  data$Min.Start.Time <- as.numeric(gsub(",","",data$Min.Start.Time))
+  data$MaxFWHM <- as.numeric(gsub(",","",data$MaxFWHM))
+  data$TotalArea <- as.numeric(gsub(",","",data$TotalArea))
+  data$BestRetentionTime <- as.numeric(gsub(",","",data$BestRetentionTime))
+  data$MaxEndTime <- as.numeric(gsub(",","",data$MaxEndTime))
+  data$MinStartTime <- as.numeric(gsub(",","",data$MinStartTime))
   # ## conditions
-  required_column_names <- c("Precursor","Best.RT","Max.FWHM","Total.Area","Min.Start.Time"
-                             ,"Max.End.Time")
+  required_column_names <- c("Precursor","BestRetentionTime","MaxFWHM","TotalArea","MinStartTime"
+                             ,"MaxEndTime")
   provided_column_names <- colnames(data)
   if(all(required_column_names %in% provided_column_names)) {
     processout <- rbind(processout, c("The column names : provided - okay"))
@@ -102,7 +103,7 @@ input_checking <- function(data){
                                             " are not provided in input - stop")))
     #paste0("ERROR : The required input :", required_column_names[missedInput], ",are not provided in input - stop")
     write.table(processout, file = finalfile, row.names = FALSE)
-    stop("Please check the required input. The required input needs (Precursor, Best.RT, Max.FWHM, Total.Area, Min.Start.Time)")
+    stop("Please check the required input. The required input needs (Precursor, BestRetentionTime, MaxFWHM, TotalArea, MinStartTime)")
     
   }
   

@@ -32,18 +32,19 @@ shinyServer(function(input,output,session) {
   
   output$prodata_table <- DT::renderDataTable(
     #input$act_button
-    DT::datatable(prodata(), options = list(pageLength = 25))
+    #if(is.null(input$show_prodata_columns)){print("why")}
+    DT::datatable(prodata()[,input$show_prodata_columns], options = list(pageLength = 25))
   )
   ################################################################# plots ###################################################
   
-  render.tab <- function(normalize.metric, plot.method, main.title, y.title1, y.title2){
+  render.tab <- function(normalize.metric, plot.method, normalization.type, main.title, y.title1, y.title2){
     prodata <- prodata()
     plots <- list()
     
     if(input$pepSelection == "all peptides") {
       
       results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
-        z <- normalize(prodata, j, input$L, input$U, metric = normalize.metric)
+        z <- prepare_column(prodata, j, input$L, input$U, metric = normalize.metric, normalization = normalization.type)
         plots[[2*j-1]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
         plots[[2*j]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
       })
@@ -54,7 +55,7 @@ shinyServer(function(input,output,session) {
     
     else {
       j = which(levels(prodata$Precursor) == input$pepSelection)
-      z <- normalize(prodata, j, input$L, input$U, metric = normalize.metric)
+      z <- prepare_column(prodata, j, input$L, input$U, metric = normalize.metric, normalization = normalization.type)
       
       plot1 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
       plot2 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
@@ -64,51 +65,51 @@ shinyServer(function(input,output,session) {
   }
   ########################################################## plot CUSUM_chart  for RT####################
   output$RT_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", main.title = "Retention Time", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Retention Time", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
   ########################################################## plot CP for RT #############################
   output$RT_CP <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "CP", main.title = "Retention Time", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.tab(normalize.metric = "Retention Time", plot.method = "CP", normalization.type = FALSE, main.title = "Retention Time", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
   })
   ####################################################### plot ZMR for RT ##############################
   output$RT_ZMR <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "ZMR", main.title = "Retention Time", y.title1 = "Individual Value", y.title2 = "Moving Range")
+    render.tab(normalize.metric = "Retention Time", plot.method = "ZMR", normalization.type = FALSE, main.title = "Retention Time", y.title1 = "Individual Value", y.title2 = "Moving Range")
   })
   ########################################################plot CUSUM for Peak assymetry ################
   output$PA_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", main.title = "Peak Assymetry", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", normalization.type = FALSE, main.title = "Peak Assymetry", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
   ######################################################## plot Change Point for Peak assymetry ###########
   output$PA_CP <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", main.title = "Peak Assymetry", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", normalization.type = FALSE, main.title = "Peak Assymetry", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
   })
   ########################################################## plot ZMR for Peak assymetry ###################################
   output$PA_ZMR <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "ZMR", main.title = "Peak Assymetry", y.title1 = "Individual Value", y.title2 = "Moving Range")
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "ZMR", normalization.type = FALSE, main.title = "Peak Assymetry", y.title1 = "Individual Value", y.title2 = "Moving Range")
   })
-  ########################################################### plot CUSUM FOR Max.FWHM ####################################
+  ########################################################### plot CUSUM FOR MaxFWHM ####################################
   output$Max_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", main.title = "FWHM", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")    
+    render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", normalization.type = FALSE, main.title = "FWHM", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")    
   })
-  ########################################################## plot Change Point FOR Max.FWHM ####################################
+  ########################################################## plot Change Point FOR MaxFWHM ####################################
   output$Max_CP <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "CP", main.title = "FWHM", y.title1 = "Change point for mean", y.title2 = "Change point for variation")    
+    render.tab(normalize.metric = "FWHM", plot.method = "CP", normalization.type = FALSE, main.title = "FWHM", y.title1 = "Change point for mean", y.title2 = "Change point for variation")    
   })
-  ########################################################## plot ZMR FOR Max.FWHM ####################################
+  ########################################################## plot ZMR FOR MaxFWHM ####################################
   output$Max_ZMR <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "ZMR", main.title = "FWHM", y.title1 = "Individual Value", y.title2 = "Moving Range")
+    render.tab(normalize.metric = "FWHM", plot.method = "ZMR", normalization.type = FALSE, main.title = "FWHM", y.title1 = "Individual Value", y.title2 = "Moving Range")
   })
   ############################################################ plot CUSUM FOR total area ####################################
   output$TA_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", main.title = "Total Area", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", normalization.type = FALSE, main.title = "Total Area", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
   ########################################################## plot Change Point FOR total area ##################################
   output$TA_CP <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "CP", main.title = "Total Area", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.tab(normalize.metric = "Total Area", plot.method = "CP", normalization.type = FALSE, main.title = "Total Area", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
   })
   ########################################################## plot ZMR FOR total area ##########################################
   output$TA_ZMR <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "ZMR", main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
+    render.tab(normalize.metric = "Total Area", plot.method = "ZMR", normalization.type = FALSE, main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
   })
   ########################################################## box plot in Summary tab ##########################################
   output$box_plot <- renderPlotly({

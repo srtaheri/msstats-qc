@@ -1,20 +1,28 @@
-normalize <- function(prodata, j, L, U, metric) {
+prepare_column <- function(prodata, j, L, U, metric, normalization) {
+  prodata$Precursor <- reorder(prodata$Precursor,prodata$BestRetentionTime)
   precursdata<-prodata[prodata$Precursor==levels(prodata$Precursor)[j],]
-  x <- 0
+  z <- 0
   if(metric == "Retention Time"){
-    x = precursdata$Best.RT # raw data for retention time
+    z = precursdata$BestRetentionTime # raw data for retention time
+    #paste("bestsss")
   } else if(metric == "Peak Assymetry") {
-    x = 2*precursdata$Min.Start.Time/(precursdata$Max.End.Time+precursdata$Min.Start.Time) # raw data for peak assymetry
+    z = 2*precursdata$MinStartTime/(precursdata$MaxEndTime+precursdata$MinStartTime) # raw data for peak assymetry
   } else if(metric == "FWHM") {
-    x=precursdata$Max.FWHM
+    z = precursdata$MaxFWHM
   } else if(metric == "Total Area") {
-    x=precursdata$Total.Area # raw data for total area
+    z = precursdata$TotalArea # raw data for total area
   } else {
     print("Error")
   }
+  if(normalization == TRUE) {
+    mu=mean(z[L:U]) # in-control process mean
+    sd=sd(z[L:U]) # in-control process variance
+    z=scale(z[1:length(z)],mu,sd) # transformation for N(0,1) )
+    #paste("hello")
+    return(z)
+  } else if(normalization == FALSE){
+    #paste("bye")
+    return(z)
+  }
   
-  mu=mean(x[L:U]) # in-control process mean
-  sd=sd(x[L:U]) # in-control process variance
-  z=scale(x[1:length(x)],mu,sd) # transformation for N(0,1) )
-  return(z)
 }
