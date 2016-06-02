@@ -119,7 +119,7 @@ shinyServer(function(input,output,session) {
   ########################################################## scatterplot matrix in Summary tab #################################
   output$scatter_plot <- renderPlot({
     prodata <- prodata()
-    metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor)
+    metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor, normalization = TRUE)
   }, height = 700)
   
   ###########################################################################################################################
@@ -127,44 +127,44 @@ shinyServer(function(input,output,session) {
   ########################################################## "help" tab ################################
   
   #### Text messages in empty places - This part will be removed in future, when the metrics codes is complete ######
-  output$EWMA_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
-  
-  output$Short_run_SPC_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
-  
-  output$Multivariate_Control_Charts_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
+  # output$EWMA_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
+  # 
+  # output$Short_run_SPC_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
+  # 
+  # output$Multivariate_Control_Charts_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
   
   # output$Capability_Analysis_txt <- renderText({
   #   paste0("This part is not complete yet, we will complete it in near future.")
   # })
   
-  output$MA_ZMR_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
-  
-  output$MA_CUSUM_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
-  
-  output$CP_MA_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
-  
-  output$CA_RT_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
-  
-  output$CA_MA_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
-  
-  output$OverallQC_txt <- renderText({
-    paste0("This part is not complete yet, we will complete it in near future.")
-  })
+  # output$MA_ZMR_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
+  # 
+  # output$MA_CUSUM_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
+  # 
+  # output$CP_MA_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
+  # 
+  # output$CA_RT_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
+  # 
+  # output$CA_MA_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
+  # 
+  # output$OverallQC_txt <- renderText({
+  #   paste0("This part is not complete yet, we will complete it in near future.")
+  # })
   ############################################################################################################################
 })

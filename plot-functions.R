@@ -237,10 +237,10 @@ panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
   text(0.5, 0.4, txt2)
 }
 #########################################################################################################################
-metrics_scatter.plot <- function(prodata, L, U, metric) {
+metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
   multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
   for (j in 1:nlevels(prodata$Precursor)) {
-    z <- normalize(prodata, j, L, U, metric)
+    z <- prepare_column(prodata, j, L, U, metric, normalization)
     multidata[1:length(z),j]<-z
   }
   colnames(multidata) <- levels(prodata$Precursor)
