@@ -22,7 +22,10 @@ shinyServer(function(input,output,session) {
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
     prodata <- prodata()
-    selectInput("pepSelection","Choose precursor type", choices = c(levels(prodata$Precursor),"all peptides"))
+    selectInput("pepSelection","Choose precursor type"
+                #,choices = c(levels(prodata$Precursor)
+                            ,choices = c(levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+                            ,"all peptides"))
   })
   #### selecting columns to view in Data Import section ##############################################################
   output$prodata_column_select <- renderUI({
@@ -54,7 +57,7 @@ shinyServer(function(input,output,session) {
     }
     
     else {
-      j = which(levels(prodata$Precursor) == input$pepSelection)
+      j = which(levels(reorder(prodata$Precursor,prodata$BestRetentionTime)) == input$pepSelection)
       z <- prepare_column(prodata, j, input$L, input$U, metric = normalize.metric, normalization = normalization.type)
       
       plot1 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
