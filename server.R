@@ -34,8 +34,6 @@ shinyServer(function(input,output,session) {
   ######Show data#####################################################################################################
   
   output$prodata_table <- DT::renderDataTable(
-    #input$act_button
-    #if(is.null(input$show_prodata_columns)){print("why")}
     DT::datatable(prodata()[,input$show_prodata_columns], options = list(pageLength = 25))
   )
   ################################################################# plots ###################################################

@@ -6,8 +6,9 @@ best_colnames <- list(
   c("MaxFWHM","fwhm","max.fwhm"),
   c("TotalArea","total area","TA","T.Area"),
   c("MinStartTime","min start time"),
-  c("MaxEndTime", "max end time")
-  #c("Precursor")
+  c("MaxEndTime", "max end time"),
+  c("Precursor","PeptideSequence"),
+  c("Annotations","anotations")
 )
 #### camelCaseSplit function ##############################################################################################
 camelCaseSplit <- function(x) {

@@ -1,6 +1,8 @@
 CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   k=0.5 
   h=5  
+  precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
+  prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
   
   v <- numeric(length(z))
   
@@ -45,6 +47,7 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
                line = list(color = "dodgerblue")
                , name = "CUSUM+"
                ,showlegend = FALSE
+               , text=prodata_grouped_by_precursor$Annotations
   ) %>%
     add_trace(x = plot.data[which(group == "CUSUM-"),"QCno"], 
               y = plot.data[which(group == "CUSUM-"),"CUSUM"], 
@@ -81,7 +84,8 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
 #########################################################################################################################
 CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
   ## Create variables 
-  
+  precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
+  prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
   Et <-  numeric(length(z)-1) # this is Ct in type 1, and Dt in type 2.
   SS<- numeric(length(z)-1)
   SST<- numeric(length(z)-1)
@@ -124,6 +128,7 @@ CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
           ,type = "scatter"
           ,line = list(shape = "linear")
           ,showlegend = FALSE,name=""
+          , text=prodata_grouped_by_precursor$Annotations
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
     add_trace( x = c(tho.hat,tho.hat), y = c(0, (max(Et)+2)) 
@@ -144,12 +149,12 @@ CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
 IMR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
   
   t <- numeric(length(z)-1) # z in plot 1, MR in plot 2
+  precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
+  prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
   
   ## Calculate X chart statistics and limits 
   #UCL = 0
   #LCL = 0
-  #UCLI=mean(z[L:U])+2.66*sd(MR[L:U])
-  #LCLI=mean(z[L:U])-2.66*sd(MR[L:U])
   for(i in 2:length(z)) {
     t[i]=abs(z[i]-z[i-1]) # Compute moving range of z
   }
@@ -183,7 +188,8 @@ IMR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
   plot_ly(plot.data, x = QCno, y = t, type = "scatter",
           name = "",  line = list(shape = "linear"),
           marker=list(color="dodgerblue" , size=4 , opacity=0.5)
-          ,showlegend = FALSE, text=prodata$Annotations
+          ,showlegend = FALSE
+          , text=prodata_grouped_by_precursor$Annotations
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
     add_trace(y = UCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE,name="UCL") %>%
