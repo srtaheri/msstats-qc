@@ -70,7 +70,7 @@ shinyServer(function(input,output,session) {
   })
   ########################################################## plot CP for RT #############################
   output$RT_CP <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "CP", normalization.type = FALSE, main.title = "Retention Time", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.tab(normalize.metric = "Retention Time", plot.method = "CP", normalization.type = TRUE, main.title = "Retention Time", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
   })
   ####################################################### plot ZMR for RT ##############################
   output$RT_ZMR <- renderPlotly({
@@ -82,7 +82,7 @@ shinyServer(function(input,output,session) {
   })
   ######################################################## plot Change Point for Peak assymetry ###########
   output$PA_CP <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", normalization.type = FALSE, main.title = "Peak Assymetry", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", normalization.type = TRUE, main.title = "Peak Assymetry", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
   })
   ########################################################## plot ZMR for Peak assymetry ###################################
   output$PA_ZMR <- renderPlotly({
@@ -94,7 +94,7 @@ shinyServer(function(input,output,session) {
   })
   ########################################################## plot Change Point FOR MaxFWHM ####################################
   output$Max_CP <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "CP", normalization.type = FALSE, main.title = "FWHM", y.title1 = "Change point for mean", y.title2 = "Change point for variation")    
+    render.tab(normalize.metric = "FWHM", plot.method = "CP", normalization.type = TRUE, main.title = "FWHM", y.title1 = "Change point for mean", y.title2 = "Change point for variation")    
   })
   ########################################################## plot ZMR FOR MaxFWHM ####################################
   output$Max_ZMR <- renderPlotly({
@@ -106,7 +106,7 @@ shinyServer(function(input,output,session) {
   })
   ########################################################## plot Change Point FOR total area ##################################
   output$TA_CP <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "CP", normalization.type = FALSE, main.title = "Total Area", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.tab(normalize.metric = "Total Area", plot.method = "CP", normalization.type = TRUE, main.title = "Total Area", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
   })
   ########################################################## plot ZMR FOR total area ##########################################
   output$TA_ZMR <- renderPlotly({
