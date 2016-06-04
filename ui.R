@@ -7,13 +7,13 @@ shinyUI(fluidPage(
               tabPanel("Home", theme = "bootstrap.css",
                          tags$img(src='logo.png', height=200, width=200, style = "float: right"),
                          p("MSstatsQC is an open-source web-based software which provides longitudinal
-                           system suitability monitoring tools (control charts) for LC MS/MS proteomic experiments."),
-                         p("MSstatsQC uses control charts to monitor the chromatographic performance by tracking system
-                           suitability metrics including peak area, retention time and full width at half maximum (FWHM)."),
-                         p("MSstatsQC includes simultaneous monitoring tools for metric-wise mean and dispersion and presents
+                           system suitability monitoring tools (control charts) for SRM based proteomic experiments."),
+                         p("MSstatsQC uses control charts to monitor the instrument performance by tracking system
+                           suitability metrics including total peak area, retention time and full width at half maximum (FWHM) and peak assymetry."),
+                         p("This framework includes simultaneous monitoring tools for mean and dispersion of suitability metrics and presents
                            alternative methods of monitoring such as time weighted control charts to ensure that various types
                            of process disturbances are detected effectively. Simultaneous control charts used in this framework
-                           can be classified into two groups: individual-moving range (ZmR) control charts and mean and dispersion
+                           can be classified into two groups: individual-moving range (XmR) control charts and mean and dispersion
                            cumulative sum (CUSUM) control charts. To successfully identify the time of change, change point analysis
                            is also included in this framework. Experiment specific control limits are provided with the control 
                            charts to distinguish between random noise and systematic error."),
@@ -31,7 +31,7 @@ shinyUI(fluidPage(
                          ("6.	Navigate results and download them for your QC reports"),
                          br(),
                          br(),
-                         tags$img(src='home.png', height=500, width=800, style = "float: bottom"),
+                         tags$img(src='home.png', height=200, width=500, style = "float: bottom"),
                          br(),
                          br(),
                          p ("Project Team: "),
@@ -61,7 +61,7 @@ shinyUI(fluidPage(
                        sidebarLayout(
 
                         sidebarPanel(
-                           p("Please upload your data (Comma-separated (*.csv) 12 column QC file format)"),
+                           p("Please upload your data (Comma-separated (*.csv) 8 column QC file format)"),
                            p("To see an acceptable sample data, look at", strong("Help"),"tab"),
                            fileInput("filein", "Upload file"),
                            p("Please select a guide set"),
@@ -672,10 +672,14 @@ shinyUI(fluidPage(
                                   , a("visit for more info",href="http://www.eng.fsu.edu/~pigna/pdf/"))
                          ),
                          
-                         tabPanel("User Manual",
-                        
-                                 fluidRow(column(12, includeMarkdown("UserManual.md"))) 
-                                 #includeHTML("UserManual.html")
+                         tabPanel("Documentation",
+                                  h5(strong("MSstatsQC webpage")),
+                                  p("Source codes, related documents and user manual can be found via our MSstats website"
+                                    , a("visit for more info",href="http://www.msstats.org/msstatsqc"))
+                                  
+                                  ,h5(strong("MSstatsQC Github")),
+                                  p("Latest documantation is also available via our Github page"
+                                    , a("visit for more info",href="https://github.com/srtaheri/msstats-qc"))
       
                          )
                          
