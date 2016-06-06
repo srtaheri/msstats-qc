@@ -51,7 +51,7 @@ shinyServer(function(input,output,session) {
       })
       
       do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-        layout(autosize = F, width = 1000, height = nlevels(prodata$Precursor)*200)
+        layout(autosize = F, width = 1400, height = nlevels(prodata$Precursor)*200)
     }
     
     else {
