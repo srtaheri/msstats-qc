@@ -636,7 +636,7 @@ shinyUI(fluidPage(
                                     ,a("visit for more info",href="http://www.britannica.com/science/retention-time")),
                                   
                                   h5(strong("Total Peak Area")),
-                                  p("Total Peak Area is the sum of all integrated signals for a certain peptide"),
+                                  p("Total Peak Area is the sum of all integrated signals for a certain peptide."),
                                   
                                   h5(strong("Full Width at Half Maximum (FWHM)")),
                                   p("Full width at half maximum 'FWHM' is an expression of the extent of a 
@@ -646,24 +646,26 @@ shinyUI(fluidPage(
                                     ,a("visit for more info",href="https://en.wikipedia.org/wiki/Full_width_at_half_maximum")),
                                   
                                   h5(strong("Peak Assymetry")),
-                                  p("Peak Assymetry is a measure of symetry for a peak. Calculated by taking 2*a/(a+b). Optimal value is around 1 for a Gaussian peak")
+                                  p("Peak Assymetry is a measure of symetry for a peak. Calculated by taking 2*a/(a+b). Optimal value is around 1 for a Gaussian peak.")
                                   ),
                          
                          tabPanel("Plots"
+                                  
+                                  ,h5(strong("XmR control charts")),
+                                  p("By using the sequential differences between successive values as a measure 
+                                    of dispersion, a chart for individual observations and 
+                                    a moving range chart can be created. This pair of control charts are called 'XmR' control charts.
+                                    ", 
+                                    a("visit for more info",href="https://en.wikipedia.org/wiki/Shewhart_individuals_control_chart"))
+                                  
+                                  
                                   ,h5(strong("CUSUMm and CUSUMv control charts")),
                                   p("A CUSUM chart is a time-weighted control chart that displays the cumulative sums 
                                     'CUSUMs' of the deviations of each sample value from the target value. Because it is cumulative, 
                                      even minor drifting in the process mean will lead to steadily 
                                     increasing or decreasing cumulative deviation values.", 
                                     a("visit for more info",href="https://en.wikipedia.org/wiki/CUSUM"))
-                                  
-                                  ,h5(strong("XMR and ZmR control charts")),
-                                  p("By using the sequential differences between successive values as a measure 
-                                    of dispersion, a chart for individual observations and 
-                                    a moving range chart can be created. This pair of control charts are called 'XmR' control charts.
-                                    If the observations are standardized using the guide set information, then it is called
-                                    a 'ZmR' control chart", 
-                                    a("visit for more info",href="https://en.wikipedia.org/wiki/Shewhart_individuals_control_chart"))
+                                
                                   
                                   ,h5(strong("Change Point Analysis")),
                                   p("A change in the process parameters triggers a control chart to generate an out of
