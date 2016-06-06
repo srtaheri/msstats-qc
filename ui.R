@@ -2,7 +2,7 @@ library(shiny)
 library(plotly)
 library(markdown)
 shinyUI(fluidPage(
-  titlePanel("MSstatsQC: Quality control tools for LC MS/MS proteomic experiments"),
+  titlePanel("MSstatsQC: System suitability monitoring tools for quantitative mass spectrometry based proteomic experiments"),
   navbarPage( "",
               tabPanel("Home", theme = "bootstrap.css",
                          tags$img(src='logo.png', height=200, width=200, style = "float: right"),
