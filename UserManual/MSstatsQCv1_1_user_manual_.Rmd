@@ -18,7 +18,7 @@ The increasing need for defining good quality measurement and analyzing traceabl
 ## Applicability
 `MSstatsQC` v1.0 and above is applicable to system suitability data produced from Selected Reaction Monitoring (SRM) based proteomic experiments. General framework of `MSstatsQC`is shown below.
 
-![MSstatsQC General Framework](/Users/ed/Dropbox/MSstatsQC/UserManual/Framework.png)
+![MSstatsQC General Framework](/Users/ed/GitHub/msstats-qc/UserManual/Framework.png)
 
 ## Statistical functionalities
 
@@ -53,7 +53,7 @@ To help troubleshoot potential problems with installation or functionalities of 
 
 An example of an acceptable input dataset is shown below. The system suitability dataset is generated during the CPTAC Study 9.1. The acquired dates are inputted artificially. The dataset is stored in a .csv file in a "long" format.  Each row corresponds to a single testing sample. 
 
-![MSstatsQC Data Format](/Users/ed/Dropbox/MSstatsQC/UserManual/Sampledata.png)
+![MSstatsQC Data Format](/Users/ed/GitHub/msstats-qc/UserManual/Sampledata.png)
 
 ## Uploading QC Data and 'Data Import' Tab
  
@@ -62,7 +62,7 @@ A dataset which is in the allowable data format is uploaded via `Data Import` ta
 (a) Click `Choose file` and locate your file 
 (b) Select and upload the file you want to analyze
 
-![MSstatsQC Data Import Tab](/Users/ed/Dropbox/MSstatsQC/UserManual/Dataimport.png)
+![MSstatsQC Data Import Tab](/Users/ed/GitHub/msstats-qc/UserManual/Dataimport.png)
 
 `MSstatsQC` uses a data validation method where small variations in column names are compansated and converted to the standard `MSstatsQC` format. For example, our data validation function converts column names like `Best.RT`, `best retention time`, `retention time`, `rt` and `best ret` into `BestRetentionTime`. This conversion also deals with case-sensitive typing. 
 
@@ -78,7 +78,7 @@ After choosing a guide set, the user can select the precursor of interest or sel
 
 The aim of the metric summary panel is to summarize each system suitability metric with the elution order of peptides. The boxplot tab shows boxplots for each metric. The user can investigate these charts to see if any abrubt observations are present in the dataset. If so, we recommend a preprocessing for the dataset and re-uploading it for better results. Metric summary panel also provides scatter plot matrices for each metric to show interrelations among the peptides for a specific metric.
 
-![Metric Summary-Boxplot](/Users/ed/Dropbox/MSstatsQC/UserManual/Summary.png)
+![Metric Summary-Boxplot](/Users/ed/GitHub/msstats-qc/UserManual/Summary.png)
 
 # 'Control Charts' Panel
 
@@ -88,19 +88,19 @@ All control charts are generated in this tab. The drop-down menu shows the alter
 
 This tab shows `X` and `mR` control charts for each peptide. An example for Study 9.1 is presented in Figure 5. By using the sequential differences between two successive values as a measure of dispersion, a chart for individual observations (`X` chart) and a chart for moving ranges (`mR` chart) or `XmR` chart can be created.  The original observations are plotted on a `X` chart along with upper and lower control limits. Here, design parameters are particularly chosen to provide a type I error rate of 0.0027 which guarantees the well-known 3$\sigma$ limits. Moving ranges are plotted on a mR chart along with their corresponding upper and lower control limits. Any points above or below the control limits are classified as out-of-control observations and need special attention as they might provide valuable information about chromatographic and instrumental problems.
 
-![XmR Control Chart](/Users/ed/Dropbox/MSstatsQC/UserManual/XmR.png)
+![XmR Control Chart](/Users/ed/GitHub/msstats-qc/UserManual/XmR.png)
 
 ## 'CUSUM' Control Charts
 
 This tab shows `CUSUMm` and `CUSUMv` control charts for each precursor. An example for Study 9.1 is presented in Figure 6. Mean and dispersion CUSUM charts both have more complex design parameters when compared to XmR charts. However, they have proven ability to detect small shifts earlier. In order to simplify design complexity we consider standardized metrics. We use the parameters obtained from the guide set for standardization. `CUSUMm` essentially is a tabular CUSUM with the standardized QC observations and sensitive to changes in  mean of a suitabilty metric. Basically, `CUSUMm` plots two types of CUSUM statistics; one for positive mean shifts and the other for negative mean shifts. Standardization enables informal benchmarking among different metrics and reduce design complexity into a considerably simple level. It is also possible to construct a variability or scale CUSUM called a `CUSUMv` chart to monitor the precision performance of the instrument. 
 
-![CUSUM Control Chart](/Users/ed/Dropbox/MSstatsQC/UserManual/CUSUM.png)
+![CUSUM Control Chart](/Users/ed/GitHub/msstats-qc/UserManual/CUSUM.png)
 
 # 'Change Point Analysis' Panel
 
 This tab shows change point analysis for mean and dispersion shifts for each precursor. An example for Study 9.1 is presented in Figure 7. The first change point model considers a step change in the mean level of a suitability metric. The change point estimator is the value which maximizes the change point function for process mean. Change point formulation for dispersion follows a similar approach using a change point function for process dispersion. The red vertical lines show the change point estimate which maximizes each change point function.
 
-![Change Point Analysis](/Users/ed/Dropbox/MSstatsQC/UserManual/CP.png)
+![Change Point Analysis](/Users/ed/GitHub/msstats-qc/UserManual/CP.png)
 
 # 'Help' Panel
 
