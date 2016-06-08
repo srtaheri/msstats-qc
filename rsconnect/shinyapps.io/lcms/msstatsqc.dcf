@@ -2,8 +2,8 @@ name: msstatsqc
 account: lcms
 server: shinyapps.io
 appId: 106912
-bundleId: 473401
+bundleId: 475997
 url: https://eralpdogu.shinyapps.io/msstatsqc/
-when: 1465227974.50825
+when: 1465424697.71204
 asMultiple: FALSE
 asStatic: FALSE
