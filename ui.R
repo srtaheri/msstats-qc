@@ -71,15 +71,11 @@ shinyUI(fluidPage(
                            numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
                            p("Please select a precursor or select all"),
                            uiOutput("pepSelect"),
-                           #p("If you have uploaded your data set, selected the guidset and chosen your precursor type
-                             #, click on this button to see the plots"),
-                           p("if you have uploaded your data set, click on this button to view it."),
-                           #actionButton("act_button", "click to see your data set"),
                            helpText("please select the columns of your data that you need to see"),
                            uiOutput("prodata_column_select"),
                            tags$style("body{background-color:linen; color:black}"),
                            p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
-                           actionButton("act-button", "Run with sample data")
+                           actionButton("act_button", "Run with sample data")
                            ),
                         mainPanel(
                            

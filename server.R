@@ -7,21 +7,24 @@ source("helper-functions.R")
 
 shinyServer(function(input,output,session) {
   
+  #prodata <- data.frame()
   #### Read data  ##################################################################################################
-  prodata <- reactive({ # data is what user, upload in the app
-    validate(
-      need(!is.null(input$filein), "Please upload your data")
-    )
+  data <- reactiveValues(df = NULL)
+  
+  observeEvent(input$filein, {
     file1 <- input$filein
-    if(is.null(file1)){return()} 
-    prodata <- read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE)
-    input_checking(prodata)
-    #prodata
-    # read.xlsx2(file1$path , sheetName = "data")
+    data$df <- input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
+  })
+  
+  observeEvent(input$act_button, {
+    data$df <- read.csv("./Datasets/Sampledata_CPTAC_Study_9_1_Site54.csv")
   })
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
-    prodata <- prodata()
+    prodata <- data$df
+    validate(
+      need(!is.null(prodata), "Please upload your data")
+    )
     selectInput("pepSelection","Choose precursor type"
                 #,choices = c(levels(prodata$Precursor)
                             ,choices = c(levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
@@ -29,17 +32,19 @@ shinyServer(function(input,output,session) {
   })
   #### selecting columns to view in Data Import section ##############################################################
   output$prodata_column_select <- renderUI({
-    checkboxGroupInput("show_prodata_columns", "columns of your data", choices = colnames(prodata()), selected = colnames(prodata()))
+    prodata <- data$df
+    checkboxGroupInput("show_prodata_columns", "columns of your data", choices = colnames(prodata), selected = colnames(prodata))
   })
   ######Show data#####################################################################################################
   
   output$prodata_table <- DT::renderDataTable(
-    DT::datatable(prodata()[,input$show_prodata_columns], options = list(pageLength = 25))
+    #prodata <- prodata()
+    DT::datatable(data$df[,input$show_prodata_columns], options = list(pageLength = 25))
   )
   ################################################################# plots ###################################################
   
   render.tab <- function(normalize.metric, plot.method, normalization.type, main.title, y.title1, y.title2){
-    prodata <- prodata()
+    prodata <- data$df
     plots <- list()
     
     if(input$pepSelection == "all peptides") {
@@ -114,12 +119,12 @@ shinyServer(function(input,output,session) {
   })
   ########################################################## box plot in Summary tab ##########################################
   output$box_plot <- renderPlotly({
-    prodata <- prodata()
+    prodata <- data$df
     metrics_box.plot(prodata)
   })
   ########################################################## scatterplot matrix in Summary tab #################################
   output$scatter_plot <- renderPlot({
-    prodata <- prodata()
+    prodata <- data$df
     metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor, normalization = TRUE)
   }, height = 700)
   
