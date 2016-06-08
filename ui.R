@@ -2,13 +2,14 @@ library(shiny)
 library(plotly)
 library(markdown)
 shinyUI(fluidPage(
-  titlePanel("MSstatsQC: System suitability monitoring tools for quantitative mass spectrometry based proteomic experiments"),
-  navbarPage( "",
+  titlePanel(p(strong("MSstatsQC"),align = "center",style="color:#444444;",style="font-size:150%;",style="font-family:inherit;")),
+  navbarPage(h4("System suitability monitoring tools for quantitative mass spectrometry based proteomic experiments"),
               tabPanel("Home", theme = "bootstrap.css",
-                         tags$img(src='logo.png', height=200, width=200, style = "float: right"),
+                         tags$img(src='logo.png', height=220, width=220, style = "float: right"),
                          p("MSstatsQC is an open-source web-based software which provides longitudinal
                            system suitability monitoring tools (control charts) for SRM based proteomic experiments."),
-                         p("MSstatsQC uses control charts to monitor the instrument performance by tracking system
+                        h5("Statistical functionalities"),
+                        p("MSstatsQC uses control charts to monitor the instrument performance by tracking system
                            suitability metrics including total peak area, retention time and full width at half maximum (FWHM) and peak assymetry."),
                          p("This framework includes simultaneous monitoring tools for mean and dispersion of suitability metrics and presents
                            alternative methods of monitoring such as time weighted control charts to ensure that various types
@@ -17,7 +18,8 @@ shinyUI(fluidPage(
                            cumulative sum (CUSUM) control charts. To successfully identify the time of change, change point analysis
                            is also included in this framework. Experiment specific control limits are provided with the control 
                            charts to distinguish between random noise and systematic error."),
-                         p("The steps for generating results are as follows:"),
+                       h5("Using MSstatsQC"),
+                       p("The steps for generating results are as follows:"),
                          ("1. Import your QC data "),
                          br(),
                          ("2.	Determine the guide set to estimate metric mean and variance "),
@@ -31,10 +33,10 @@ shinyUI(fluidPage(
                          ("6.	Navigate results and download them for your QC reports"),
                          br(),
                          br(),
-                         tags$img(src='home.png', height=200, width=500, style = "float: bottom"),
+                         tags$img(src='home.png', height=200, width=500, style = "float: center"),
                          br(),
                          br(),
-                         p ("Project Team: "),
+                         h5 ("Project Team: "),
                          h5("Eralp Dogu,",span("e.dogu@neu.edu",style = "color:blue")),
                          h5("Sara Taheri,",span("mohammadtaheri.s@husky.neu.edu",style = "color:blue")),
                          h5("Olga Vitek,",span("o.vitek@neu.edu",style = "color:blue")),
@@ -75,7 +77,9 @@ shinyUI(fluidPage(
                            #actionButton("act_button", "click to see your data set"),
                            helpText("please select the columns of your data that you need to see"),
                            uiOutput("prodata_column_select"),
-                           tags$style("body{background-color:linen; color:black}")
+                           tags$style("body{background-color:linen; color:black}"),
+                           p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
+                           actionButton("act-button", "Run with sample data")
                            ),
                         mainPanel(
                            
@@ -652,22 +656,36 @@ shinyUI(fluidPage(
                          tabPanel("Plots"
                                   
                                   ,h5(strong("XmR control charts")),
-                                  p("By using the sequential differences between successive values as a measure 
-                                    of dispersion, a chart for individual observations and 
-                                    a moving range chart can be created. This pair of control charts are called 'XmR' control charts.
+                                  h5("Can detect=Large shifts and spikes in mean and dispersion of suitability metric."),
+                                  h5("Statistics used to construct=using the sequential differences between successive values as a measure 
+                                    of dispersion."),
+                                  p("When data are collected as individual observations, you cannot calculate the standard 
+                                    deviation for each subgroup. The moving range is an alternative way to calculate process 
+                                    variation by computing the ranges of two or more consecutive observations.XmR is a cobination 
+                                    of a chart for individual observations and 
+                                    a chart for moving ranges. I-MR chart consists of 2 charts; 
+                                    Individuals (X) chart and Moving Range (mR) chart. 
                                     ", 
                                     a("visit for more info",href="https://en.wikipedia.org/wiki/Shewhart_individuals_control_chart"))
                                   
                                   
                                   ,h5(strong("CUSUMm and CUSUMv control charts")),
-                                  p("A CUSUM chart is a time-weighted control chart that displays the cumulative sums 
+                                  h5("Can detect=Large shifts and spikes in mean and dispersion of suitability metric."),
+                                  h5("Statistics used to construct=using the sequential differences between successive values as a measure 
+                                     of dispersion."),
+                                    p("A CUSUM chart is a time-weighted control chart that displays the cumulative sums 
                                     'CUSUMs' of the deviations of each sample value from the target value. Because it is cumulative, 
-                                     even minor drifting in the process mean will lead to steadily 
-                                    increasing or decreasing cumulative deviation values.", 
+                                    even minor drifting in the process mean will lead to steadily 
+                                    increasing or decreasing cumulative deviation values. In that case, you are often primarily interested 
+                                    in detecting small shifts in the product quality (for example, gradual deterioration of quality due to 
+                                    machine wear)", 
                                     a("visit for more info",href="https://en.wikipedia.org/wiki/CUSUM"))
                                 
                                   
                                   ,h5(strong("Change Point Analysis")),
+                                  h5("Can detect=Large shifts and spikes in mean and dispersion of suitability metric."),
+                                  h5("Statistics used to construct=using the sequential differences between successive values as a measure 
+                                     of dispersion."),
                                   p("A change in the process parameters triggers a control chart to generate an out of
                                     control signal. The QC sample at which the signal is issued is considered as the 
                                     stopping time and after the signal search for an assignable cause is recommended."
