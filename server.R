@@ -34,12 +34,13 @@ shinyServer(function(input,output,session) {
   output$prodata_column_select <- renderUI({
     prodata <- data$df
     checkboxGroupInput("show_prodata_columns", "columns of your data", choices = colnames(prodata), selected = colnames(prodata))
+    #print(input$show_prodata_columns)
   })
   ######Show data#####################################################################################################
-  
   output$prodata_table <- DT::renderDataTable(
-    #prodata <- prodata()
+    #DT::datatable(data$df[,ifelse(input$show_prodata_columns==NA,1, input$show_prodata_columns)], options = list(pageLength = 25))
     DT::datatable(data$df[,input$show_prodata_columns], options = list(pageLength = 25))
+    #DT::datatable(diamonds2[,input$show_prodata_columns], options = list(pageLength = 25))
   )
   ################################################################# plots ###################################################
   
