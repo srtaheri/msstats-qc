@@ -18,10 +18,8 @@ prepare_column <- function(prodata, j, L, U, metric, normalization) {
     mu=mean(z[L:U]) # in-control process mean
     sd=sd(z[L:U]) # in-control process variance
     z=scale(z[1:length(z)],mu,sd) # transformation for N(0,1) )
-    #paste("hello")
     return(z)
   } else if(normalization == FALSE){
-    #paste("bye")
     return(z)
   }
   

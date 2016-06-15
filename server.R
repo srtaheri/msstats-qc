@@ -47,6 +47,7 @@ shinyServer(function(input,output,session) {
     prodata <- data$df
     plots <- list()
     
+    
     if(input$pepSelection == "all peptides") {
       
       results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
@@ -71,6 +72,10 @@ shinyServer(function(input,output,session) {
   }
   ########################################################## plot CUSUM_chart  for RT####################
   output$RT_CUSUM <- renderPlotly({
+    prodata <- data$df
+    validate(
+      need(!is.null(prodata), "Please upload your data")
+    )
     render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Retention Time", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
   ########################################################## plot CP for RT #############################
@@ -127,7 +132,12 @@ shinyServer(function(input,output,session) {
     prodata <- data$df
     metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor, normalization = TRUE)
   }, height = 700)
-  
+  ######################################################### plot_summary in Summary tab ########################################
+  output$plot_summary <- renderPlotly({
+    prodata <- data$df
+    CUSUM.summary.plot(prodata, input$L, input$U,type = 1, ytitle = "hi")
+    
+  })
   ###########################################################################################################################
   ###########################################################################################################################
   ########################################################## "help" tab ################################

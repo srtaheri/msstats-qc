@@ -1,83 +1,163 @@
+source("QCMetrics.R")
+
 CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
-  k=0.5 
-  h=5  
-  precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
-  prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
-  
-  v <- numeric(length(z))
-  
-  Cpoz <- numeric(length(z))
-  Cneg <- numeric(length(z))
-  
-  for(i in 2:length(z)) {
-    Cpoz[i]=max(0,(z[i]-(k)+Cpoz[i-1]))
-    Cneg[i]=max(0,((-k)-z[i]+Cneg[i-1]))
-  }
-  
-  if(type==2) {
-    for(i in 2:length(z)) {
-      v[i]=(sqrt(abs(z[i]))-0.822)/0.349
-    }
-    for(i in 2:length(z)) {
-      Cpoz[i]=max(0,(v[i]-(k)+Cpoz[i-1]))
-      Cneg[i]=max(0,((-k)-v[i]+Cneg[i-1]))
-    }
-  }
-  
-  QCno = rep(1:length(z),2)
-  group = c(rep('CUSUM+',length(z)),rep('CUSUM-',length(z)))
-  plot.data = data.frame(QCno,group,CUSUM=c(Cpoz,-Cneg),h)
-  
-  ymax=ifelse(max(plot.data$CUSUM)>=h,(max(plot.data$CUSUM)),h)
-  ymin=ifelse(min(plot.data$CUSUM)<=-h,(min(plot.data$CUSUM)),-h)
+  h <- 5 
+  precursor.level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
+  plot.data <- CUSUM.data.prepare(prodata, precursor.level, z, L, U, type)
+  #print(plot.data[1,1])
+  #ymax=ifelse(max(plot.data$CUSUM)>=h,(max(plot.data$CUSUM)),h)
+  #ymin=ifelse(min(plot.data$CUSUM)<=-h,(min(plot.data$CUSUM)),-h)
   
   Main=Main.title
   
   x <- list(
-    title =  paste("QCno - ", levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]),
+    title =  paste("QCno - ", precursor.level),
     range = c(0, max(plot.data$QCno))
   )
   y <- list(
     title = ytitle
   )
   
-  p <- plot_ly(plot.data,
-               x = plot.data[which(group == "CUSUM+"),"QCno"], 
-               y = plot.data[which(group == "CUSUM+"),"CUSUM"], 
-               line = list(color = "dodgerblue")
+  p <- plot_ly(plot.data
+               , x = QCno
+               , y = CUSUM.poz
+               , line = list(color = "dodgerblue")
                , name = "CUSUM+"
-               ,showlegend = FALSE
-               , text=prodata_grouped_by_precursor$Annotations
+               , showlegend = FALSE
+               , text = Annotations
   ) %>%
-    add_trace(x = plot.data[which(group == "CUSUM-"),"QCno"], 
-              y = plot.data[which(group == "CUSUM-"),"CUSUM"], 
-              line = list(color = "blue")
+    add_trace(  x = QCno
+              , y = CUSUM.neg
+              , line = list(color = "blue")
               , name = "CUSUM-"
-              ,showlegend = FALSE
+              , showlegend = FALSE
+              , text = Annotations
     ) %>%
     layout(xaxis = x,yaxis = y, showlegend = FALSE) %>%
-    add_trace(y = h, marker=list(color="red" , size=4 , opacity=0.5), name = "UCL",showlegend = FALSE,name = "H") %>%
-    add_trace(y = -h, marker=list(color="red" , size=4 , opacity=0.5), name = "LCL",showlegend = FALSE,name = "-H") %>%
-    add_trace(x =plot.data[which(group == "CUSUM-"),"QCno"],
-              y = plot.data[which(group == "CUSUM-"),"CUSUM"], 
-              mode = "markers",
-              marker=list(color="blue" , size=5 , opacity=0.5)
-              ,showlegend = FALSE,name=""
+    add_trace(x=c(0, max(plot.data$QCno)),y = c(h,h), marker=list(color="red" , size=4 , opacity=0.5), name = "UCL",showlegend = FALSE) %>%
+    add_trace(x=c(0, max(plot.data$QCno)),y = c(-h,-h), marker=list(color="red" , size=4 , opacity=0.5), name = "LCL",showlegend = FALSE) %>%
+    add_trace(  x = QCno
+              , y = CUSUM.neg
+              , mode = "markers"
+              , marker=list(color="blue" , size=5 , opacity=0.5)
+              , showlegend = FALSE,name=""
     ) %>%
-    add_trace(x = plot.data[CUSUM <= -h, ]$QCno,
-              y = plot.data[CUSUM <= -h, ]$CUSUM,
+    add_trace(  x = QCno
+                , y = CUSUM.poz
+                , mode = "markers"
+                , marker=list(color="blue" , size=5 , opacity=0.5)
+                , showlegend = FALSE,name=""
+    ) %>%
+    add_trace(x = plot.data[CUSUM.poz <= -h, ]$QCno,
+              y = plot.data[CUSUM.poz <= -h, ]$CUSUM.poz,
               mode = "markers",
               marker=list(color="red" , size=5 , opacity=0.5),
               showlegend = FALSE,name=""
     ) %>%
-    add_trace(x = plot.data[CUSUM >= h, ]$QCno,
-              y = plot.data[CUSUM >= h, ]$CUSUM,
+    add_trace(x = plot.data[CUSUM.poz >= h, ]$QCno,
+              y = plot.data[CUSUM.poz >= h, ]$CUSUM.poz,
               mode = "markers",
               marker=list(color="red" , size=5 , opacity=0.5),
               showlegend = FALSE,name=""
-    ) 
+    )%>%
+    add_trace(x = plot.data[CUSUM.neg <= -h, ]$QCno,
+              y = plot.data[CUSUM.neg <= -h, ]$CUSUM.neg,
+              mode = "markers",
+              marker=list(color="red" , size=5 , opacity=0.5),
+              showlegend = FALSE,name=""
+    ) %>%
+    add_trace(x = plot.data[CUSUM.neg >= h, ]$QCno,
+              y = plot.data[CUSUM.neg >= h, ]$CUSUM.neg,
+              mode = "markers",
+              marker=list(color="red" , size=5 , opacity=0.5),
+              showlegend = FALSE,name=""
+    )
   
   return(p)
+}
+##########################################################################################################
+CUSUM.summary.plot <- function(prodata, L, U,type, ytitle) {
+  h <- 5
+  plot.data.ret.time <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type)
+  plot.data.peak.assymetry <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type)
+  plot.data.fwhm <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type)
+  plot.data.total.area <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type)
+
+  p <- plot_ly( 
+                 x = plot.data.ret.time$QCno
+               , y = plot.data.ret.time$pr.y.poz
+               #,  mode = "markers"
+               #, marker=list(color="dodgerblue" , size=8 , opacity=0.5)
+               , name = "CUSUM+RT"
+               , line = list(shape = "linear", color="dodgerblue")
+               , showlegend = FALSE
+  ) %>%
+    add_trace(  
+                  x = plot.data.ret.time$QCno
+                , y = plot.data.ret.time$pr.y.neg
+                #,  mode = "markers"
+                #, marker=list(color="blue" , size=8 , opacity=0.5)
+                , name = "CUSUM-RT"
+                , line = list(shape = "linear", color="blue")
+                , showlegend = FALSE
+  ) %>%
+    add_trace(  
+               x = plot.data.peak.assymetry$QCno
+              , y = plot.data.peak.assymetry$pr.y.poz
+              #,  mode = "markers"
+              #, marker=list(color="rgb(128, 42, 42)" , size=8 , opacity=0.5)
+              , name = "CUSUM+PA"
+              , line = list(shape = "linear", color="rgb(128, 42, 42)")
+              , showlegend = FALSE
+              ) %>%
+    add_trace(
+        x = plot.data.peak.assymetry$QCno
+      , y = plot.data.peak.assymetry$pr.y.neg
+      #,  mode = "markers"
+      #, marker=list(color="rgb(205, 92, 92)" , size=8 , opacity=0.5)
+      , name = "CUSUM+PA"
+      , line = list(shape = "linear", color="rgb(205, 92, 92)")
+      , showlegend = FALSE
+    ) %>%
+    add_trace(
+      x = plot.data.fwhm$QCno
+      , y = plot.data.fwhm$pr.y.poz
+      #,  mode = "markers"
+      #, marker=list(color="rgb(248, 117, 49)" , size=8 , opacity=0.5)
+      , name = "CUSUM+FWHM"
+      , line = list(shape = "linear", color="rgb(248, 117, 49)")
+      , showlegend = FALSE
+    ) %>%
+  add_trace(
+    x = plot.data.fwhm$QCno
+    , y = plot.data.fwhm$pr.y.neg
+    #,  mode = "markers"
+    #, marker=list(color="rgb(94, 38, 5)" , size=8 , opacity=0.5)
+    , name = "CUSUM+FWHM"
+    , line = list(shape = "linear", color="rgb(94, 38, 5)")
+    , showlegend = FALSE
+  ) %>%
+    add_trace(
+      x = plot.data.total.area$QCno
+      , y = plot.data.total.area$pr.y.poz
+      #,  mode = "markers"
+      #, marker=list(color="rgb(84, 99, 44)" , size=8 , opacity=0.5)
+      , name = "CUSUM+TA"
+      , line = list(shape = "linear", color="rgb(84, 99, 44)")
+      , showlegend = FALSE
+    ) %>%
+    add_trace(
+      x = plot.data.total.area$QCno
+      , y = plot.data.total.area$pr.y.neg
+      #,  mode = "markers"
+      #, marker=list(color="rgb(156, 203, 25)" , size=8 , opacity=0.5)
+      , name = "CUSUM-TA"
+      , line = list(shape = "linear", color="rgb(156, 203, 25)")
+      , showlegend = FALSE
+    )
+  
+  return(p)
+  
 }
 #########################################################################################################################
 #########################################################################################################################
@@ -117,7 +197,6 @@ CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
   y.min=0 # y axis lower limit
   
   x <- list(
-    #title = "QCno"
     title = paste("QCno - ", levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j])
   )
   y <- list(
@@ -210,6 +289,9 @@ IMR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
               ,showlegend = FALSE,name=""
     )
 }
+#################################################################################################################
+#################################################################################################################
+#################################################################################################################
 
 #################################################################################################################
 #################################################################################################################
