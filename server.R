@@ -135,8 +135,12 @@ shinyServer(function(input,output,session) {
   ######################################################### plot_summary in Summary tab ########################################
   output$plot_summary <- renderPlotly({
     prodata <- data$df
-    CUSUM.summary.plot(prodata, input$L, input$U,type = 1, ytitle = "hi")
+    CUSUM.summary.plot(prodata, input$L, input$U,type = 1, ytitle = "probability of out of range points for CUSUM mean")
     
+  })
+  output$plot_summaryy <- renderPlotly({
+    prodata <- data$df
+    CUSUM.summary.plot.version2(prodata, input$L, input$U,type = 1)%>% layout(height = 1000)
   })
   ###########################################################################################################################
   ###########################################################################################################################

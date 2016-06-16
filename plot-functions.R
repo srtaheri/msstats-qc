@@ -83,16 +83,24 @@ CUSUM.summary.plot <- function(prodata, L, U,type, ytitle) {
   plot.data.fwhm <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type)
   plot.data.total.area <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type)
 
+  x <- list(
+    title =  paste("QCno")
+  )
+  y <- list(
+    title = ytitle
+  )
+  print(plot.data.ret.time$QCno)
+  print(plot.data.ret.time$pr.y.poz)
   p <- plot_ly( 
                  x = plot.data.ret.time$QCno
                , y = plot.data.ret.time$pr.y.poz
                #,  mode = "markers"
                #, marker=list(color="dodgerblue" , size=8 , opacity=0.5)
                , name = "CUSUM+RT"
-               , line = list(shape = "linear", color="dodgerblue")
+               , line = list(shape = "linear")
                , showlegend = FALSE
-  ) %>%
-    add_trace(  
+   ) %>%
+    add_trace(
                   x = plot.data.ret.time$QCno
                 , y = plot.data.ret.time$pr.y.neg
                 #,  mode = "markers"
@@ -101,7 +109,7 @@ CUSUM.summary.plot <- function(prodata, L, U,type, ytitle) {
                 , line = list(shape = "linear", color="blue")
                 , showlegend = FALSE
   ) %>%
-    add_trace(  
+    add_trace(
                x = plot.data.peak.assymetry$QCno
               , y = plot.data.peak.assymetry$pr.y.poz
               #,  mode = "markers"
@@ -154,9 +162,110 @@ CUSUM.summary.plot <- function(prodata, L, U,type, ytitle) {
       , name = "CUSUM-TA"
       , line = list(shape = "linear", color="rgb(156, 203, 25)")
       , showlegend = FALSE
-    )
-  
+    ) %>%
+  layout(xaxis = x,yaxis = y, showlegend = FALSE)
   return(p)
+  
+}
+#########################################################################################################################
+CUSUM.summary.plot.version2 <- function(prodata, L, U,type) {
+  h <- 5
+  plot.data.ret.time <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type)
+  plot.data.peak.assymetry <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type)
+  plot.data.fwhm <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type)
+  plot.data.total.area <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type)
+  
+  x <- list(
+    title =  "QCno"
+  )
+  y <- list(
+    title = "y title"
+  )
+  x.null <- list(
+    title =  " "
+  )
+  y.null <- list(
+    title = " "
+  )
+  p1 <- plot_ly( 
+    x = plot.data.ret.time$QCno
+    , y = plot.data.ret.time$pr.y.poz
+    #,  mode = "markers"
+    #, marker=list(color="dodgerblue" , size=8 , opacity=0.5)
+    , name = "CUSUM+RT"
+    , line = list(shape = "linear", color="dodgerblue")
+    , showlegend = FALSE
+  ) %>%
+    add_trace(  
+      x = plot.data.ret.time$QCno
+      , y = plot.data.ret.time$pr.y.neg
+      #,  mode = "markers"
+      #, marker=list(color="blue" , size=8 , opacity=0.5)
+      , name = "CUSUM-RT"
+      , line = list(shape = "linear", color="blue")
+      , showlegend = FALSE
+    ) %>%
+    layout(xaxis = x.null,yaxis = y.null, showlegend = FALSE) 
+   p2 <- plot_ly(  
+      x = plot.data.peak.assymetry$QCno
+      , y = plot.data.peak.assymetry$pr.y.poz
+      #,  mode = "markers"
+      #, marker=list(color="rgb(128, 42, 42)" , size=8 , opacity=0.5)
+      , name = "CUSUM+PA"
+      , line = list(shape = "linear", color="rgb(128, 42, 42)")
+      , showlegend = FALSE
+    ) %>%
+    add_trace(
+      x = plot.data.peak.assymetry$QCno
+      , y = plot.data.peak.assymetry$pr.y.neg
+      #,  mode = "markers"
+      #, marker=list(color="rgb(205, 92, 92)" , size=8 , opacity=0.5)
+      , name = "CUSUM+PA"
+      , line = list(shape = "linear", color="rgb(205, 92, 92)")
+      , showlegend = FALSE
+    ) %>%
+     layout(xaxis = x.null,yaxis = y.null, showlegend = FALSE) 
+    p3 <- plot_ly(
+      x = plot.data.fwhm$QCno
+      , y = plot.data.fwhm$pr.y.poz
+      #,  mode = "markers"
+      #, marker=list(color="rgb(248, 117, 49)" , size=8 , opacity=0.5)
+      , name = "CUSUM+FWHM"
+      , line = list(shape = "linear", color="rgb(248, 117, 49)")
+      , showlegend = FALSE
+    ) %>%
+    add_trace(
+      x = plot.data.fwhm$QCno
+      , y = plot.data.fwhm$pr.y.neg
+      #,  mode = "markers"
+      #, marker=list(color="rgb(94, 38, 5)" , size=8 , opacity=0.5)
+      , name = "CUSUM+FWHM"
+      , line = list(shape = "linear", color="rgb(94, 38, 5)")
+      , showlegend = FALSE
+    ) %>%
+      layout(xaxis = x.null,yaxis = y.null, showlegend = FALSE) 
+   p4 <- plot_ly(
+      x = plot.data.total.area$QCno
+      , y = plot.data.total.area$pr.y.poz
+      #,  mode = "markers"
+      #, marker=list(color="rgb(84, 99, 44)" , size=8 , opacity=0.5)
+      , name = "CUSUM+TA"
+      , line = list(shape = "linear", color="rgb(84, 99, 44)")
+      , showlegend = FALSE
+    ) %>%
+    add_trace(
+      x = plot.data.total.area$QCno
+      , y = plot.data.total.area$pr.y.neg
+      #,  mode = "markers"
+      #, marker=list(color="rgb(156, 203, 25)" , size=8 , opacity=0.5)
+      , name = "CUSUM-TA"
+      , line = list(shape = "linear", color="rgb(156, 203, 25)")
+      , showlegend = FALSE
+    ) %>%
+     layout(xaxis = x,yaxis = y, showlegend = FALSE) 
+   
+   subplot(p1,p2,p3,p4, nrows = 4) 
+  #return(p)
   
 }
 #########################################################################################################################
