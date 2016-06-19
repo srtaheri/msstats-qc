@@ -65,6 +65,9 @@ shinyUI(fluidPage(
                            p("Please upload your data (Comma-separated (*.csv) 8 column QC file format)"),
                            p("To see an acceptable sample data, look at", strong("Help"),"tab"),
                            fileInput("filein", "Upload file"),
+                           actionButton("sample_button", "Run with sample data"),
+                           actionButton("clear_button", "clear the data and plots"),
+                           br(),
                            p("Please select a guide set"),
                            numericInput("L","Lower bound of guide set",value = 1, min = 1, step = 1),
                            numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
@@ -73,8 +76,8 @@ shinyUI(fluidPage(
                            #helpText("please select the columns of your data that you need to see."),
                            #uiOutput("prodata_column_select"),
                            tags$style("body{background-color:linen; color:black}"),
-                           p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
-                           actionButton("act_button", "Run with sample data")
+                           p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button")
+                           
                            ),
                         mainPanel(
                            

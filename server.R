@@ -16,8 +16,12 @@ shinyServer(function(input,output,session) {
     data$df <- input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
   })
   
-  observeEvent(input$act_button, {
+  observeEvent(input$sample_button, {
     data$df <- read.csv("./Datasets/Sampledata_CPTAC_Study_9_1_Site54.csv")
+  })
+  
+  observeEvent(input$clear_button, {
+    data$df <- NULL
   })
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
