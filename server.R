@@ -35,16 +35,18 @@ shinyServer(function(input,output,session) {
                             ,"all peptides"))
   })
   #### selecting columns to view in Data Import section ##############################################################
-  # output$prodata_column_select <- renderUI({
-  #   prodata <- data$df
-  #   checkboxGroupInput("show_prodata_columns", "columns of your data", choices = colnames(prodata), selected = colnames(prodata))
-  # })
+  output$prodata_column_select <- renderUI({
+    prodata <- data$df
+    checkboxGroupInput("show_prodata_columns", "columns of your data", choices = colnames(prodata), selected = colnames(prodata))
+  })
   ######Show data#####################################################################################################
   output$prodata_table <- DT::renderDataTable(
-    #DT::datatable(data$df[,ifelse(input$show_prodata_columns==NA,1, input$show_prodata_columns)], options = list(pageLength = 25))
-    DT::datatable(data$df, options = list(pageLength = 25))
-   
+    DT::datatable(data$df[,input$show_prodata_columns, drop = FALSE], options = list(pageLength = 25))
+    #DT::datatable(data$df, options = list(pageLength = 25))
   )
+  # output$prodata_table <- renderDataTable({
+  #   data$df[,input$show_prodata_columns, drop = FALSE]
+  # }, options = list(pageLength = 25))
   ################################################################# plots ###################################################
   
   render.tab <- function(normalize.metric, plot.method, normalization.type, main.title, y.title1, y.title2){

@@ -73,8 +73,8 @@ shinyUI(fluidPage(
                            numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
                            p("Please select a precursor or select all"),
                            uiOutput("pepSelect"),
-                           #helpText("please select the columns of your data that you need to see."),
-                           #uiOutput("prodata_column_select"),
+                           helpText("please select the columns of your data that you need to see."),
+                           uiOutput("prodata_column_select"),
                            tags$style("body{background-color:linen; color:black}"),
                            p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button")
                            
@@ -83,6 +83,7 @@ shinyUI(fluidPage(
                            
                           tabPanel("Data",  
                                       DT::dataTableOutput('prodata_table'))
+                                   #dataTableOutput('prodata_table'))
                         ), 
                            position = "left")
                        ),
