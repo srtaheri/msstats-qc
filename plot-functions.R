@@ -4,7 +4,7 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   h <- 5 
   precursor.level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
   plot.data <- CUSUM.data.prepare(prodata, precursor.level, z, L, U, type)
-  #print(plot.data[1,1])
+  
   #ymax=ifelse(max(plot.data$CUSUM)>=h,(max(plot.data$CUSUM)),h)
   #ymin=ifelse(min(plot.data$CUSUM)<=-h,(min(plot.data$CUSUM)),-h)
   
@@ -89,8 +89,7 @@ CUSUM.summary.plot <- function(prodata, L, U,type, ytitle) {
   y <- list(
     title = ytitle
   )
-  print(plot.data.ret.time$QCno)
-  print(plot.data.ret.time$pr.y.poz)
+
   p <- plot_ly( 
                  x = plot.data.ret.time$QCno
                , y = plot.data.ret.time$pr.y.poz

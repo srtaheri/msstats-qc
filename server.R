@@ -44,9 +44,12 @@ shinyServer(function(input,output,session) {
   ################################################################# plots ###################################################
   
   render.tab <- function(normalize.metric, plot.method, normalization.type, main.title, y.title1, y.title2){
-    prodata <- data$df
-    plots <- list()
     
+    prodata <- data$df
+    validate(
+      need(!is.null(prodata), "Please upload your data")
+    )
+    plots <- list()
     
     if(input$pepSelection == "all peptides") {
       
@@ -72,10 +75,6 @@ shinyServer(function(input,output,session) {
   }
   ########################################################## plot CUSUM_chart  for RT####################
   output$RT_CUSUM <- renderPlotly({
-    prodata <- data$df
-    validate(
-      need(!is.null(prodata), "Please upload your data")
-    )
     render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Retention Time", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
   ########################################################## plot CP for RT #############################
@@ -125,22 +124,38 @@ shinyServer(function(input,output,session) {
   ########################################################## box plot in Summary tab ##########################################
   output$box_plot <- renderPlotly({
     prodata <- data$df
+    prodata <- data$df
+    validate(
+      need(!is.null(prodata), "Please upload your data")
+    )
     metrics_box.plot(prodata)
   })
   ########################################################## scatterplot matrix in Summary tab #################################
   output$scatter_plot <- renderPlot({
+   
     prodata <- data$df
+    validate(
+      need(!is.null(prodata), "Please upload your data")
+    )
     metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor, normalization = TRUE)
   }, height = 700)
   ######################################################### plot_summary in Summary tab ########################################
   output$plot_summary <- renderPlotly({
+   
     prodata <- data$df
+    validate(
+      need(!is.null(prodata), "Please upload your data")
+    )
     CUSUM.summary.plot(prodata, input$L, input$U,type = 1, ytitle = "probability of out of range points for CUSUM mean")
     
   })
   output$plot_summaryy <- renderPlotly({
+    
     prodata <- data$df
-    CUSUM.summary.plot.version2(prodata, input$L, input$U,type = 1)%>% layout(height = 1000)
+    validate(
+      need(!is.null(prodata), "Please upload your data")
+    )
+    CUSUM.summary.plot.version2(prodata, input$L, input$U,type = 1)
   })
   ###########################################################################################################################
   ###########################################################################################################################
