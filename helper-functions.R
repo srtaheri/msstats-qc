@@ -24,3 +24,14 @@ prepare_column <- function(prodata, j, L, U, metric, normalization) {
   }
   
 }
+#########################################################################################################
+find_metrics <- function(prodata) {
+  all_metrics_availabe <- c("BestRetentionTime",
+                            "MaxFWHM",
+                            "TotalArea","metric1","metric2","meric3","metric4","metric5")
+ 
+  a <- all_metrics_availabe[which(all_metrics_availabe %in% colnames(prodata)==T)]
+  
+  return(a)
+  
+}

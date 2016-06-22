@@ -1,7 +1,9 @@
 library(shiny)
+library(shinyBS)
 library(plotly)
 library(markdown)
 shinyUI(fluidPage(
+  shinyjs::useShinyjs(),
   titlePanel(p(strong("MSstatsQC"),align = "center",style="color:#444444;",style="font-size:150%;",
                style="font-family:inherit;")),
   navbarPage(h4("System suitability monitoring tools for quantitative mass spectrometry based proteomic
@@ -64,21 +66,42 @@ shinyUI(fluidPage(
                        sidebarLayout(
 
                         sidebarPanel(
-                           p("Please upload your data (Comma-separated (*.csv) 8 column QC file format)"),
-                           p("To see an acceptable sample data, look at", strong("Help"),"tab"),
-                           fileInput("filein", "Upload file"),
-                           actionButton("sample_button", "Run with sample data"),
-                           actionButton("clear_button", "clear the data and plots"),
-                           br(),
-                           p("Please select a guide set"),
-                           numericInput("L","Lower bound of guide set",value = 1, min = 1, step = 1),
-                           numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
-                           p("Please select a precursor or select all"),
-                           uiOutput("pepSelect"),
-                           helpText("please select the columns of your data that you need to see."),
-                           uiOutput("prodata_column_select"),
-                           tags$style("body{background-color:linen; color:black}"),
-                           p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button")
+                          wellPanel(
+                            p("Please upload your data (Comma-separated (*.csv) 8 column QC file format)"),
+                            p("To see an acceptable sample data, look at", strong("Help"),"tab"),
+                            fileInput("filein", "Upload file")
+                            
+                          ),
+                           
+                           wellPanel(
+                             #p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
+                             actionButton("sample_button", "Run with sample data"),
+                             bsTooltip("sample_button","If you want to run MSstatsQC with sample data file, please click this button", placement = "bottom", trigger = "hover",
+                                       options = NULL)
+                           ),
+                           
+                          wellPanel(
+                            #p("if you want to clear your data and all the tables and plots from the system, click this button"),
+                            actionButton("clear_button", "clear the data and plots"),
+                            bsTooltip("clear_button","click this button to clear your data and all the tables and plots from the system.", placement = "bottom", trigger = "hover",
+                                      options = NULL)
+                          ),
+                           
+                          wellPanel(
+                            p("Please select a guide set"),
+                            numericInput("L","Lower bound of guide set",value = 1, min = 1, step = 1),
+                            numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
+                            p("Please select a precursor or select all"),
+                            uiOutput("pepSelect")
+                          ),
+                           #br(),
+                           wellPanel(
+                             helpText("please select the columns of your data that you need to see."),
+                             uiOutput("prodata_column_select")
+                           ),
+                           
+                           tags$style("body{background-color:linen; color:black}")
+                           
                            
                            ),
                         mainPanel(
@@ -91,6 +114,7 @@ shinyUI(fluidPage(
               
               tabPanel("Metric Summary",
                        tabsetPanel(
+                         
                          tabPanel("Plot Summary",
                            plotlyOutput("plot_summary")
                          ),
@@ -105,49 +129,18 @@ shinyUI(fluidPage(
                                               choices = c("Retention Time","Total Area","FWHM","Peak Assymetry")),
                                   plotOutput("scatter_plot")
                          )
-                       )),
+                       )
+                       ),
+             
               navbarMenu("Control Charts",
                          tabPanel("XmR",
                                   
                                     sidebarLayout(
                                       sidebarPanel(
-                                        checkboxGroupInput("XMR_select_metric",
-                                                           "choose your prefered metric",
-                                                           choices = c("a","b","c","d"),
-                                                           selected = c("a","b")
-                                                           )
+                                        uiOutput("XmR_select_metric")
                                       ), # end sidebarPanel
                                       mainPanel(
-                                        tabsetPanel(
-                                        tabPanel("Retention Time",
-                                                 plotlyOutput("RT_ZMR")
-                                                 , tags$head(tags$style(type="text/css"))
-                                                 , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                                  tags$div("It may take a while to load the plots, please wait...
-                                                                           ",id="loadmessage"))
-                                                                  ),
-                                        tabPanel("Total Peak Area", 
-                                                 plotlyOutput("TA_ZMR")
-                                                 , tags$head(tags$style(type="text/css"))
-                                                 , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                                  tags$div("It may take a while to load the plots, please wait...
-                                                                           ",id="loadmessage"))
-                                                                  ),
-                                        tabPanel("Full Width at Half Maximum (FWHM)", 
-                                                 plotlyOutput("Max_ZMR")
-                                                 , tags$head(tags$style(type="text/css"))
-                                                 , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                                  tags$div("It may take a while to load the plots, please wait...
-                                                                           ",id="loadmessage"))
-                                                                  ),
-                                        tabPanel("Peak Assymetry", 
-                                                 plotlyOutput("PA_ZMR")
-                                                 , tags$head(tags$style(type="text/css"))
-                                                 , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                              tags$div("It may take a while to load the plots, please wait...
-                                                                       ",id="loadmessage"))
-                                                              )
-                                        )
+                                        uiOutput("XmR_tabset")
                                       ) # end mainPanel
                                     ) # end sidebarLayout
                                     
@@ -156,8 +149,8 @@ shinyUI(fluidPage(
 
                                     #,
                                     # tabPanel("Mass Accuracy"
-                                    #          , textOutput("MA_ZMR_txt")
-                                    #          ,plotlyOutput("MA_ZMR")
+                                    #          , textOutput("MA_XmR_txt")
+                                    #          ,plotlyOutput("MA_XmR")
                                     #          ,tags$head(tags$style(type="text/css"))
                                     #          , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                     #                           tags$div("It may take a while to load the plots, please wait...
@@ -168,17 +161,13 @@ shinyUI(fluidPage(
                          tabPanel("CUSUM",
                                   tabsetPanel(
                                     tabPanel("Retention Time", 
-                                             #plotOutput("RT_CUSUM"
-                                             plotlyOutput("RT_CUSUM"
-                                             )
-                                             #,verbatimTextOutput("RT_CUSUM_info")  # for interactive plots
+                                             plotlyOutput("RT_CUSUM")
                                              , tags$head(tags$style(type="text/css"))
                                              , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                               tags$div("It may take a while to load the plots, please wait...
                                                                        ",id="loadmessage"))
                                                               ),
-                                    tabPanel("Total Peak Area", 
-                                             #plotOutput("TA_CUSUM")
+                                    tabPanel("Total Peak Area",
                                              plotlyOutput("TA_CUSUM")
                                              , tags$head(tags$style(type="text/css"))
                                              , conditionalPanel(condition="$('html').hasClass('shiny-busy')",

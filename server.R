@@ -1,6 +1,10 @@
 library(shiny)
+library(shinyBS)
+library(shinyjs)
 library(plotly)
 library(RecordLinkage)
+library(hash)
+
 source("plot-functions.R")
 source("data-validation.R")
 source("helper-functions.R")
@@ -75,54 +79,102 @@ shinyServer(function(input,output,session) {
       subplot(plot1,plot2)
     }
   }
-  ########################################################## plot CUSUM_chart  for RT####################
+  ################################################################################################################
+  output$XmR_select_metric <- renderUI({
+
+    checkboxGroupInput("XmR_checkbox_select","choose your prefered metric to view plots",
+                       #choices = c("Retention Time" = "RT_XmR","Peak Assymetry" = "PA_XmR",
+                         #          "Full Width at Half Maximum (FWHM)" = "Max_XmR","Total Peak Area" = "TA_XmR"),
+                       choices = c("Peak Assymetry",find_metrics(data$df)),
+                       selected = c("Peak Assymetry","BestRetentionTime",
+                            "MaxFWHM",
+                            "TotalArea")
+                       )
+                       
+                       
+    # cg <- checkboxGroupInput("abc","other metrics", choices = c("m1","m2","m3"))
+    # shinyjs::disable("abc")
+    # cg
+
+  })
+  #################################################################################################################
+  map_XmR <- hash(keys= c("BestRetentionTime","Peak Assymetry",
+                          "MaxFWHM",
+                          "TotalArea","metric1","metric2","meric3","metric4","metric5"),
+                     values=c("RT_XmR","PA_XmR","Max_XmR","TA_XmR","m1","m2","m3","m4","m5"))
+  
+  output$XmR_tabset <- renderUI({
+    
+    Tabs <- lapply(input$XmR_checkbox_select,
+                   function(x) {
+                     tabPanel(x,
+                              plotlyOutput(map_XmR[[x]]),
+                              tags$head(tags$style(type="text/css")),
+                              conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                               tags$div("It may take a while to load the plots, please wait...",
+                                                        id="loadmessage"))
+                              )
+                     })
+    
+    do.call(tabsetPanel, Tabs)
+  })
+  ####################################################### plot XmR for RT ###################################################################################################################
+  output$RT_XmR <- renderPlotly({
+    render.tab(normalize.metric = "Retention Time", plot.method = "XmR", normalization.type = FALSE, main.title = "Retention Time", y.title1 = "Individual Value", y.title2 = "Moving Range")
+  })
+  ########################################################## plot XmR for Peak assymetry #####################################################################################################
+  output$PA_XmR <- renderPlotly({
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "XmR", normalization.type = FALSE, main.title = "Peak Assymetry", y.title1 = "Individual Value", y.title2 = "Moving Range")
+  })
+  ########################################################## plot XmR FOR MaxFWHM ############################################################################################################
+  output$Max_XmR <- renderPlotly({
+    render.tab(normalize.metric = "FWHM", plot.method = "XmR", normalization.type = FALSE, main.title = "FWHM", y.title1 = "Individual Value", y.title2 = "Moving Range")
+  })
+  ########################################################## plot XmR FOR total area #########################################################################################################
+  output$TA_XmR <- renderPlotly({
+    render.tab(normalize.metric = "Total Area", plot.method = "XmR", normalization.type = FALSE, main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
+  })
+  ########################################################## plot XmR for metric1 #############################################################################################################
+  output$m1 <- renderPlotly({
+    render.tab(normalize.metric = "Total Area", plot.method = "XmR", normalization.type = FALSE, main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
+  })
+  ########################################################## plot XmR for metric2 #############################################################################################################
+  output$m2 <- renderPlotly({
+    render.tab(normalize.metric = "Total Area", plot.method = "XmR", normalization.type = FALSE, main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
+  })
+  ########################################################## plot CUSUM_chart  for RT##########################################################################################################
   output$RT_CUSUM <- renderPlotly({
     render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Retention Time", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
-  ########################################################## plot CP for RT #############################
-  output$RT_CP <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "CP", normalization.type = TRUE, main.title = "Retention Time", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
-  })
-  ####################################################### plot ZMR for RT ##############################
-  output$RT_ZMR <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "ZMR", normalization.type = FALSE, main.title = "Retention Time", y.title1 = "Individual Value", y.title2 = "Moving Range")
-  })
-  ########################################################plot CUSUM for Peak assymetry ################
+  ########################################################plot CUSUM for Peak assymetry ######################################################################################################
   output$PA_CUSUM <- renderPlotly({
     render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Peak Assymetry", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
-  ######################################################## plot Change Point for Peak assymetry ###########
-  output$PA_CP <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", normalization.type = TRUE, main.title = "Peak Assymetry", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
-  })
-  ########################################################## plot ZMR for Peak assymetry ###################################
-  output$PA_ZMR <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "ZMR", normalization.type = FALSE, main.title = "Peak Assymetry", y.title1 = "Individual Value", y.title2 = "Moving Range")
-  })
-  ########################################################### plot CUSUM FOR MaxFWHM ####################################
+  ########################################################### plot CUSUM FOR MaxFWHM #########################################################################################################
   output$Max_CUSUM <- renderPlotly({
     render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", normalization.type = TRUE, main.title = "FWHM", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")    
-  })
-  ########################################################## plot Change Point FOR MaxFWHM ####################################
-  output$Max_CP <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "CP", normalization.type = TRUE, main.title = "FWHM", y.title1 = "Change point for mean", y.title2 = "Change point for variation")    
-  })
-  ########################################################## plot ZMR FOR MaxFWHM ####################################
-  output$Max_ZMR <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "ZMR", normalization.type = FALSE, main.title = "FWHM", y.title1 = "Individual Value", y.title2 = "Moving Range")
   })
   ############################################################ plot CUSUM FOR total area ####################################
   output$TA_CUSUM <- renderPlotly({
     render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Total Area", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
+  ########################################################## plot Change Point for RT #############################
+  output$RT_CP <- renderPlotly({
+    render.tab(normalize.metric = "Retention Time", plot.method = "CP", normalization.type = TRUE, main.title = "Retention Time", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+  })
+  ######################################################## plot Change Point for Peak assymetry ###########
+  output$PA_CP <- renderPlotly({
+    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", normalization.type = TRUE, main.title = "Peak Assymetry", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+  })
+  ########################################################## plot Change Point FOR MaxFWHM ####################################
+  output$Max_CP <- renderPlotly({
+    render.tab(normalize.metric = "FWHM", plot.method = "CP", normalization.type = TRUE, main.title = "FWHM", y.title1 = "Change point for mean", y.title2 = "Change point for variation")    
+  })
   ########################################################## plot Change Point FOR total area ##################################
   output$TA_CP <- renderPlotly({
     render.tab(normalize.metric = "Total Area", plot.method = "CP", normalization.type = TRUE, main.title = "Total Area", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
   })
-  ########################################################## plot ZMR FOR total area ##########################################
-  output$TA_ZMR <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "ZMR", normalization.type = FALSE, main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
-  })
+
   ########################################################## box plot in Summary tab ##########################################
   output$box_plot <- renderPlotly({
     prodata <- data$df
@@ -180,7 +232,7 @@ shinyServer(function(input,output,session) {
   #   paste0("This part is not complete yet, we will complete it in near future.")
   # })
   
-  # output$MA_ZMR_txt <- renderText({
+  # output$MA_XmR_txt <- renderText({
   #   paste0("This part is not complete yet, we will complete it in near future.")
   # })
   # 
