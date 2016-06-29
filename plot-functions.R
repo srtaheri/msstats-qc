@@ -77,15 +77,7 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   
   return(p)
 }
-##########################################################################################################
 
-#########################################################################################################################
-#  CUSUM.summary.plot <- function(prodata, L, U) {
-#   h <- 5
-#   
-# 
-# 
-# }
 #########################################################################################################################
 #########################################################################################################################
 #########################################################################################################################
@@ -172,14 +164,14 @@ XmR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
 #################################################################################################################
 XmR.Summary.plot <- function(prodata,L,U) {
   
-  A1 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Retention Time", type = 1)
-  A2 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Retention Time", type = 2)
-  B1 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Peak Assymetry", type = 1)
-  B2 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Peak Assymetry", type = 2)
-  C1 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "FWHM", type = 1)
-  C2 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "FWHM", type = 2)
-  D1 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Total Area", type = 1)
-  D2 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Total Area", type = 2)
+  A1 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Retention Time", type = 1)
+  A2 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Retention Time", type = 2)
+  B1 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Peak Assymetry", type = 1)
+  B2 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Peak Assymetry", type = 2)
+  C1 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "FWHM", type = 1)
+  C2 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "FWHM", type = 2)
+  D1 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Total Area", type = 1)
+  D2 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Total Area", type = 2)
   my_data <- data.frame(y = c(A1,A2,B1,B2,C1,C2,D1,D2),
                         x = c(rep("Retention Time",length(A1)+length(A2)), 
                               rep("Peak Assymetry",length(B1)+length(B2)), 
@@ -207,9 +199,37 @@ XmR.Summary.plot <- function(prodata,L,U) {
     ylab('QCno') +
     theme_minimal() +
     theme(axis.title.x = element_blank()) +
-    ggtitle("Percentage of peptides with signal")
+    ggtitle("Percentage of peptides with signal - XmR Chart")
 }
 #################################################################################################################
+XmR.Radar.Plot <- function(prodata,L,U) {
+  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  dat1 = data.frame(peptides = precursors,
+                   OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 1),
+                   group = rep("individual value",length(precursors)),
+                   orderby = seq(1:length(precursors))
+                   )
+  dat2 = data.frame(peptides = precursors,
+                    OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 2),
+                    group = rep("moving range",length(precursors)),
+                    orderby = seq(1:length(precursors))
+                    )
+  dat <- rbind(dat1,dat2)
+  print(dat)
+  ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group)) +
+    coord_polar() +
+    geom_point() +
+    geom_path() +
+    labs(x = NULL)
+  
+}
+#########################################################################################################################
+#  CUSUM.summary.plot <- function(prodata, L, U) {
+#   h <- 5
+#   
+# 
+# 
+# }
 #################################################################################################################
 
 #################################################################################################################

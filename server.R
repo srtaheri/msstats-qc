@@ -199,6 +199,15 @@ shinyServer(function(input,output,session) {
     XmR.Summary.plot(prodata,input$L,input$U)
 
   })
+  
+  output$plot_summary1 <- renderPlot({
+    prodata <- data$df
+    validate(
+      need(!is.null(prodata), "Please upload your data")
+    )
+    XmR.Radar.Plot(prodata,input$L,input$U)
+    
+  })
   ###########################################################################################################################
   ###########################################################################################################################
   ########################################################## "help" tab ################################

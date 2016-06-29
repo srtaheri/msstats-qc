@@ -114,6 +114,9 @@ shinyUI(fluidPage(
               
               tabPanel("Metric Summary",
                        tabsetPanel(
+                         tabPanel("Plot Summary1",
+                                  plotOutput("plot_summary1")
+                         ),
                            tabPanel("Plot Summary",
                                     plotOutput("plot_summary")
                            ),
