@@ -181,32 +181,33 @@ XmR.Summary.plot <- function(prodata,L,U) {
   D1 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Total Area", type = 1)
   D2 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Total Area", type = 2)
   my_data <- data.frame(y = c(A1,A2,B1,B2,C1,C2,D1,D2),
-                        x = c(rep("A",length(A1)+length(A2)), 
-                              rep("B",length(B1)+length(B2)), 
-                              rep("C",length(C1)+length(C2)), 
-                              rep("D",length(D1)+length(D2))),
-                        m = c(rep("i",length(A1)), rep("j",length(A2)),
-                              rep("i",length(B1)), rep("j",length(B2)),
-                              rep("i",length(C1)), rep("j",length(C2)),
-                              rep("i",length(D1)), rep("j",length(D2))))
+                        x = c(rep("Retention Time",length(A1)+length(A2)), 
+                              rep("Peak Assymetry",length(B1)+length(B2)), 
+                              rep("FWHM",length(C1)+length(C2)), 
+                              rep("Total Area",length(D1)+length(D2))),
+                        m = c(rep("individual value",length(A1)), rep("moving range",length(A2)),
+                              rep("individual value",length(B1)), rep("moving range",length(B2)),
+                              rep("individual value",length(C1)), rep("moving range",length(C2)),
+                              rep("individual value",length(D1)), rep("moving range",length(D2))))
  
   pdat <- my_data %>%
     group_by(x, m) %>%
     do(data.frame(loc = density(.$y)$x,
                   dens = density(.$y)$y))
   pdat$dens <- pdat$dens * 7
-  pdat$dens <- ifelse(pdat$m == 'i', pdat$dens * -1, pdat$dens)
-  pdat$dens <- ifelse(pdat$x == 'B', pdat$dens + 1, pdat$dens)
-  pdat$dens <- ifelse(pdat$x == 'C', pdat$dens + 2, pdat$dens)
-  pdat$dens <- ifelse(pdat$x == 'D', pdat$dens + 3, pdat$dens)
+  pdat$dens <- ifelse(pdat$m == 'individual value', pdat$dens * -1, pdat$dens)
+  pdat$dens <- ifelse(pdat$x == 'Peak Assymetry', pdat$dens + 1, pdat$dens)
+  pdat$dens <- ifelse(pdat$x == 'FWHM', pdat$dens + 2, pdat$dens)
+  pdat$dens <- ifelse(pdat$x == 'Total Area', pdat$dens + 3, pdat$dens)
   
   
   ggplot(pdat, aes(dens, loc, fill = m, group = interaction(m, x))) +
-     geom_polygon() 
-    # scale_x_continuous(breaks = 0:3, labels = c('A', 'B','C','D')) +
-    # ylab('density') +
-    # theme_minimal() +
-    # theme(axis.title.x = element_blank())
+     geom_polygon() +
+    scale_x_continuous(breaks = 0:3, labels = c('Retention Time', 'Peak Assymetry','FWHM','Total Area')) +
+    ylab('QCno') +
+    theme_minimal() +
+    theme(axis.title.x = element_blank()) +
+    ggtitle("Percentage of peptides with signal")
 }
 #################################################################################################################
 #################################################################################################################
