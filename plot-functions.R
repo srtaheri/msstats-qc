@@ -1,4 +1,6 @@
 source("QCMetrics.R")
+library(dplyr)
+library(ggplot2)
 
 CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   h <- 5 
@@ -76,231 +78,23 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   return(p)
 }
 ##########################################################################################################
-CUSUM.summary.plot <- function(prodata, L, U,type, ytitle) {
-  h <- 5
-  plot.data.ret.time <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type)
-  plot.data.peak.assymetry <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type)
-  plot.data.fwhm <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type)
-  plot.data.total.area <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type)
 
-  x <- list(
-    title =  paste("QCno")
-  )
-  y <- list(
-    title = ytitle
-  )
-
-  p <- plot_ly( 
-                 x = plot.data.ret.time$QCno
-               , y = plot.data.ret.time$pr.y.poz
-               #,  mode = "markers"
-               #, marker=list(color="dodgerblue" , size=8 , opacity=0.5)
-               , name = "CUSUM+RT"
-               , line = list(shape = "linear")
-               , showlegend = FALSE
-   ) %>%
-    add_trace(
-                  x = plot.data.ret.time$QCno
-                , y = plot.data.ret.time$pr.y.neg
-                #,  mode = "markers"
-                #, marker=list(color="blue" , size=8 , opacity=0.5)
-                , name = "CUSUM-RT"
-                , line = list(shape = "linear", color="blue")
-                , showlegend = FALSE
-  ) %>%
-    add_trace(
-               x = plot.data.peak.assymetry$QCno
-              , y = plot.data.peak.assymetry$pr.y.poz
-              #,  mode = "markers"
-              #, marker=list(color="rgb(128, 42, 42)" , size=8 , opacity=0.5)
-              , name = "CUSUM+PA"
-              , line = list(shape = "linear", color="rgb(128, 42, 42)")
-              , showlegend = FALSE
-              ) %>%
-    add_trace(
-        x = plot.data.peak.assymetry$QCno
-      , y = plot.data.peak.assymetry$pr.y.neg
-      #,  mode = "markers"
-      #, marker=list(color="rgb(205, 92, 92)" , size=8 , opacity=0.5)
-      , name = "CUSUM+PA"
-      , line = list(shape = "linear", color="rgb(205, 92, 92)")
-      , showlegend = FALSE
-    ) %>%
-    add_trace(
-      x = plot.data.fwhm$QCno
-      , y = plot.data.fwhm$pr.y.poz
-      #,  mode = "markers"
-      #, marker=list(color="rgb(248, 117, 49)" , size=8 , opacity=0.5)
-      , name = "CUSUM+FWHM"
-      , line = list(shape = "linear", color="rgb(248, 117, 49)")
-      , showlegend = FALSE
-    ) %>%
-  add_trace(
-    x = plot.data.fwhm$QCno
-    , y = plot.data.fwhm$pr.y.neg
-    #,  mode = "markers"
-    #, marker=list(color="rgb(94, 38, 5)" , size=8 , opacity=0.5)
-    , name = "CUSUM+FWHM"
-    , line = list(shape = "linear", color="rgb(94, 38, 5)")
-    , showlegend = FALSE
-  ) %>%
-    add_trace(
-      x = plot.data.total.area$QCno
-      , y = plot.data.total.area$pr.y.poz
-      #,  mode = "markers"
-      #, marker=list(color="rgb(84, 99, 44)" , size=8 , opacity=0.5)
-      , name = "CUSUM+TA"
-      , line = list(shape = "linear", color="rgb(84, 99, 44)")
-      , showlegend = FALSE
-    ) %>%
-    add_trace(
-      x = plot.data.total.area$QCno
-      , y = plot.data.total.area$pr.y.neg
-      #,  mode = "markers"
-      #, marker=list(color="rgb(156, 203, 25)" , size=8 , opacity=0.5)
-      , name = "CUSUM-TA"
-      , line = list(shape = "linear", color="rgb(156, 203, 25)")
-      , showlegend = FALSE
-    ) %>%
-  layout(xaxis = x,yaxis = y, showlegend = FALSE)
-  return(p)
-  
-}
 #########################################################################################################################
-CUSUM.summary.plot.version2 <- function(prodata, L, U,type) {
-  h <- 5
-  plot.data.ret.time <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type)
-  plot.data.peak.assymetry <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type)
-  plot.data.fwhm <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type)
-  plot.data.total.area <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type)
-  
-  x <- list(
-    title =  "QCno"
-  )
-  y <- list(
-    title = "y title"
-  )
-  x.null <- list(
-    title =  " "
-  )
-  y.null <- list(
-    title = " "
-  )
-  p1 <- plot_ly( 
-    x = plot.data.ret.time$QCno
-    , y = plot.data.ret.time$pr.y.poz
-    #,  mode = "markers"
-    #, marker=list(color="dodgerblue" , size=8 , opacity=0.5)
-    , name = "CUSUM+RT"
-    , line = list(shape = "linear", color="dodgerblue")
-    , showlegend = FALSE
-  ) %>%
-    add_trace(  
-      x = plot.data.ret.time$QCno
-      , y = plot.data.ret.time$pr.y.neg
-      #,  mode = "markers"
-      #, marker=list(color="blue" , size=8 , opacity=0.5)
-      , name = "CUSUM-RT"
-      , line = list(shape = "linear", color="blue")
-      , showlegend = FALSE
-    ) %>%
-    layout(xaxis = x.null,yaxis = y.null, showlegend = FALSE) 
-   p2 <- plot_ly(  
-      x = plot.data.peak.assymetry$QCno
-      , y = plot.data.peak.assymetry$pr.y.poz
-      #,  mode = "markers"
-      #, marker=list(color="rgb(128, 42, 42)" , size=8 , opacity=0.5)
-      , name = "CUSUM+PA"
-      , line = list(shape = "linear", color="rgb(128, 42, 42)")
-      , showlegend = FALSE
-    ) %>%
-    add_trace(
-      x = plot.data.peak.assymetry$QCno
-      , y = plot.data.peak.assymetry$pr.y.neg
-      #,  mode = "markers"
-      #, marker=list(color="rgb(205, 92, 92)" , size=8 , opacity=0.5)
-      , name = "CUSUM+PA"
-      , line = list(shape = "linear", color="rgb(205, 92, 92)")
-      , showlegend = FALSE
-    ) %>%
-     layout(xaxis = x.null,yaxis = y.null, showlegend = FALSE) 
-    p3 <- plot_ly(
-      x = plot.data.fwhm$QCno
-      , y = plot.data.fwhm$pr.y.poz
-      #,  mode = "markers"
-      #, marker=list(color="rgb(248, 117, 49)" , size=8 , opacity=0.5)
-      , name = "CUSUM+FWHM"
-      , line = list(shape = "linear", color="rgb(248, 117, 49)")
-      , showlegend = FALSE
-    ) %>%
-    add_trace(
-      x = plot.data.fwhm$QCno
-      , y = plot.data.fwhm$pr.y.neg
-      #,  mode = "markers"
-      #, marker=list(color="rgb(94, 38, 5)" , size=8 , opacity=0.5)
-      , name = "CUSUM+FWHM"
-      , line = list(shape = "linear", color="rgb(94, 38, 5)")
-      , showlegend = FALSE
-    ) %>%
-      layout(xaxis = x.null,yaxis = y.null, showlegend = FALSE) 
-   p4 <- plot_ly(
-      x = plot.data.total.area$QCno
-      , y = plot.data.total.area$pr.y.poz
-      #,  mode = "markers"
-      #, marker=list(color="rgb(84, 99, 44)" , size=8 , opacity=0.5)
-      , name = "CUSUM+TA"
-      , line = list(shape = "linear", color="rgb(84, 99, 44)")
-      , showlegend = FALSE
-    ) %>%
-    add_trace(
-      x = plot.data.total.area$QCno
-      , y = plot.data.total.area$pr.y.neg
-      #,  mode = "markers"
-      #, marker=list(color="rgb(156, 203, 25)" , size=8 , opacity=0.5)
-      , name = "CUSUM-TA"
-      , line = list(shape = "linear", color="rgb(156, 203, 25)")
-      , showlegend = FALSE
-    ) %>%
-     layout(xaxis = x,yaxis = y, showlegend = FALSE) 
-   
-   subplot(p1,p2,p3,p4, nrows = 4) 
-  #return(p)
-  
-}
+#  CUSUM.summary.plot <- function(prodata, L, U) {
+#   h <- 5
+#   
+# 
+# 
+# }
 #########################################################################################################################
 #########################################################################################################################
 #########################################################################################################################
 CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
-  ## Create variables 
+  
   precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
   prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
-  Et <-  numeric(length(z)-1) # this is Ct in type 1, and Dt in type 2.
-  SS<- numeric(length(z)-1)
-  SST<- numeric(length(z)-1)
-  tho.hat <- 0
-  
-  Main = Main.title
-  
-  if(type == 1) {
-    ## Change point analysis for mean (Single step change model)
-    for(i in 1:length(z)-1) {
-      Et[i]=(length(z)-i)*(((1/(length(z)-i))*sum(z[(i+1):length(z)]))-0)^2 #change point function
-    }
-    QCno=1:(length(z)-1) 
-  } else if(type == 2) {
-    ## Change point analysis for variance (Single step change model)  
-    for(i in 1:length(z)) {
-      SS[i]=z[i]^2
-    }
-    for(i in 1:length(z)) {
-      SST[i]=sum(SS[i:length(z)])
-      Et[i]=((SST[i]/2)-((length(z)-i+1)/2)*log(SST[i]/(length(z)-i+1))-(length(z)-i+1)/2) #change point function
-    }
-    QCno=1:length(z)
-  }
-  
-  tho.hat = which(Et==max(Et)) # change point estimate
-  plot.data=data.frame(QCno,Et,tho.hat) # dataframe for change point plot
+  ## Create variables 
+  plot.data <- CP.data.prepare(prodata,z,j, type)
   y.max=max(plot.data$Et) # y axis upper limit
   y.min=0 # y axis lower limit
   
@@ -335,36 +129,13 @@ CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
 #########################################################################################################################
 XmR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
   
-  t <- numeric(length(z)-1) # z in plot 1, MR in plot 2
   precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
   prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
+  plot.data <- XmR.data.prepare(prodata, z, j,L,U, type)
+  print(plot.data)
   
-  ## Calculate X chart statistics and limits 
-  #UCL = 0
-  #LCL = 0
-  for(i in 2:length(z)) {
-    t[i]=abs(z[i]-z[i-1]) # Compute moving range of z
-  }
-  Main=Main.title
-  
-  QCno=1:length(z)
-  
-  if(type == 1) {
-    UCL=mean(z[L:U])+2.66*sd(t[L:U])
-    LCL=mean(z[L:U])-2.66*sd(t[L:U])
-    #UCL=3
-    #LCL=-3
-    t <- z
-  } else if(type == 2) {
-    ## Calculate MR chart statistics and limits
-
-    UCL=3.267*sd(t[1:L-U])
-    LCL=0
-  }
-  plot.data=data.frame(QCno,z,t,UCL,LCL)
-  
-  y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
-  y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
+  #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
+  #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
   
   x <- list(
     title = paste("QCno - ", levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j])
@@ -396,8 +167,47 @@ XmR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
               , marker=list(color="blue" , size=8 , opacity=0.5)
               ,showlegend = FALSE,name=""
     )
+
 }
 #################################################################################################################
+XmR.Summary.plot <- function(prodata,L,U) {
+  
+  A1 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Retention Time", type = 1)
+  A2 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Retention Time", type = 2)
+  B1 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Peak Assymetry", type = 1)
+  B2 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Peak Assymetry", type = 2)
+  C1 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "FWHM", type = 1)
+  C2 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "FWHM", type = 2)
+  D1 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Total Area", type = 1)
+  D2 <- Compute.QCno.OutOfRange(prodata,L,U, metric = "Total Area", type = 2)
+  my_data <- data.frame(y = c(A1,A2,B1,B2,C1,C2,D1,D2),
+                        x = c(rep("A",length(A1)+length(A2)), 
+                              rep("B",length(B1)+length(B2)), 
+                              rep("C",length(C1)+length(C2)), 
+                              rep("D",length(D1)+length(D2))),
+                        m = c(rep("i",length(A1)), rep("j",length(A2)),
+                              rep("i",length(B1)), rep("j",length(B2)),
+                              rep("i",length(C1)), rep("j",length(C2)),
+                              rep("i",length(D1)), rep("j",length(D2))))
+ 
+  pdat <- my_data %>%
+    group_by(x, m) %>%
+    do(data.frame(loc = density(.$y)$x,
+                  dens = density(.$y)$y))
+  pdat$dens <- pdat$dens * 7
+  pdat$dens <- ifelse(pdat$m == 'i', pdat$dens * -1, pdat$dens)
+  pdat$dens <- ifelse(pdat$x == 'B', pdat$dens + 1, pdat$dens)
+  pdat$dens <- ifelse(pdat$x == 'C', pdat$dens + 2, pdat$dens)
+  pdat$dens <- ifelse(pdat$x == 'D', pdat$dens + 3, pdat$dens)
+  
+  
+  ggplot(pdat, aes(dens, loc, fill = m, group = interaction(m, x))) +
+     geom_polygon() 
+    # scale_x_continuous(breaks = 0:3, labels = c('A', 'B','C','D')) +
+    # ylab('density') +
+    # theme_minimal() +
+    # theme(axis.title.x = element_blank())
+}
 #################################################################################################################
 #################################################################################################################
 
@@ -466,4 +276,127 @@ metrics_box.plot <- function(prodata) {
   
   return(subplot(RT, PA, TPA, FWHM, nrows = 4) %>%
            layout(autosize = F, width = 700, height = 1000))
+}
+################################################### vioplot2 #####################################
+vioplot2 <- function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL, 
+                      horizontal = FALSE, col = "magenta", border = "black", lty = 1, 
+                      lwd = 1, rectCol = "black", colMed = "white", pchMed = 19, 
+                      at, add = FALSE, wex = 1, drawRect = TRUE, side="both") 
+{
+  datas <- list(x, ...)
+  n <- length(datas)
+  if (missing(at)) 
+    at <- 1:n
+  upper <- vector(mode = "numeric", length = n)
+  lower <- vector(mode = "numeric", length = n)
+  q1 <- vector(mode = "numeric", length = n)
+  q2 <- vector(mode = "numeric", length = n)
+  q3 <- vector(mode = "numeric", length = n)
+  med <- vector(mode = "numeric", length = n)
+  base <- vector(mode = "list", length = n)
+  height <- vector(mode = "list", length = n)
+  baserange <- c(Inf, -Inf)
+  args <- list(display = "none")
+  radj <- ifelse(side == "right", 0, 1)
+  ladj <- ifelse(side == "left", 0, 1)
+  if (!(is.null(h))) 
+    args <- c(args, h = h)
+  med.dens <- rep(NA, n)
+  for (i in 1:n) {
+    data <- datas[[i]]
+    data.min <- min(data)
+    data.max <- max(data)
+    q1[i] <- quantile(data, 0.25)
+    q2[i] <- quantile(data, 0.5)
+    q3[i] <- quantile(data, 0.75)
+    med[i] <- median(data)
+    iqd <- q3[i] - q1[i]
+    upper[i] <- min(q3[i] + range * iqd, data.max)
+    lower[i] <- max(q1[i] - range * iqd, data.min)
+    est.xlim <- c(min(lower[i], data.min), max(upper[i], 
+                                               data.max))
+    smout <- do.call("sm.density", c(list(data, xlim = est.xlim), 
+                                     args))
+    med.dat <- do.call("sm.density", 
+                       c(list(data, xlim=est.xlim,
+                              eval.points=med[i], display = "none")))
+    med.dens[i] <- med.dat$estimate
+    hscale <- 0.4/max(smout$estimate) * wex
+    base[[i]] <- smout$eval.points
+    height[[i]] <- smout$estimate * hscale
+    med.dens[i] <- med.dens[i] * hscale
+    t <- range(base[[i]])
+    baserange[1] <- min(baserange[1], t[1])
+    baserange[2] <- max(baserange[2], t[2])
+  }
+  if (!add) {
+    xlim <- if (n == 1) 
+      at + c(-0.5, 0.5)
+    else range(at) + min(diff(at))/2 * c(-1, 1)
+    if (is.null(ylim)) {
+      ylim <- baserange
+    }
+  }
+  if (is.null(names)) {
+    label <- 1:n
+  }
+  else {
+    label <- names
+  }
+  boxwidth <- 0.05 * wex
+  if (!add) 
+    plot.new()
+  if (!horizontal) {
+    if (!add) {
+      plot.window(xlim = xlim, ylim = ylim)
+      axis(2)
+      axis(1, at = at, label = label)
+    }
+    box()
+    for (i in 1:n) {
+      polygon(x = c(at[i] - radj*height[[i]], rev(at[i] + ladj*height[[i]])), 
+              y = c(base[[i]], rev(base[[i]])), 
+              col = col, border = border, 
+              lty = lty, lwd = lwd)
+      if (drawRect) {
+        lines(at[c(i, i)], c(lower[i], upper[i]), lwd = lwd, 
+              lty = lty)
+        rect(at[i] - radj*boxwidth/2, 
+             q1[i], 
+             at[i] + ladj*boxwidth/2, 
+             q3[i], col = rectCol)
+        # median line segment
+        lines(x = c(at[i] - radj*med.dens[i], 
+                    at[i], 
+                    at[i] + ladj*med.dens[i]),
+              y = rep(med[i],3))
+      }
+    }
+  }
+  else {
+    if (!add) {
+      plot.window(xlim = ylim, ylim = xlim)
+      axis(1)
+      axis(2, at = at, label = label)
+    }
+    box()
+    for (i in 1:n) {
+      polygon(c(base[[i]], rev(base[[i]])), 
+              c(at[i] - radj*height[[i]], rev(at[i] + ladj*height[[i]])), 
+              col = col, border = border, 
+              lty = lty, lwd = lwd)
+      if (drawRect) {
+        lines(c(lower[i], upper[i]), at[c(i, i)], lwd = lwd, 
+              lty = lty)
+        rect(q1[i], at[i] - radj*boxwidth/2, q3[i], at[i] + 
+               ladj*boxwidth/2, col = rectCol)
+        lines(y = c(at[i] - radj*med.dens[i], 
+                    at[i], 
+                    at[i] + ladj*med.dens[i]),
+              x = rep(med[i],3))
+      }
+    }
+  }
+  invisible(list(upper = upper, lower = lower, median = med, 
+                 q1 = q1, q3 = q3))
 }

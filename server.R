@@ -9,6 +9,7 @@ source("plot-functions.R")
 source("data-validation.R")
 source("helper-functions.R")
 
+
 shinyServer(function(input,output,session) {
   
   #prodata <- data.frame()
@@ -90,11 +91,6 @@ shinyServer(function(input,output,session) {
                             "MaxFWHM",
                             "TotalArea")
                        )
-                       
-                       
-    # cg <- checkboxGroupInput("abc","other metrics", choices = c("m1","m2","m3"))
-    # shinyjs::disable("abc")
-    # cg
 
   })
   #################################################################################################################
@@ -178,7 +174,6 @@ shinyServer(function(input,output,session) {
   ########################################################## box plot in Summary tab ##########################################
   output$box_plot <- renderPlotly({
     prodata <- data$df
-    prodata <- data$df
     validate(
       need(!is.null(prodata), "Please upload your data")
     )
@@ -194,22 +189,15 @@ shinyServer(function(input,output,session) {
     metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor, normalization = TRUE)
   }, height = 700)
   ######################################################### plot_summary in Summary tab ########################################
-  output$plot_summary <- renderPlotly({
-   
-    prodata <- data$df
-    validate(
-      need(!is.null(prodata), "Please upload your data")
-    )
-    CUSUM.summary.plot(prodata, input$L, input$U,type = 1, ytitle = "probability of out of range points for CUSUM mean")
-    
-  })
-  output$plot_summaryy <- renderPlotly({
+  output$plot_summary <- renderPlot({
     
     prodata <- data$df
     validate(
       need(!is.null(prodata), "Please upload your data")
     )
-    CUSUM.summary.plot.version2(prodata, input$L, input$U,type = 1)
+    #CUSUM.summary.plot(prodata, input$L, input$U,type = 1)
+    XmR.Summary.plot(prodata,input$L,input$U)
+
   })
   ###########################################################################################################################
   ###########################################################################################################################

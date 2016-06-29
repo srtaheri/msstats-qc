@@ -26,38 +26,106 @@ CUSUM.data.prepare <- function(prodata, precursor.level, z, L, U, type) {
   QCno = 1:length(z)
   plot.data = 
     data.frame(QCno
-                         ,CUSUM.poz = Cpoz
-                         ,CUSUM.neg = -Cneg 
-                         ,Annotations=prodata_grouped_by_precursor$Annotations
+               ,CUSUM.poz = Cpoz
+               ,CUSUM.neg = -Cneg 
+               ,Annotations=prodata_grouped_by_precursor$Annotations
                )
-  #print(plot.data)
+  
   return(plot.data)
 }
 ###################################################################################################
-CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
-  h <- 5
+CP.data.prepare <- function(prodata,z,j, type) {
   
-  QCno <- 1:nrow(prodata)
-  y.poz <- rep(0,nrow(prodata))
-  y.neg <- rep(0,nrow(prodata))
-  counter <- rep(0,nrow(prodata))
+  Et <-  numeric(length(z)-1) # this is Ct in type 1, and Dt in type 2.
+  SS<- numeric(length(z)-1)
+  SST<- numeric(length(z)-1)
+  tho.hat <- 0
   
+  #Main = Main.title
+  
+  if(type == 1) {
+    ## Change point analysis for mean (Single step change model)
+    for(i in 1:length(z)-1) {
+      Et[i]=(length(z)-i)*(((1/(length(z)-i))*sum(z[(i+1):length(z)]))-0)^2 #change point function
+    }
+    QCno=1:(length(z)-1) 
+  } else if(type == 2) {
+    ## Change point analysis for variance (Single step change model)  
+    for(i in 1:length(z)) {
+      SS[i]=z[i]^2
+    }
+    for(i in 1:length(z)) {
+      SST[i]=sum(SS[i:length(z)])
+      Et[i]=((SST[i]/2)-((length(z)-i+1)/2)*log(SST[i]/(length(z)-i+1))-(length(z)-i+1)/2) #change point function
+    }
+    QCno=1:length(z)
+  }
+  
+  tho.hat = which(Et==max(Et)) # change point estimate
+  return(data.frame(QCno,Et,tho.hat)) # dataframe for change point plot
+}
+###################################################################################################
+XmR.data.prepare <- function(prodata, z, j,L,U, type) {
+  t <- numeric(length(z)-1) # z in plot 1, MR in plot 2
+
+  for(i in 2:length(z)) {
+    t[i]=abs(z[i]-z[i-1]) # Compute moving range of z
+  }
+  #Main=Main.title
+  
+  QCno=1:length(z)
+  
+  if(type == 1) {
+    UCL=mean(z[L:U])+2.66*sd(t[L:U])
+    LCL=mean(z[L:U])-2.66*sd(t[L:U])
+    t <- z
+  } else if(type == 2) {
+    ## Calculate MR chart statistics and limits
+    
+    UCL=3.267*sd(t[1:L-U])
+    LCL=0
+  }
+  plot.data=data.frame(QCno,z,t,UCL,LCL)
+  return(plot.data)
+}
+###################################################################################################
+# CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
+#   h <- 5
+#   
+#   QCno <- 1:nrow(prodata)
+#   y.poz <- rep(0,nrow(prodata))
+#   y.neg <- rep(0,nrow(prodata))
+#   counter <- rep(0,nrow(prodata))
+#   
+#   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+#   
+#   for(j in 1:length(precursors)) {
+#     z <- prepare_column(prodata, j, L, U, metric = metric, normalization = T)
+#     counter[1:length(z)] <- counter[1:length(z)]+1
+#     plot.data <- CUSUM.data.prepare(prodata, precursors[j], z, L, U, type)
+#     
+#     sub.poz <- plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]
+#     sub.neg <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
+#     
+#     y.poz[sub.poz$QCno] <- y.poz[sub.poz$QCno] + 1
+#     y.neg[sub.neg$QCno] <- y.neg[sub.neg$QCno] + 1
+#   }
+#   max_QCno <- max(which(counter!=0))
+#   #print(y.poz[1:max_QCno]/counter[1:max_QCno])
+#   plot.data <- data.frame(QCno[1:max_QCno], 
+#                           pr.y.poz = y.poz[1:max_QCno]/counter[1:max_QCno], 
+#                           pr.y.neg = y.neg[1:max_QCno]/counter[max_QCno])
+#   return(plot.data)
+# }
+############################################################################################
+Compute.QCno.OutOfRange <- function(prodata,L,U, metric, type) {
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  QCno.out.range <- c()
   
   for(j in 1:length(precursors)) {
     z <- prepare_column(prodata, j, L, U, metric = metric, normalization = T)
-    counter[1:length(z)] <- counter[1:length(z)]+1
-    plot.data <- CUSUM.data.prepare(prodata, precursors[j], z, L, U, type)
-    
-    sub.poz <- plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]
-    sub.neg <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
-    
-    y.poz[sub.poz$QCno] <- y.poz[sub.poz$QCno] + 1
-    y.neg[sub.neg$QCno] <- y.neg[sub.neg$QCno] + 1
+    plot.data <- XmR.data.prepare(prodata, z, j,L,U, type)
+    QCno.out.range <- c(QCno.out.range,plot.data[plot.data$t >= plot.data$UCL | plot.data$t <= plot.data$LCL, ]$QCno)
   }
-  max_QCno <- max(which(counter!=0))
-  plot.data <- data.frame(QCno[1:max_QCno], 
-                          pr.y.poz = y.poz[1:max_QCno]/counter[1:max_QCno], 
-                          pr.y.neg = y.neg[1:max_QCno]/counter[max_QCno])
-  return(plot.data)
+  return(QCno.out.range)
 }
