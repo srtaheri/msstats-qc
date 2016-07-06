@@ -124,7 +124,7 @@ XmR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
   precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
   prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
   plot.data <- XmR.data.prepare(prodata, z, j,L,U, type)
-  print(plot.data)
+  #print(plot.data)
   
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
   #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
@@ -196,10 +196,13 @@ XmR.Summary.plot <- function(prodata,L,U) {
   ggplot(pdat, aes(dens, loc, fill = m, group = interaction(m, x))) +
      geom_polygon() +
     scale_x_continuous(breaks = 0:3, labels = c('Retention Time', 'Peak Assymetry','FWHM','Total Area')) +
-    ylab('QCno') +
+    #ylab('QCno') + xlab('Retention Time') +
     theme_minimal() +
     theme(axis.title.x = element_blank()) +
-    ggtitle("Percentage of peptides with signal - XmR Chart")
+    #ggtitle("Percentage of peptides with signal \n XmR Chart for Retention Time") 
+    labs(title = "Percentage of peptides with signal \n XmR Chart \n (Retention Time)")
+    
+    
 }
 #################################################################################################################
 XmR.Radar.Plot <- function(prodata,L,U) {
@@ -219,8 +222,10 @@ XmR.Radar.Plot <- function(prodata,L,U) {
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group)) +
     coord_polar() +
     geom_point() +
-    geom_path() +
-    labs(x = NULL)
+    geom_path(linejoin = "mitre", lineend = "butt") +
+    labs(title = "Radar plot \n XmR Chart \n Retention Time") +
+    xlab("") +
+    ylab("Number of Out of ranged QC numbers")
   
 }
 #########################################################################################################################
