@@ -205,9 +205,10 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data")
     )
-    XmR.Radar.Plot(prodata,input$L,input$U)
+    multiplot(XmR.Radar.Plot(prodata,input$L,input$U),CUSUM.Radar.Plot(prodata,input$L,input$U))
     
-  },width = 1400)
+
+  }, width = 1200, height = 1000)
   ###########################################################################################################################
   ###########################################################################################################################
   ########################################################## "help" tab ################################

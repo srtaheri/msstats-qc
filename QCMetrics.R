@@ -114,7 +114,8 @@ Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type) {
   return(QCno.out.range)
 }
 #############################################################################################
-Compute.QCno.OutOfRange.CUSUM <- function(prodata,L,U,metric,type, CUSUM.type) {
+Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type) {
+  h <- 5
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
   QCno.out.range <- c()
   
@@ -122,10 +123,157 @@ Compute.QCno.OutOfRange.CUSUM <- function(prodata,L,U,metric,type, CUSUM.type) {
     z <- prepare_column(prodata, j, L, U, metric = metric, normalization = T)
     precursor.level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
     plot.data <- CUSUM.data.prepare(prodata, precursor.level, z, L, U, type)
-    if(CUSUM.type == "poz")
-    QCno.out.range <- c(QCno.out.range,plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno)
-    else
-    QCno.out.range <- c(QCno.out.range,plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno)
+    # if(CUSUM.type == "poz")    # I shoud add " , CUSUM.type " to the function
+    # QCno.out.range <- c(QCno.out.range,plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno)
+    # else
+    # QCno.out.range <- c(QCno.out.range,plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno)
+    QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno)) +
+                      c(QCno.out.range,length(plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno))
+    
   }
+  print(QCno.out.range)
   return(QCno.out.range)
+}
+#########################################################################################################
+XmR.Radar.Plot.prepare <- function(prodata,L,U) {
+  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  
+  dat1.ret = data.frame(peptides = precursors,
+                        OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 1),
+                        group         = rep("individual \n value",length(precursors)),
+                        orderby       = seq(1:length(precursors)),
+                        metric        = rep("Retention Time - XmR", length(precursors)),
+                        tool          = rep("XmR",length(precursors)) 
+  )
+  dat2.ret = data.frame(peptides     = precursors,
+                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 2),
+                        group        = rep("moving \n range",length(precursors)),
+                        orderby      = seq(1:length(precursors)),
+                        metric       = rep("Retention Time - XmR", length(precursors)),
+                        tool         = rep("XmR",length(precursors)) 
+  )
+  
+  
+  dat1.pa = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Peak Assymetry",type = 1),
+                       group        = rep("individual \n value",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Peak Assymetry - XmR", length(precursors)),
+                       tool         = rep("XmR",length(precursors)) 
+  )
+  dat2.pa = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Peak Assymetry",type = 2),
+                       group        = rep("moving \n range",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Peak Assymetry - XmR", length(precursors)),
+                       tool         = rep("XmR",length(precursors)) 
+  )
+  
+  
+  dat1.fwhm = data.frame(peptides     = precursors,
+                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "FWHM",type = 1),
+                         group        = rep("individual \n value",length(precursors)),
+                         orderby      = seq(1:length(precursors)),
+                         metric       = rep("FWHM - XmR", length(precursors)),
+                         tool         = rep("XmR",length(precursors)) 
+  )
+  dat2.fwhm = data.frame(peptides     = precursors,
+                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "FWHM",type = 2),
+                         group        = rep("moving \n range",length(precursors)),
+                         orderby      = seq(1:length(precursors)),
+                         metric       = rep("FWHM - XmR", length(precursors)),
+                         tool         = rep("XmR",length(precursors)) 
+  )
+  
+  
+  dat1.ta = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Total Area",type = 1),
+                       group        = rep("individual \n value",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Total Area - XmR", length(precursors)),
+                       tool         = rep("XmR",length(precursors)) 
+  )
+  dat2.ta = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Total Area",type = 2),
+                       group        = rep("moving \n range",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Total Area - XmR", length(precursors)),
+                       tool         = rep("XmR",length(precursors)) 
+  )
+  
+  rbind(dat1.ret,dat2.ret,dat1.pa,dat2.pa,dat1.fwhm,dat2.fwhm,dat1.ta,dat2.ta)
+  
+
+  
+}
+#################################################################################################################
+CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
+  
+  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  
+  dat1.ret = data.frame(peptides = precursors,
+                        OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric= "Retention Time",type = 1),
+                        group         = rep("individual \n value",length(precursors)),
+                        orderby       = seq(1:length(precursors)),
+                        metric        = rep("Retention Time - CUSUM", length(precursors)),
+                        tool          = rep("CUSUM",length(precursors)) 
+  )
+  dat2.ret = data.frame(peptides     = precursors,
+                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Retention Time",type = 2),
+                        group        = rep("moving \n range",length(precursors)),
+                        orderby      = seq(1:length(precursors)),
+                        metric       = rep("Retention Time - CUSUM", length(precursors)),
+                        tool         = rep("CUSUM",length(precursors))
+  )
+  
+  
+  dat1.pa = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",type = 1),
+                       group        = rep("individual \n value",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
+                       tool         = rep("CUSUM",length(precursors))
+  )
+  dat2.pa = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",type = 2),
+                       group        = rep("moving \n range",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
+                       tool         = rep("CUSUM",length(precursors))
+  )
+  
+  
+  dat1.fwhm = data.frame(peptides     = precursors,
+                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",type = 1),
+                         group        = rep("individual \n value",length(precursors)),
+                         orderby      = seq(1:length(precursors)),
+                         metric       = rep("FWHM - CUSUM", length(precursors)),
+                         tool         = rep("CUSUM",length(precursors))
+  )
+  dat2.fwhm = data.frame(peptides     = precursors,
+                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",type = 2),
+                         group        = rep("moving \n range",length(precursors)),
+                         orderby      = seq(1:length(precursors)),
+                         metric       = rep("FWHM - CUSUM", length(precursors)),
+                         tool         = rep("CUSUM",length(precursors))
+  )
+  
+  
+  dat1.ta = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",type = 1),
+                       group        = rep("individual \n value",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Total Area - CUSUM", length(precursors)),
+                       tool         = rep("CUSUM",length(precursors))
+  )
+  dat2.ta = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",type = 2),
+                       group        = rep("moving \n range",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Total Area - CUSUM", length(precursors)),
+                       tool         = rep("CUSUM",length(precursors))
+  )
+  
+  rbind(dat1.ret,dat2.ret,dat1.pa,dat2.pa,dat1.fwhm,dat2.fwhm,dat1.ta,dat2.ta)
+  
 }

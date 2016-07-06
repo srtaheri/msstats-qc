@@ -1,7 +1,43 @@
 source("QCMetrics.R")
 library(dplyr)
 library(ggplot2)
-
+##### multiplot function ###################################################################################################
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+#########################################################################################################################
 CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   h <- 5 
   precursor.level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
@@ -78,8 +114,6 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   return(p)
 }
 
-
-#########################################################################################################################
 #########################################################################################################################
 CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
   
@@ -116,8 +150,6 @@ CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
     )
 }
 
-#########################################################################################################################
-#########################################################################################################################
 #########################################################################################################################
 XmR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
   
@@ -204,91 +236,41 @@ XmR.Summary.plot <- function(prodata,L,U) {
     
     
 }
-#################################################################################################################
-XmR.Radar.Plot <- function(prodata,L,U) {
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
-  
-  dat1.ret = data.frame(peptides = precursors,
-                   OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 1),
-                   group         = rep("individual \n value",length(precursors)),
-                   orderby       = seq(1:length(precursors)),
-                   metric        = rep("Retention Time", length(precursors))
-                       )
-  dat2.ret = data.frame(peptides     = precursors,
-                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 2),
-                        group        = rep("moving \n range",length(precursors)),
-                        orderby      = seq(1:length(precursors)),
-                        metric       = rep("Retention Time", length(precursors))
-                       )
- 
-  
-  dat1.pa = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Peak Assymetry",type = 1),
-                       group        = rep("individual \n value",length(precursors)),
-                       orderby      = seq(1:length(precursors)),
-                       metric       = rep("Peak Assymetry", length(precursors))
-                      )
-  dat2.pa = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Peak Assymetry",type = 2),
-                       group        = rep("moving \n range",length(precursors)),
-                       orderby      = seq(1:length(precursors)),
-                       metric       = rep("Peak Assymetry", length(precursors))
-                      )
-  
-  
-  dat1.fwhm = data.frame(peptides     = precursors,
-                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "FWHM",type = 1),
-                         group        = rep("individual \n value",length(precursors)),
-                         orderby      = seq(1:length(precursors)),
-                         metric       = rep("FWHM", length(precursors))
-                         )
-  dat2.fwhm = data.frame(peptides     = precursors,
-                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "FWHM",type = 2),
-                         group        = rep("moving \n range",length(precursors)),
-                         orderby      = seq(1:length(precursors)),
-                         metric       = rep("FWHM", length(precursors))
-                        )
- 
-  
-  dat1.ta = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Total Area",type = 1),
-                       group        = rep("individual \n value",length(precursors)),
-                       orderby      = seq(1:length(precursors)),
-                       metric       = rep("Total Area", length(precursors))
-                      )
-  dat2.ta = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Total Area",type = 2),
-                       group        = rep("moving \n range",length(precursors)),
-                       orderby      = seq(1:length(precursors)),
-                       metric       = rep("Total Area", length(precursors))
-                      )
-  
-  dat <- rbind(dat1.ret,dat2.ret,dat1.pa,dat2.pa,dat1.fwhm,dat2.fwhm,dat1.ta,dat2.ta)
-  
-  ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group)) +
-    coord_polar() +
-    geom_point() +
-    facet_wrap(~metric,nrow = 1) +
-    geom_path(linejoin = "mitre", lineend = "butt") +
-    labs(title = "Radar plot \n XmR Chart") +
-    xlab("") +
-    ylab("Number of Out of ranged QC numbers")
-  
- 
-  
-}
 #########################################################################################################################
-#  CUSUM.summary.plot <- function(prodata, L, U) {
-#   h <- 5
-#   
-# 
-# 
-# }
-#################################################################################################################
-CUSUM.Radar.Plot <- function() {
+ CUSUM.summary.plot <- function(prodata, L, U) {
+  h <- 5
   
-}
+
+ }
 #################################################################################################################
+ XmR.Radar.Plot <- function(prodata,L,U) {
+
+   dat <- XmR.Radar.Plot.prepare(prodata,L,U) 
+   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group)) +
+     coord_polar() +
+     geom_point() +
+     facet_wrap(~metric,nrow = 1) +
+     geom_path(linejoin = "mitre", lineend = "butt") +
+     labs(title = "Radar plot \n XmR Chart") +
+     xlab("") +
+     ylab("Number of Out of ranged QC numbers")
+ }
+#################################################################################################################
+ CUSUM.Radar.Plot <- function(prodata,L,U) {
+   dat <- CUSUM.Radar.Plot.prepare(prodata,L,U)
+   
+   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group)) +
+     scale_color_manual(values=c("dodgerblue4", "darkolivegreen4")) +
+     coord_polar() +
+     geom_point() +
+     facet_wrap(~metric,nrow = 1) +
+     geom_path(linejoin = "mitre", lineend = "butt") +
+     labs(title = "Radar plot \n CUSUM Chart") +
+     xlab("") +
+     ylab("Number of Out of ranged QC numbers")
+ }
+ 
+
 #################################################################################################################
 #################################################################################################################
 
