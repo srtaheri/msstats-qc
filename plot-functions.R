@@ -227,10 +227,12 @@ XmR.Summary.plot <- function(prodata,L,U) {
   
   ggplot(pdat, aes(dens, loc, fill = m, group = interaction(m, x))) +
      geom_polygon() +
-    scale_x_continuous(breaks = 0:3, labels = c('Retention Time', 'Peak Assymetry','FWHM','Total Area')) +
-    #ylab('QCno') + xlab('Retention Time') +
+    scale_x_continuous(breaks = 0:3, labels = c('Percentage of Signals', 'Peak Assymetry','FWHM','Total Area')) +
+   ylab('QCno') + #xlab('Retention Time') +
     theme_minimal() +
     theme(axis.title.x = element_blank()) +
+   geom_vline(xintercept=seq(-0.5, 0.5, by=0.125))+
+    annotate("text",x=seq(-0.5, 0.5, by=0.125),y=-25,label=c("100%","","50%","","0%","","50%","","100%"))+
     #ggtitle("Percentage of peptides with signal \n XmR Chart for Retention Time") 
     labs(title = "Percentage of peptides with signal \n XmR Chart \n (Retention Time)")
     
