@@ -253,7 +253,7 @@ XmR.Summary.plot <- function(prodata,L,U) {
      geom_path(linejoin = "mitre", lineend = "butt") +
      labs(title = "Radar plot \n XmR Chart") +
      xlab("") +
-     ylab("Number of Out of ranged QC numbers")
+     ylab("Number of Signals")
  }
 #################################################################################################################
  CUSUM.Radar.Plot <- function(prodata,L,U) {
@@ -267,7 +267,7 @@ XmR.Summary.plot <- function(prodata,L,U) {
      geom_path(linejoin = "mitre", lineend = "butt") +
      labs(title = "Radar plot \n CUSUM Chart") +
      xlab("") +
-     ylab("Number of Out of ranged QC numbers")
+     ylab("Number of Signals")
  }
  
 
