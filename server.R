@@ -196,7 +196,8 @@ shinyServer(function(input,output,session) {
       need(!is.null(prodata), "Please upload your data")
     )
     #CUSUM.summary.plot(prodata, input$L, input$U,type = 1)
-    XmR.Summary.plot(prodata,input$L,input$U)
+    #XmR.Summary.plot(prodata,input$L,input$U)
+    CUSUM.Summary.plot(prodata, input$L, input$U)
 
   })
   

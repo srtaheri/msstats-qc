@@ -25,7 +25,7 @@ CUSUM.data.prepare <- function(prodata, precursor.level, z, L, U, type) {
 
   QCno = 1:length(z)
   plot.data = 
-    data.frame(QCno
+    data.frame(QCno = QCno
                ,CUSUM.poz = Cpoz
                ,CUSUM.neg = -Cneg 
                ,Annotations=prodata_grouped_by_precursor$Annotations
@@ -88,19 +88,54 @@ XmR.data.prepare <- function(prodata, z, j,L,U, type) {
   plot.data=data.frame(QCno,z,t,UCL,LCL)
   return(plot.data)
 }
-
 ############################################################################################
-Compute.QCno.OutOfRange.XmR <- function(prodata,L,U, metric, type) {
+CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
+  h <- 5
+
+  QCno <- 1:nrow(prodata)
+  y.poz <- rep(0,nrow(prodata))
+  y.neg <- rep(0,nrow(prodata))
+  counter <- rep(0,nrow(prodata))
+
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
-  QCno.out.range <- c()
-  
+
   for(j in 1:length(precursors)) {
     z <- prepare_column(prodata, j, L, U, metric = metric, normalization = T)
-    plot.data <- XmR.data.prepare(prodata, z, j,L,U, type)
-    QCno.out.range <- c(QCno.out.range,plot.data[plot.data$t >= plot.data$UCL | plot.data$t <= plot.data$LCL, ]$QCno)
+    counter[1:length(z)] <- counter[1:length(z)]+1
+    plot.data <- CUSUM.data.prepare(prodata, precursors[j], z, L, U, type)
+
+    sub.poz <- plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]
+    sub.neg <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
+
+    y.poz[sub.poz$QCno] <- y.poz[sub.poz$QCno] + 1
+    y.neg[sub.neg$QCno] <- y.neg[sub.neg$QCno] + 1
   }
-  return(QCno.out.range)
+  max_QCno <- max(which(counter!=0))
+  #print(y.poz[1:max_QCno]/counter[1:max_QCno])
+  plot.data <- data.frame(QCno = QCno[1:max_QCno],
+                          pr.y.poz = y.poz[1:max_QCno]/counter[1:max_QCno],
+                          pr.y.neg = y.neg[1:max_QCno]/counter[max_QCno]
+                          )
+  # dat1.ret = data.frame(peptides = precursors,
+  #                       OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric= "Retention Time",type = 1),
+  #                       group         = rep("individual \n value",length(precursors)),
+  #                       orderby       = seq(1:length(precursors)),
+  #                       metric        = rep("Retention Time - CUSUM", length(precursors)),
+  #                       tool          = rep("CUSUM",length(precursors)) 
+  return(plot.data)
 }
+############################################################################################
+# Compute.QCno.OutOfRange.XmR <- function(prodata,L,U, metric, type) {
+#   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+#   QCno.out.range <- c()
+#   
+#   for(j in 1:length(precursors)) {
+#     z <- prepare_column(prodata, j, L, U, metric = metric, normalization = T)
+#     plot.data <- XmR.data.prepare(prodata, z, j,L,U, type)
+#     QCno.out.range <- c(QCno.out.range,plot.data[plot.data$t >= plot.data$UCL | plot.data$t <= plot.data$LCL, ]$QCno)
+#   }
+#   return(QCno.out.range)
+# }
 ############################################################################################
 Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type) {
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
@@ -127,11 +162,12 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type) {
     # QCno.out.range <- c(QCno.out.range,plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno)
     # else
     # QCno.out.range <- c(QCno.out.range,plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno)
-    QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno)) +
-                      c(QCno.out.range,length(plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno))
+    QCno.out.range1 <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno))
+    QCno.out.range2 <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno))
+    QCno.out.range <- c(QCno.out.range1,QCno.out.range2)
     
   }
-  print(QCno.out.range)
+  #print(QCno.out.range)
   return(QCno.out.range)
 }
 #########################################################################################################
@@ -211,6 +247,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
   
+
   dat1.ret = data.frame(peptides = precursors,
                         OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric= "Retention Time",type = 1),
                         group         = rep("individual \n value",length(precursors)),
