@@ -193,53 +193,6 @@ XmR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
     )
 
 }
-
-#################################################################################################################
-# XmR.Summary.plot <- function(prodata,L,U) {
-#   
-#   A1 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Retention Time", type = 1)
-#   A2 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Retention Time", type = 2)
-#   B1 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Peak Assymetry", type = 1)
-#   B2 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Peak Assymetry", type = 2)
-#   C1 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "FWHM", type = 1)
-#   C2 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "FWHM", type = 2)
-#   D1 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Total Area", type = 1)
-#   D2 <- Compute.QCno.OutOfRange.XmR(prodata,L,U, metric = "Total Area", type = 2)
-#   my_data <- data.frame(y = c(A1,A2,B1,B2,C1,C2,D1,D2),
-#                         x = c(rep("Retention Time",length(A1)+length(A2)), 
-#                               rep("Peak Assymetry",length(B1)+length(B2)), 
-#                               rep("FWHM",length(C1)+length(C2)), 
-#                               rep("Total Area",length(D1)+length(D2))),
-#                         m = c(rep("individual value",length(A1)), rep("moving range",length(A2)),
-#                               rep("individual value",length(B1)), rep("moving range",length(B2)),
-#                               rep("individual value",length(C1)), rep("moving range",length(C2)),
-#                               rep("individual value",length(D1)), rep("moving range",length(D2))))
-#  
-#   pdat <- my_data %>%
-#     group_by(x, m) %>%
-#     do(data.frame(loc = density(.$y)$x,
-#                   dens = density(.$y)$y))
-#   print(A1)
-#   pdat$dens <- pdat$dens * 7
-#   pdat$dens <- ifelse(pdat$m == 'individual value', pdat$dens * -1, pdat$dens)
-#   pdat$dens <- ifelse(pdat$x == 'Peak Assymetry', pdat$dens + 1, pdat$dens)
-#   pdat$dens <- ifelse(pdat$x == 'FWHM', pdat$dens + 2, pdat$dens)
-#   pdat$dens <- ifelse(pdat$x == 'Total Area', pdat$dens + 3, pdat$dens)
-#   
-#   
-#   ggplot(pdat, aes(dens, loc, fill = m, group = interaction(m, x))) +
-#      geom_polygon() +
-#     scale_x_continuous(breaks = 0:3, labels = c('Percentage of Signals', 'Peak Assymetry','FWHM','Total Area')) +
-#    ylab('QCno') + #xlab('Retention Time') +
-#     theme_minimal() +
-#     theme(axis.title.x = element_blank()) +
-#    geom_vline(xintercept=seq(-0.5, 0.5, by=0.125))+
-#     annotate("text",x=seq(-0.5, 0.5, by=0.125),y=-25,label=c("100%","","50%","","0%","","50%","","100%"))+
-#     #ggtitle("Percentage of peptides with signal \n XmR Chart for Retention Time") 
-#     labs(title = "Percentage of peptides with signal \n XmR Chart \n (Retention Time)")
-#     
-#     
-# }
 #################################################################################################################
 XmR.Summary.plot <- function(prodata,L,U) {
   data.rt.1   <- XmR.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 1) %>% 
@@ -272,7 +225,7 @@ XmR.Summary.plot <- function(prodata,L,U) {
   
   
   dat <- rbind(data.rt.1,data.rt.2,data.pa.1,data.pa.2,data.fwhm.1,data.fwhm.2,data.ta.1,data.ta.2)
-  
+  theme_set(theme_gray(base_size = 10))
   gg <- ggplot(dat)
   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
   gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
@@ -287,47 +240,49 @@ XmR.Summary.plot <- function(prodata,L,U) {
 ###############################################################################################
 CUSUM.Summary.plot <- function(prodata, L, U) {
   h <- 5
-  data.rt.1   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 1) %>% 
-    mutate(group = "Individual value") %>% mutate(metric = "Retention Time")
-  data.rt.2   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 2)%>% 
-    mutate(group = "Moving Range") %>% mutate(metric = "Retention Time")
-  data.rt.2$pr.y.poz <- -(data.rt.2$pr.y.poz)
-  data.rt.2$pr.y.neg <- -(data.rt.2$pr.y.neg)
+  data.rt.1   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 1)
+  print(data.rt.1)
+  data.rt.2   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 2)
+  data.rt.2$pr.y <- -(data.rt.2$pr.y)
   
   
-  data.pa.1   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 1)%>% 
-    mutate(group = "Individual value") %>% mutate(metric = "Peak Assymetry")
-  data.pa.2   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 2)%>% 
-    mutate(group = "Moving Range") %>% mutate(metric = "Peak Assymetry")
-  data.pa.2$pr.y.poz <- -(data.pa.2$pr.y.poz)
-  data.pa.2$pr.y.neg <- -(data.pa.2$pr.y.neg)
+  
+  data.pa.1   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 1)
+  data.pa.2   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 2)
+  data.pa.2$pr.y <- -(data.pa.2$pr.y)
+ 
   
   
-  data.fwhm.1 <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type = 1)%>% 
-    mutate(group = "Individual value") %>% mutate(metric = "FWHM")
-  data.fwhm.2 <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type = 2)%>% 
-    mutate(group = "Moving Range") %>% mutate(metric = "FWHM")
-  data.fwhm.2$pr.y.poz <- -(data.fwhm.2$pr.y.poz)
-  data.fwhm.2$pr.y.neg <- -(data.fwhm.2$pr.y.neg)
+  data.fwhm.1 <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type = 1)
+  data.fwhm.2 <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type = 2)
+  data.fwhm.2$pr.y <- -(data.fwhm.2$pr.y)
   
   
-  data.ta.1   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 1)%>% 
-    mutate(group = "Individual value") %>% mutate(metric = "Total Area")
-  data.ta.2   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 2)%>% 
-    mutate(group = "Moving Range") %>% mutate(metric = "Total Area")
-  data.ta.2$pr.y.poz <- -(data.ta.2$pr.y.poz)
-  data.ta.2$pr.y.neg <- -(data.ta.2$pr.y.neg)
   
-  dat <- rbind(data.rt.1,data.rt.2,data.pa.1,data.pa.2,data.fwhm.1,data.fwhm.2,data.ta.1,data.ta.2)
-  gg <- ggplot(dat)
-  gg <- gg + geom_hline(yintercept=0, alpha=0.5)
-  gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y.poz,colour = group, group = group))
-  gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y.poz, colour = group, group = group), size=0.3)
-  gg <- gg + facet_wrap(~metric,nrow = 1)
-  gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
-  gg <- gg + labs(title = "CUSUM Chart", x = "QC Numbers", y = "Percentage of peptides with signal")
+  data.ta.1   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 1)
+  data.ta.2   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 2)
+  data.ta.2$pr.y <- -(data.ta.2$pr.y)
   
-  gg
+  
+   dat <- rbind(data.rt.1,data.rt.2,data.pa.1,data.pa.2,data.fwhm.1,data.fwhm.2,data.ta.1,data.ta.2)
+   
+   gg <- ggplot(dat)
+   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
+   gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
+   gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
+   gg <- gg + facet_wrap(~metric,nrow = 1)
+   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),
+                                 breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
+   gg <- gg + ggtitle("CUSUM Chart")
+   
+   gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
+   gg <- gg + theme(plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
+              axis.text.x=element_text(size=15, vjust=0.5),
+              axis.text.y=element_text(size=15, hjust=0.5),
+              text = element_text(size=15)
+              )
+
+   gg
   
 }
 #########################################################################################################################
@@ -336,7 +291,7 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
  XmR.Radar.Plot <- function(prodata,L,U) {
 
    dat <- XmR.Radar.Plot.prepare(prodata,L,U) 
-   
+   theme_set(theme_gray(base_size = 10))
    ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group)) +
      coord_polar() +
      geom_point() +
@@ -349,9 +304,8 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
 #################################################################################################################
  CUSUM.Radar.Plot <- function(prodata,L,U) {
    dat <- CUSUM.Radar.Plot.prepare(prodata,L,U)
-   #print(head(dat))
-   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group)) +
-     scale_color_manual(values=c("dodgerblue4", "darkolivegreen4")) +
+   theme_set(theme_gray(base_size = 10))
+    ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group)) +
      coord_polar() +
      geom_point() +
      facet_wrap(~metric,nrow = 1) +

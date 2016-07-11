@@ -65,7 +65,7 @@ CP.data.prepare <- function(prodata,j,z, type) {
   return(data.frame(QCno,Et,tho.hat)) # dataframe for change point plot
 }
 ###################################################################################################
-XmR.data.prepare <- function(prodata,j, z, L,U, type) {
+XmR.data.prepare <- function(prodata, z, L,U, type) {
   t <- numeric(length(z)-1) # z in plot 1, MR in plot 2
 
   for(i in 2:length(z)) {
@@ -111,11 +111,21 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
     y.neg[sub.neg$QCno] <- y.neg[sub.neg$QCno] + 1
   }
   max_QCno <- max(which(counter!=0))
-  
-  plot.data <- data.frame(QCno = QCno[1:max_QCno],
-                          pr.y.poz = y.poz[1:max_QCno]/counter[1:max_QCno],
-                          pr.y.neg = y.neg[1:max_QCno]/counter[max_QCno]
-                          )
+  pr.y.poz = y.poz[1:max_QCno]/counter[1:max_QCno]
+  pr.y.neg = y.poz[1:max_QCno]/counter[1:max_QCno]
+  # plot.data <- data.frame(QCno = QCno[1:max_QCno],
+  #                         pr.y.poz = y.poz[1:max_QCno]/counter[1:max_QCno],
+  #                         pr.y.neg = y.poz[1:max_QCno]/counter[1:max_QCno]
+  #  )
+  plot.data <- data.frame(QCno = rep(1:max_QCno,2),
+                          pr.y = c(pr.y.poz, pr.y.neg),
+                          group = ifelse(rep(type==1,2*max_QCno), 
+                                         c(rep("IndividualValue+",max_QCno),
+                                           rep("IndividualValue-",max_QCno)),
+                                         c(rep("MovingRange+",max_QCno),
+                                           rep("MovingRange-",max_QCno))),
+                          metric = rep(metric,max_QCno*2)
+     )
   return(plot.data)
 }
 ############################################################################################
@@ -129,7 +139,7 @@ XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
   for(j in 1:length(precursors)) {
     z <- prepare_column(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
     counter[1:length(z)] <- counter[1:length(z)]+1
-    plot.data <- XmR.data.prepare(prodata, j = precursors[j], z = z, L = L, U = U, type)
+    plot.data <- XmR.data.prepare(prodata, z = z, L = L, U = U, type)
     
     sub <- plot.data[plot.data$t >= plot.data$UCL | plot.data$t <= plot.data$LCL, ]
     
@@ -149,13 +159,13 @@ Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type) {
   
   for(j in 1:length(precursors)) {
     z <- prepare_column(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
-    plot.data <- XmR.data.prepare(prodata, z = z, j = j, L = L, U = U, type = type)
+    plot.data <- XmR.data.prepare(prodata, z = z, L = L, U = U, type = type)
     QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$t >= plot.data$UCL | plot.data$t <= plot.data$LCL, ]$QCno))
   }
   return(QCno.out.range)
 }
 #############################################################################################
-Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type) {
+Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.type) {
   h <- 5
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
   QCno.out.range <- c()
@@ -164,13 +174,13 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type) {
     z <- prepare_column(prodata, j, L, U, metric = metric, normalization = T)
     precursor.level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
     plot.data <- CUSUM.data.prepare(prodata, precursor.level, z, L, U, type)
-    # if(CUSUM.type == "poz")    # I shoud add " , CUSUM.type " to the function
-    # QCno.out.range <- c(QCno.out.range,plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno)
-    # else
-    # QCno.out.range <- c(QCno.out.range,plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno)
-    QCno.out.range1 <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno))
-    QCno.out.range2 <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno))
-    QCno.out.range <- c(QCno.out.range1,QCno.out.range2)
+    if(CUSUM.type == "poz")
+      QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno))
+    else
+    QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno))
+    # QCno.out.range1 <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno))
+    # QCno.out.range2 <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno))
+    # QCno.out.range <- c(QCno.out.range1,QCno.out.range2)
     
   }
   #print(QCno.out.range)
@@ -187,6 +197,7 @@ XmR.Radar.Plot.prepare <- function(prodata,L,U) {
                         metric        = rep("Retention Time - XmR", length(precursors)),
                         tool          = rep("XmR",length(precursors)) 
   )
+  
   dat2.ret = data.frame(peptides     = precursors,
                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 2),
                         group        = rep("moving \n range",length(precursors)),
@@ -252,71 +263,145 @@ XmR.Radar.Plot.prepare <- function(prodata,L,U) {
 CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
-  
 
-  dat1.ret = data.frame(peptides = precursors,
-                        OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric= "Retention Time",type = 1),
-                        group         = rep("individual \n value",length(precursors)),
+  dat1.ret.poz = data.frame(peptides = precursors,
+                        OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric= "Retention Time",
+                                                                             type = 1, CUSUM.type = "poz"),
+                        group         = rep("individualValueCUSUM+",length(precursors)),
                         orderby       = seq(1:length(precursors)),
                         metric        = rep("Retention Time - CUSUM", length(precursors)),
                         tool          = rep("CUSUM",length(precursors)) 
   )
-  dat2.ret = data.frame(peptides     = precursors,
-                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Retention Time",type = 2),
-                        group        = rep("moving \n range",length(precursors)),
+  
+  dat1.ret.neg = data.frame(peptides = precursors,
+                            OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric= "Retention Time",
+                                                                                 type = 1, CUSUM.type = "neg"),
+                            group         = rep("individualValueCUSUM-",length(precursors)),
+                            orderby       = seq(1:length(precursors)),
+                            metric        = rep("Retention Time - CUSUM", length(precursors)),
+                            tool          = rep("CUSUM",length(precursors)) 
+  )
+  
+  dat2.ret.poz = data.frame(peptides     = precursors,
+                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Retention Time",
+                                                                            type = 2, CUSUM.type = "poz"),
+                        group        = rep("movingRangeCUSUM+",length(precursors)),
                         orderby      = seq(1:length(precursors)),
                         metric       = rep("Retention Time - CUSUM", length(precursors)),
                         tool         = rep("CUSUM",length(precursors))
   )
+  dat2.ret.neg = data.frame(peptides     = precursors,
+                            OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Retention Time",
+                                                                                type = 2, CUSUM.type = "neg"),
+                            group        = rep("movingRangeCUSUM-",length(precursors)),
+                            orderby      = seq(1:length(precursors)),
+                            metric       = rep("Retention Time - CUSUM", length(precursors)),
+                            tool         = rep("CUSUM",length(precursors))
+  )
   
-  
-  dat1.pa = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",type = 1),
-                       group        = rep("individual \n value",length(precursors)),
+  dat1.pa.poz = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",
+                                                                           type = 1, CUSUM.type = "poz"),
+                       group        = rep("individualValueCUSUM+",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
+                       tool         = rep("CUSUM",length(precursors))
+                       
+  )
+  dat1.pa.neg = data.frame(peptides     = precursors,
+                           OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",
+                                                                               type = 1, CUSUM.type = "neg"),
+                           group        = rep("individualValueCUSUM-",length(precursors)),
+                           orderby      = seq(1:length(precursors)),
+                           metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
+                           tool         = rep("CUSUM",length(precursors))
+  )
+  dat2.pa.poz = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",
+                                                                           type = 2, CUSUM.type = "poz"),
+                       group        = rep("movingRangeCUSUM+",length(precursors)),
                        orderby      = seq(1:length(precursors)),
                        metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
                        tool         = rep("CUSUM",length(precursors))
   )
-  dat2.pa = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",type = 2),
-                       group        = rep("moving \n range",length(precursors)),
-                       orderby      = seq(1:length(precursors)),
-                       metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
-                       tool         = rep("CUSUM",length(precursors))
+  dat2.pa.neg = data.frame(peptides     = precursors,
+                           OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",
+                                                                               type = 2, CUSUM.type = "neg"),
+                           group        = rep("movingRangeCUSUM-",length(precursors)),
+                           orderby      = seq(1:length(precursors)),
+                           metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
+                           tool         = rep("CUSUM",length(precursors))
   )
   
-  
-  dat1.fwhm = data.frame(peptides     = precursors,
-                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",type = 1),
-                         group        = rep("individual \n value",length(precursors)),
+  dat1.fwhm.poz = data.frame(peptides     = precursors,
+                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",
+                                                                             type = 1, CUSUM.type = "poz"),
+                         group        = rep("individualValueCUSUM+",length(precursors)),
                          orderby      = seq(1:length(precursors)),
                          metric       = rep("FWHM - CUSUM", length(precursors)),
                          tool         = rep("CUSUM",length(precursors))
   )
-  dat2.fwhm = data.frame(peptides     = precursors,
-                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",type = 2),
-                         group        = rep("moving \n range",length(precursors)),
+  dat1.fwhm.neg = data.frame(peptides     = precursors,
+                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",
+                                                                             type = 1, CUSUM.type = "neg"),
+                         group        = rep("individualValueCUSUM-",length(precursors)),
+                         orderby      = seq(1:length(precursors)),
+                         metric       = rep("FWHM - CUSUM", length(precursors)),
+                         tool         = rep("CUSUM",length(precursors))
+  )
+  dat2.fwhm.poz = data.frame(peptides     = precursors,
+                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",
+                                                                             type = 2, CUSUM.type = "poz"),
+                         group        = rep("movingRangeCUSUM+",length(precursors)),
+                         orderby      = seq(1:length(precursors)),
+                         metric       = rep("FWHM - CUSUM", length(precursors)),
+                         tool         = rep("CUSUM",length(precursors))
+  )
+  dat2.fwhm.neg = data.frame(peptides     = precursors,
+                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",
+                                                                             type = 2, CUSUM.type = "neg"),
+                         group        = rep("movingRangeCUSUM-",length(precursors)),
                          orderby      = seq(1:length(precursors)),
                          metric       = rep("FWHM - CUSUM", length(precursors)),
                          tool         = rep("CUSUM",length(precursors))
   )
   
-  
-  dat1.ta = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",type = 1),
-                       group        = rep("individual \n value",length(precursors)),
+  dat1.ta.poz = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",
+                                                                           type = 1, CUSUM.type = "poz"),
+                       group        = rep("individualValueCUSUM+",length(precursors)),
                        orderby      = seq(1:length(precursors)),
                        metric       = rep("Total Area - CUSUM", length(precursors)),
                        tool         = rep("CUSUM",length(precursors))
   )
-  dat2.ta = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",type = 2),
-                       group        = rep("moving \n range",length(precursors)),
+  dat1.ta.neg = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",
+                                                                           type = 1, CUSUM.type = "neg"),
+                       group        = rep("individualValueCUSUM-",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Total Area - CUSUM", length(precursors)),
+                       tool         = rep("CUSUM",length(precursors))
+  )
+  dat2.ta.poz = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",
+                                                                           type = 2, CUSUM.type = "poz"),
+                       group        = rep("movingRangeCUSUM+",length(precursors)),
+                       orderby      = seq(1:length(precursors)),
+                       metric       = rep("Total Area - CUSUM", length(precursors)),
+                       tool         = rep("CUSUM",length(precursors))
+  )
+  dat2.ta.neg = data.frame(peptides     = precursors,
+                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",
+                                                                           type = 2, CUSUM.type = "neg"),
+                       group        = rep("movingRangeCUSUM-",length(precursors)),
                        orderby      = seq(1:length(precursors)),
                        metric       = rep("Total Area - CUSUM", length(precursors)),
                        tool         = rep("CUSUM",length(precursors))
   )
   
-  rbind(dat1.ret,dat2.ret,dat1.pa,dat2.pa,dat1.fwhm,dat2.fwhm,dat1.ta,dat2.ta)
+  rbind(dat1.ret.poz,dat1.ret.neg,dat2.ret.poz,dat2.ret.neg,
+        dat1.pa.poz,dat1.pa.neg,dat2.pa.poz,dat2.pa.neg,
+        dat1.fwhm.poz,dat1.fwhm.neg,dat2.fwhm.poz,dat2.fwhm.neg,
+        dat1.ta.poz,dat1.ta.neg,dat2.ta.poz,dat2.ta.neg)
   
 }
