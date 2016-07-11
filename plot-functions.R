@@ -280,7 +280,7 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
   gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y.poz, colour = group, group = group), size=0.3)
   gg <- gg + facet_wrap(~metric,nrow = 1)
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
-  gg <- gg + labs(title = "", x = "QC Numbers", y = "Percentage of peptides with signal")
+  gg <- gg + labs(title = "CUSUM Chart", x = "QC Numbers", y = "Percentage of peptides with signal")
   
   gg
   

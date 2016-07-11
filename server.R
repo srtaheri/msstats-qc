@@ -189,7 +189,7 @@ shinyServer(function(input,output,session) {
     metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor, normalization = TRUE)
   }, height = 700)
   ######################################################### plot_summary in Summary tab ########################################
-  output$plot_summary <- renderPlot({
+  output$plot_summary <- renderPlotly({
     
     prodata <- data$df
     validate(
@@ -197,7 +197,7 @@ shinyServer(function(input,output,session) {
     )
     #CUSUM.summary.plot(prodata, input$L, input$U,type = 1)
     #XmR.Summary.plot(prodata,input$L,input$U)
-    CUSUM.Summary.plot(prodata, input$L, input$U)
+    ggplotly(CUSUM.Summary.plot(prodata, input$L, input$U))
 
   })
   
