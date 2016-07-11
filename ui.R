@@ -114,11 +114,8 @@ shinyUI(fluidPage(
               
               tabPanel("Metric Summary",
                        tabsetPanel(
-                         tabPanel("Plot Summary1",
-                                  plotOutput("plot_summary1")
-                         ),
                            tabPanel("Plot Summary",
-                                    plotlyOutput("plot_summary")
+                                    plotOutput("plot_summary")
                            ),
                          tabPanel("Boxplot",
                                   plotlyOutput("box_plot", height = 2000)

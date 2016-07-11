@@ -34,7 +34,7 @@ CUSUM.data.prepare <- function(prodata, precursor.level, z, L, U, type) {
   return(plot.data)
 }
 ###################################################################################################
-CP.data.prepare <- function(prodata,z,j, type) {
+CP.data.prepare <- function(prodata,j,z, type) {
   
   Et <-  numeric(length(z)-1) # this is Ct in type 1, and Dt in type 2.
   SS<- numeric(length(z)-1)
@@ -65,7 +65,7 @@ CP.data.prepare <- function(prodata,z,j, type) {
   return(data.frame(QCno,Et,tho.hat)) # dataframe for change point plot
 }
 ###################################################################################################
-XmR.data.prepare <- function(prodata, z, j,L,U, type) {
+XmR.data.prepare <- function(prodata,j, z, L,U, type) {
   t <- numeric(length(z)-1) # z in plot 1, MR in plot 2
 
   for(i in 2:length(z)) {
@@ -111,39 +111,45 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
     y.neg[sub.neg$QCno] <- y.neg[sub.neg$QCno] + 1
   }
   max_QCno <- max(which(counter!=0))
-  #print(y.poz[1:max_QCno]/counter[1:max_QCno])
+  
   plot.data <- data.frame(QCno = QCno[1:max_QCno],
                           pr.y.poz = y.poz[1:max_QCno]/counter[1:max_QCno],
                           pr.y.neg = y.neg[1:max_QCno]/counter[max_QCno]
                           )
-  # dat1.ret = data.frame(peptides = precursors,
-  #                       OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric= "Retention Time",type = 1),
-  #                       group         = rep("individual \n value",length(precursors)),
-  #                       orderby       = seq(1:length(precursors)),
-  #                       metric        = rep("Retention Time - CUSUM", length(precursors)),
-  #                       tool          = rep("CUSUM",length(precursors)) 
   return(plot.data)
 }
 ############################################################################################
-# Compute.QCno.OutOfRange.XmR <- function(prodata,L,U, metric, type) {
-#   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
-#   QCno.out.range <- c()
-#   
-#   for(j in 1:length(precursors)) {
-#     z <- prepare_column(prodata, j, L, U, metric = metric, normalization = T)
-#     plot.data <- XmR.data.prepare(prodata, z, j,L,U, type)
-#     QCno.out.range <- c(QCno.out.range,plot.data[plot.data$t >= plot.data$UCL | plot.data$t <= plot.data$LCL, ]$QCno)
-#   }
-#   return(QCno.out.range)
-# }
+XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
+  QCno    <- 1:nrow(prodata)
+  y       <- rep(0,nrow(prodata))
+  counter <- rep(0,nrow(prodata))
+  
+  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  
+  for(j in 1:length(precursors)) {
+    z <- prepare_column(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
+    counter[1:length(z)] <- counter[1:length(z)]+1
+    plot.data <- XmR.data.prepare(prodata, j = precursors[j], z = z, L = L, U = U, type)
+    
+    sub <- plot.data[plot.data$t >= plot.data$UCL | plot.data$t <= plot.data$LCL, ]
+    
+    y[sub$QCno] <- y[sub$QCno] + 1
+  }
+  max_QCno <- max(which(counter!=0))
+  
+  plot.data <- data.frame(QCno = QCno[1:max_QCno],
+                          pr.y = y[1:max_QCno]/counter[1:max_QCno]
+  )
+  return(plot.data)
+}
 ############################################################################################
 Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type) {
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
   QCno.out.range <- c()
   
   for(j in 1:length(precursors)) {
-    z <- prepare_column(prodata, j, L, U, metric = metric, normalization = T)
-    plot.data <- XmR.data.prepare(prodata, z, j,L,U, type)
+    z <- prepare_column(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
+    plot.data <- XmR.data.prepare(prodata, z = z, j = j, L = L, U = U, type = type)
     QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$t >= plot.data$UCL | plot.data$t <= plot.data$LCL, ]$QCno))
   }
   return(QCno.out.range)

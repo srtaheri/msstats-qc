@@ -4,6 +4,7 @@ library(shinyjs)
 library(plotly)
 library(RecordLinkage)
 library(hash)
+library(gridExtra)
 
 source("plot-functions.R")
 source("data-validation.R")
@@ -189,27 +190,19 @@ shinyServer(function(input,output,session) {
     metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor, normalization = TRUE)
   }, height = 700)
   ######################################################### plot_summary in Summary tab ########################################
-  output$plot_summary <- renderPlotly({
+  output$plot_summary <- renderPlot({
     
     prodata <- data$df
     validate(
       need(!is.null(prodata), "Please upload your data")
     )
-    #CUSUM.summary.plot(prodata, input$L, input$U,type = 1)
-    #XmR.Summary.plot(prodata,input$L,input$U)
-    ggplotly(CUSUM.Summary.plot(prodata, input$L, input$U))
-
-  })
+    p1 <- CUSUM.Summary.plot(prodata, input$L, input$U)
+    p2 <- CUSUM.Radar.Plot(prodata,input$L,input$U)
+    p3 <- XmR.Summary.plot(prodata, input$L, input$U)
+    p4 <- XmR.Radar.Plot(prodata,input$L,input$U)
+    grid.arrange(p1,p2,p3,p4, ncol = 1)
+  }, height = 1500)
   
-  output$plot_summary1 <- renderPlot({
-    prodata <- data$df
-    validate(
-      need(!is.null(prodata), "Please upload your data")
-    )
-    multiplot(XmR.Radar.Plot(prodata,input$L,input$U),CUSUM.Radar.Plot(prodata,input$L,input$U))
-    
-
-  }, width = 1200, height = 1000)
   ###########################################################################################################################
   ###########################################################################################################################
   ########################################################## "help" tab ################################
