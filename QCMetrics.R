@@ -112,7 +112,7 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
   }
   max_QCno <- max(which(counter!=0))
   pr.y.poz = y.poz[1:max_QCno]/counter[1:max_QCno]
-  pr.y.neg = y.poz[1:max_QCno]/counter[1:max_QCno]
+  pr.y.neg = y.neg[1:max_QCno]/counter[1:max_QCno]
   # plot.data <- data.frame(QCno = QCno[1:max_QCno],
   #                         pr.y.poz = y.poz[1:max_QCno]/counter[1:max_QCno],
   #                         pr.y.neg = y.poz[1:max_QCno]/counter[1:max_QCno]
