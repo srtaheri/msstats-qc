@@ -120,10 +120,10 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
   plot.data <- data.frame(QCno = rep(1:max_QCno,2),
                           pr.y = c(pr.y.poz, pr.y.neg),
                           group = ifelse(rep(type==1,2*max_QCno), 
-                                         c(rep("IndividualValue+",max_QCno),
-                                           rep("IndividualValue-",max_QCno)),
-                                         c(rep("MovingRange+",max_QCno),
-                                           rep("MovingRange-",max_QCno))),
+                                         c(rep("Individual Value CUSUM+",max_QCno),
+                                           rep("Individual Value CUSUM-",max_QCno)),
+                                         c(rep("Moving Range CUSUM+",max_QCno),
+                                           rep("Moving Range CUSUM-",max_QCno))),
                           metric = rep(metric,max_QCno*2)
      )
   return(plot.data)
@@ -267,7 +267,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat1.ret.poz = data.frame(peptides = precursors,
                         OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric= "Retention Time",
                                                                              type = 1, CUSUM.type = "poz"),
-                        group         = rep("individualValueCUSUM+",length(precursors)),
+                        group         = rep("Individual Value CUSUM+",length(precursors)),
                         orderby       = seq(1:length(precursors)),
                         metric        = rep("Retention Time - CUSUM", length(precursors)),
                         tool          = rep("CUSUM",length(precursors)) 
@@ -276,7 +276,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat1.ret.neg = data.frame(peptides = precursors,
                             OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric= "Retention Time",
                                                                                  type = 1, CUSUM.type = "neg"),
-                            group         = rep("individualValueCUSUM-",length(precursors)),
+                            group         = rep("Individual Value CUSUM-",length(precursors)),
                             orderby       = seq(1:length(precursors)),
                             metric        = rep("Retention Time - CUSUM", length(precursors)),
                             tool          = rep("CUSUM",length(precursors)) 
@@ -285,7 +285,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat2.ret.poz = data.frame(peptides     = precursors,
                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Retention Time",
                                                                             type = 2, CUSUM.type = "poz"),
-                        group        = rep("movingRangeCUSUM+",length(precursors)),
+                        group        = rep("Moving Range CUSUM+",length(precursors)),
                         orderby      = seq(1:length(precursors)),
                         metric       = rep("Retention Time - CUSUM", length(precursors)),
                         tool         = rep("CUSUM",length(precursors))
@@ -293,7 +293,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat2.ret.neg = data.frame(peptides     = precursors,
                             OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Retention Time",
                                                                                 type = 2, CUSUM.type = "neg"),
-                            group        = rep("movingRangeCUSUM-",length(precursors)),
+                            group        = rep("Moving Range CUSUM-",length(precursors)),
                             orderby      = seq(1:length(precursors)),
                             metric       = rep("Retention Time - CUSUM", length(precursors)),
                             tool         = rep("CUSUM",length(precursors))
@@ -302,7 +302,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat1.pa.poz = data.frame(peptides     = precursors,
                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",
                                                                            type = 1, CUSUM.type = "poz"),
-                       group        = rep("individualValueCUSUM+",length(precursors)),
+                       group        = rep("Individual Value CUSUM+",length(precursors)),
                        orderby      = seq(1:length(precursors)),
                        metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
                        tool         = rep("CUSUM",length(precursors))
@@ -311,7 +311,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat1.pa.neg = data.frame(peptides     = precursors,
                            OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",
                                                                                type = 1, CUSUM.type = "neg"),
-                           group        = rep("individualValueCUSUM-",length(precursors)),
+                           group        = rep("Individual Value CUSUM-",length(precursors)),
                            orderby      = seq(1:length(precursors)),
                            metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
                            tool         = rep("CUSUM",length(precursors))
@@ -319,7 +319,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat2.pa.poz = data.frame(peptides     = precursors,
                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",
                                                                            type = 2, CUSUM.type = "poz"),
-                       group        = rep("movingRangeCUSUM+",length(precursors)),
+                       group        = rep("Moving Range CUSUM+",length(precursors)),
                        orderby      = seq(1:length(precursors)),
                        metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
                        tool         = rep("CUSUM",length(precursors))
@@ -327,7 +327,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat2.pa.neg = data.frame(peptides     = precursors,
                            OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Peak Assymetry",
                                                                                type = 2, CUSUM.type = "neg"),
-                           group        = rep("movingRangeCUSUM-",length(precursors)),
+                           group        = rep("Moving Range CUSUM-",length(precursors)),
                            orderby      = seq(1:length(precursors)),
                            metric       = rep("Peak Assymetry - CUSUM", length(precursors)),
                            tool         = rep("CUSUM",length(precursors))
@@ -336,7 +336,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat1.fwhm.poz = data.frame(peptides     = precursors,
                          OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",
                                                                              type = 1, CUSUM.type = "poz"),
-                         group        = rep("individualValueCUSUM+",length(precursors)),
+                         group        = rep("Individual Value CUSUM+",length(precursors)),
                          orderby      = seq(1:length(precursors)),
                          metric       = rep("FWHM - CUSUM", length(precursors)),
                          tool         = rep("CUSUM",length(precursors))
@@ -344,7 +344,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat1.fwhm.neg = data.frame(peptides     = precursors,
                          OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",
                                                                              type = 1, CUSUM.type = "neg"),
-                         group        = rep("individualValueCUSUM-",length(precursors)),
+                         group        = rep("Individual Value CUSUM-",length(precursors)),
                          orderby      = seq(1:length(precursors)),
                          metric       = rep("FWHM - CUSUM", length(precursors)),
                          tool         = rep("CUSUM",length(precursors))
@@ -352,7 +352,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat2.fwhm.poz = data.frame(peptides     = precursors,
                          OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",
                                                                              type = 2, CUSUM.type = "poz"),
-                         group        = rep("movingRangeCUSUM+",length(precursors)),
+                         group        = rep("Moving Range CUSUM+",length(precursors)),
                          orderby      = seq(1:length(precursors)),
                          metric       = rep("FWHM - CUSUM", length(precursors)),
                          tool         = rep("CUSUM",length(precursors))
@@ -360,7 +360,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat2.fwhm.neg = data.frame(peptides     = precursors,
                          OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "FWHM",
                                                                              type = 2, CUSUM.type = "neg"),
-                         group        = rep("movingRangeCUSUM-",length(precursors)),
+                         group        = rep("Moving Range CUSUM-",length(precursors)),
                          orderby      = seq(1:length(precursors)),
                          metric       = rep("FWHM - CUSUM", length(precursors)),
                          tool         = rep("CUSUM",length(precursors))
@@ -369,7 +369,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat1.ta.poz = data.frame(peptides     = precursors,
                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",
                                                                            type = 1, CUSUM.type = "poz"),
-                       group        = rep("individualValueCUSUM+",length(precursors)),
+                       group        = rep("Individual Value CUSUM+",length(precursors)),
                        orderby      = seq(1:length(precursors)),
                        metric       = rep("Total Area - CUSUM", length(precursors)),
                        tool         = rep("CUSUM",length(precursors))
@@ -377,7 +377,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat1.ta.neg = data.frame(peptides     = precursors,
                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",
                                                                            type = 1, CUSUM.type = "neg"),
-                       group        = rep("individualValueCUSUM-",length(precursors)),
+                       group        = rep("Individual Value CUSUM-",length(precursors)),
                        orderby      = seq(1:length(precursors)),
                        metric       = rep("Total Area - CUSUM", length(precursors)),
                        tool         = rep("CUSUM",length(precursors))
@@ -385,7 +385,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat2.ta.poz = data.frame(peptides     = precursors,
                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",
                                                                            type = 2, CUSUM.type = "poz"),
-                       group        = rep("movingRangeCUSUM+",length(precursors)),
+                       group        = rep("Moving Range CUSUM+",length(precursors)),
                        orderby      = seq(1:length(precursors)),
                        metric       = rep("Total Area - CUSUM", length(precursors)),
                        tool         = rep("CUSUM",length(precursors))
@@ -393,7 +393,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   dat2.ta.neg = data.frame(peptides     = precursors,
                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = "Total Area",
                                                                            type = 2, CUSUM.type = "neg"),
-                       group        = rep("movingRangeCUSUM-",length(precursors)),
+                       group        = rep("Moving Range CUSUM-",length(precursors)),
                        orderby      = seq(1:length(precursors)),
                        metric       = rep("Total Area - CUSUM", length(precursors)),
                        tool         = rep("CUSUM",length(precursors))

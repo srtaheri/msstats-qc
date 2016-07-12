@@ -200,10 +200,10 @@ shinyServer(function(input,output,session) {
     p2 <- CUSUM.Radar.Plot(prodata,input$L,input$U)
     p3 <- XmR.Summary.plot(prodata, input$L, input$U)
     p4 <- XmR.Radar.Plot(prodata,input$L,input$U)
-    #theme_set(theme_gray(base_size = 10))
+    
     grid.arrange(p1,p2,p3,p4, ncol = 1)
     
-  }, height = 500)
+  }, height = 1500)
   
   ###########################################################################################################################
   ###########################################################################################################################

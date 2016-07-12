@@ -232,8 +232,16 @@ XmR.Summary.plot <- function(prodata,L,U) {
   gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
   gg <- gg + facet_wrap(~metric,nrow = 1)
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
-  gg <- gg + labs(title = "XmR Chart", x = "QC Numbers", y = "Percentage of peptides with signal")
-  
+  gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
+  gg <- gg + ggtitle("XmR Chart")
+  gg <- gg + theme(plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
+                   axis.text.x=element_text(size=12, vjust=0.5),
+                   axis.text.y=element_text(size=12, hjust=0.5),
+                   axis.title.y=element_text(size=15),
+                   axis.title.x=element_text(size=15),
+                   legend.text = element_text(size = 12),
+                   legend.title=element_blank()
+  )
   gg
   
 }
@@ -241,7 +249,6 @@ XmR.Summary.plot <- function(prodata,L,U) {
 CUSUM.Summary.plot <- function(prodata, L, U) {
   h <- 5
   data.rt.1   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 1)
-  print(data.rt.1)
   data.rt.2   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 2)
   data.rt.2$pr.y <- -(data.rt.2$pr.y)
   
@@ -277,15 +284,16 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
    
    gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
    gg <- gg + theme(plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
-              axis.text.x=element_text(size=15, vjust=0.5),
-              axis.text.y=element_text(size=15, hjust=0.5),
-              text = element_text(size=15)
+                    axis.text.x=element_text(size=12, vjust=0.5),
+                    axis.text.y=element_text(size=12, hjust=0.5),
+                    axis.title.y=element_text(size=15),
+                    axis.title.x=element_text(size=15),
+                    legend.text = element_text(size = 12),
+                    legend.title=element_blank()
               )
-
    gg
   
 }
-#########################################################################################################################
  
 #################################################################################################################
  XmR.Radar.Plot <- function(prodata,L,U) {
@@ -297,9 +305,16 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
      geom_point() +
      facet_wrap(~metric,nrow = 1) +
      geom_path(linejoin = "mitre", lineend = "butt") +
-     labs(title = "Radar plot \n XmR Chart") +
+     ggtitle("Radar plot \n XmR Chart") +
      xlab("") +
-     ylab("Number of Signals")
+     ylab("Number of Signals") +
+     theme(
+           axis.title.y=element_text(size=15),
+           axis.text.y=element_text(size=12, hjust=0.5),
+           plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
+           legend.title=element_blank(),
+           legend.text = element_text(size = 12)
+   )
  }
 #################################################################################################################
  CUSUM.Radar.Plot <- function(prodata,L,U) {
@@ -310,9 +325,16 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
      geom_point() +
      facet_wrap(~metric,nrow = 1) +
      geom_path(linejoin = "mitre", lineend = "butt") +
-     labs(title = "Radar plot \n CUSUM Chart") +
+     ggtitle("Radar plot \n CUSUM Chart") +
      xlab("") +
-     ylab("Number of Signals")
+     ylab("Number of Signals") +
+     theme(
+        axis.title.y=element_text(size=15),
+        axis.text.y=element_text(size=12, hjust=0.5),
+        plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
+        legend.title=element_blank(),
+        legend.text = element_text(size = 12)
+      )
  }
  
 
