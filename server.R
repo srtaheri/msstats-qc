@@ -175,20 +175,15 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data")
     )
-  #   subplot(
-  # XmR.Radar.Plot(prodata,input$L,input$U,metric = "Retention Time"),
-  # XmR.Radar.Plot(prodata,input$L,input$U,metric = "Peak Assymetry"),
-  # XmR.Radar.Plot(prodata,input$L,input$U,metric = "FWHM"),
-  # XmR.Radar.Plot(prodata,input$L,input$U,metric = "Total Area"), nrows = 2)
-    
+
     # subplot(
-    #   CUSUM.Radar.Plot(prodata,input$L,input$U,metric = "Retention Time"),
-    #   CUSUM.Radar.Plot(prodata,input$L,input$U,metric = "Peak Assymetry"),
-    #   CUSUM.Radar.Plot(prodata,input$L,input$U,metric = "FWHM"),
-    #   CUSUM.Radar.Plot(prodata,input$L,input$U,metric = "Total Area"),
-    #   nrows = 2
+    #   ggplotly(CUSUM.Summary.plot(prodata, input$L, input$U)),
+    #   CUSUM.Radar.Plot.combine(prodata,input$L, input$U),
+    #   ggplotly(XmR.Summary.plot(prodata, input$L, input$U)),
+    #   XmR.Radar.Plot.combine(prodata,input$L, input$U),
+    #   nrows = 4
     # )%>%
-    #   layout(autosize = F, width = 2000, height = 1000)
+    #  layout(autosize = F, width = 1500, height = 1500,showlegend = FALSE)
     subplot(
       ggplotly(CUSUM.Summary.plot(prodata, input$L, input$U)),
       CUSUM.Radar.Plot.combine(prodata,input$L, input$U),
@@ -196,10 +191,8 @@ shinyServer(function(input,output,session) {
       XmR.Radar.Plot.combine(prodata,input$L, input$U),
       nrows = 4
     )%>%
-     layout(autosize = F, width = 1300, height = 1500,showlegend = FALSE)
+      layout(autosize = F, width = 1250, height = 3200,showlegend = FALSE)
     
-    
-
 
     
   })

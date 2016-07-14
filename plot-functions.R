@@ -219,7 +219,7 @@ XmR.Summary.plot <- function(prodata,L,U) {
   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
   gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
   gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
-  gg <- gg + facet_wrap(~metric,nrow = 1)
+  gg <- gg + facet_wrap(~metric,nrow = 2)
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
   gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
   gg <- gg + ggtitle("XmR Chart")
@@ -267,7 +267,7 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
    gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
    gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
    #gg <- gg + geom_smooth(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group))
-   gg <- gg + facet_wrap(~metric,nrow = 1)
+   gg <- gg + facet_wrap(~metric,nrow = 2)
    gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
    gg <- gg + ggtitle("CUSUM Chart")
@@ -383,7 +383,7 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
                       xanchor = "left", yanchor = "top",
                       x = 0.03, y = 1,
                       showarrow = F,
-                      text = metric,
+                      text = paste(metric,"-XmR"),
                       #text = "hello",
                       font = list(family = "serif",
                                   size = 25,
@@ -428,7 +428,7 @@ p
      XmR.Radar.Plot(prodata,L,U,metric = "Peak Assymetry"),
      XmR.Radar.Plot(prodata,L,U,metric = "FWHM"),
      XmR.Radar.Plot(prodata,L,U,metric = "Total Area"),
-     nrows = 1)
+     nrows = 2)
  }
 
 #################################################################################################################
@@ -535,7 +535,7 @@ p
                       xanchor = "left", yanchor = "top",
                       x = 0.03, y = 1,
                       showarrow = F,
-                      text = metric,
+                      text =  paste(metric,"-CUSUM") ,
                       #text = "hello",
                       font = list(family = "serif",
                                   size = 25,
@@ -579,7 +579,7 @@ p
     CUSUM.Radar.Plot(prodata,L,U,metric = "Peak Assymetry"),
     CUSUM.Radar.Plot(prodata,L,U,metric = "FWHM"),
     CUSUM.Radar.Plot(prodata,L,U,metric = "Total Area"),
-    nrows = 1
+    nrows = 2
   )
  }
 #################################################################################################################
