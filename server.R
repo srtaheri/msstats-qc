@@ -173,10 +173,11 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data")
     )
-  XmR.Radar.Plot(prodata,input$L,input$U,metric = "Retention Time")
-  XmR.Radar.Plot(prodata,input$L,input$U,metric = "Peak Assymetry")
-  XmR.Radar.Plot(prodata,input$L,input$U,metric = "FWHM")
-  XmR.Radar.Plot(prodata,input$L,input$U,metric = "Total Area")
+    subplot(
+  XmR.Radar.Plot(prodata,input$L,input$U,metric = "Retention Time"),
+  XmR.Radar.Plot(prodata,input$L,input$U,metric = "Peak Assymetry"),
+  XmR.Radar.Plot(prodata,input$L,input$U,metric = "FWHM"),
+  XmR.Radar.Plot(prodata,input$L,input$U,metric = "Total Area"), nrows = 2)
   })
   
   ###########################################################################################################################
