@@ -5,18 +5,44 @@ library(dplyr)
 library(ggplot2)
 library(scales)
 
-CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
-  h <- 5 
-  precursor.level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
-  plot.data <- CUSUM.data.prepare(prodata, precursor.level, z, L, U, type)
+CUSUM.outrange.thld <- 5
+
+render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric, plot.method, normalization.type, y.title1, y.title2){
+  validate(
+    need(!is.null(prodata), "Please upload your data")
+  )
+  prodata$Precursor <- reorder(prodata$Precursor,prodata$BestRetentionTime)
+  precursors <- levels(prodata$Precursor)
+  plots <- list()
   
-  #ymax=ifelse(max(plot.data$CUSUM)>=h,(max(plot.data$CUSUM)),h)
-  #ymin=ifelse(min(plot.data$CUSUM)<=-h,(min(plot.data$CUSUM)),-h)
+  if(precursorSelection == "all peptides") {
+    results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
+      metricData <- getMetricData(prodata, precursors[j], L, U, metric = normalize.metric, normalization = normalization.type)
+      plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, method=plot.method, y.title1, 1)
+      plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, method=plot.method, y.title2, 2)
+    })
+    
+    do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
+      layout(autosize = F, width = 1400, height = nlevels(prodata$Precursor)*200)
+  }
   
-  Main=Main.title
+  else {
+    metricData <- getMetricData(prodata, precursorSelection, L, U, metric = normalize.metric, normalization = normalization.type)
+    
+    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, method=plot.method,  y.title1, 1)
+    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, method=plot.method,  y.title2, 2)
+    
+    subplot(plot1,plot2)
+  }
+}
+#################################################################################################
+CUSUM.plot <- function(prodata, metricData, precursor, L, U,  ytitle, type) {
+  plot.data <- CUSUM.data.prepare(prodata, metricData, precursor, L, U, type)
   
+  #ymax=ifelse(max(plot.data$CUSUM)>=CUSUM.outrange.thld,(max(plot.data$CUSUM)),CUSUM.outrange.thld)
+  #ymin=ifelse(min(plot.data$CUSUM)<=-CUSUM.outrange.thld,(min(plot.data$CUSUM)),-CUSUM.outrange.thld)
   x <- list(
-    title =  paste("QCno - ", precursor.level),
+    title =  paste("QCno - ", precursor),
     range = c(0, max(plot.data$QCno))
   )
   y <- list(
@@ -39,8 +65,8 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
               , text = Annotations
     ) %>%
     layout(xaxis = x,yaxis = y, showlegend = FALSE) %>%
-    add_trace(x=c(0, max(plot.data$QCno)),y = c(h,h), marker=list(color="red" , size=4 , opacity=0.5), name = "UCL",showlegend = FALSE) %>%
-    add_trace(x=c(0, max(plot.data$QCno)),y = c(-h,-h), marker=list(color="red" , size=4 , opacity=0.5), name = "LCL",showlegend = FALSE) %>%
+    add_trace(x=c(0, max(plot.data$QCno)),y = c(CUSUM.outrange.thld,CUSUM.outrange.thld), marker=list(color="red" , size=4 , opacity=0.5), name = "UCL",showlegend = FALSE) %>%
+    add_trace(x=c(0, max(plot.data$QCno)),y = c(-CUSUM.outrange.thld,-CUSUM.outrange.thld), marker=list(color="red" , size=4 , opacity=0.5), name = "LCL",showlegend = FALSE) %>%
     add_trace(  x = QCno
               , y = CUSUM.neg
               , mode = "markers"
@@ -53,26 +79,26 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
                 , marker=list(color="blue" , size=5 , opacity=0.5)
                 , showlegend = FALSE,name=""
     ) %>%
-    add_trace(x = plot.data[CUSUM.poz <= -h, ]$QCno,
-              y = plot.data[CUSUM.poz <= -h, ]$CUSUM.poz,
+    add_trace(x = plot.data[CUSUM.poz <= -CUSUM.outrange.thld, ]$QCno,
+              y = plot.data[CUSUM.poz <= -CUSUM.outrange.thld, ]$CUSUM.poz,
               mode = "markers",
               marker=list(color="red" , size=5 , opacity=0.5),
               showlegend = FALSE,name=""
     ) %>%
-    add_trace(x = plot.data[CUSUM.poz >= h, ]$QCno,
-              y = plot.data[CUSUM.poz >= h, ]$CUSUM.poz,
+    add_trace(x = plot.data[CUSUM.poz >= CUSUM.outrange.thld, ]$QCno,
+              y = plot.data[CUSUM.poz >= CUSUM.outrange.thld, ]$CUSUM.poz,
               mode = "markers",
               marker=list(color="red" , size=5 , opacity=0.5),
               showlegend = FALSE,name=""
     )%>%
-    add_trace(x = plot.data[CUSUM.neg <= -h, ]$QCno,
-              y = plot.data[CUSUM.neg <= -h, ]$CUSUM.neg,
+    add_trace(x = plot.data[CUSUM.neg <= -CUSUM.outrange.thld, ]$QCno,
+              y = plot.data[CUSUM.neg <= -CUSUM.outrange.thld, ]$CUSUM.neg,
               mode = "markers",
               marker=list(color="red" , size=5 , opacity=0.5),
               showlegend = FALSE,name=""
     ) %>%
-    add_trace(x = plot.data[CUSUM.neg >= h, ]$QCno,
-              y = plot.data[CUSUM.neg >= h, ]$CUSUM.neg,
+    add_trace(x = plot.data[CUSUM.neg >= CUSUM.outrange.thld, ]$QCno,
+              y = plot.data[CUSUM.neg >= CUSUM.outrange.thld, ]$CUSUM.neg,
               mode = "markers",
               marker=list(color="red" , size=5 , opacity=0.5),
               showlegend = FALSE,name=""
@@ -82,17 +108,15 @@ CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
 }
 
 #########################################################################################################################
-CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
-  
-  precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
-  prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
+CP.plot <- function(prodata, metricData, precursor, ytitle, type) {
+  precursor.data <- prodata[prodata$Precursor==precursor,]
   ## Create variables 
-  plot.data <- CP.data.prepare(prodata,j, z, type)
+  plot.data <- CP.data.prepare(prodata, metricData, type)
   y.max=max(plot.data$Et) # y axis upper limit
   y.min=0 # y axis lower limit
   
   x <- list(
-    title = paste("QCno - ", levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j])
+    title = paste("QCno - ", precursor)
   )
   y <- list(
     title = ytitle
@@ -102,7 +126,7 @@ CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
           ,type = "scatter"
           ,line = list(shape = "linear")
           ,showlegend = FALSE,name=""
-          , text=prodata_grouped_by_precursor$Annotations
+          , text=precursor.data$Annotations
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
     add_trace( x = c(tho.hat,tho.hat), y = c(0, (max(Et)+2)) 
@@ -118,18 +142,16 @@ CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
 }
 
 #########################################################################################################################
-XmR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
-  
-  precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
-  prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
-  plot.data <- XmR.data.prepare(prodata, z, L, U, type)
+XmR.plot <- function(prodata, metricData, precursor, L, U, ytitle, type) {
+  precursor.data <- prodata[prodata$Precursor==precursor,]
+  plot.data <- XmR.data.prepare(prodata, metricData, L, U, type)
   #print(plot.data)
   
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
   #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
   
   x <- list(
-    title = paste("QCno - ", levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j])
+    title = paste("QCno - ", precursor)
   )
   y <- list(
     title = ytitle
@@ -138,7 +160,7 @@ XmR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
           name = "",  line = list(shape = "linear"),
           marker=list(color="dodgerblue" , size=4 , opacity=0.5)
           ,showlegend = FALSE
-          , text=prodata_grouped_by_precursor$Annotations
+          , text=precursor.data$Annotations
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
     add_trace(y = UCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE,name="UCL") %>%
@@ -457,13 +479,13 @@ XmR.Radar.Plot <- function(prodata,L,U,metric) {
 #################################################################################################################
 #################################################################################################################
 
-do.plot <- function(prodata, z, j, L, U, method, main.title, y.title, type) {
+do.plot <- function(prodata, z, precursor, L, U, method,  y.title, type) {
   if(method=="CUSUM") {
-    CUSUM_plot(prodata, z, j, L, U, main.title, y.title, type)
+    CUSUM.plot(prodata, z, precursor, L, U,  y.title, type)
   } else if(method=="CP") {
-    CP_plot(prodata, z, j, main.title, type, y.title)
+    CP.plot(prodata, z, precursor, y.title, type)
   } else if(method=="XmR") {
-    XmR_plot(prodata, z, j, L, U,main.title, type, y.title)
+    XmR.plot(prodata, z, precursor, L, U, y.title, type)
   }
 }
 
@@ -488,7 +510,7 @@ panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
 metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
   multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
   for (j in 1:nlevels(prodata$Precursor)) {
-    z <- prepare_column(prodata, j, L, U, metric, normalization)
+    z <- getMetricData(prodata, levels(prodata$Precursor)[j], L, U, metric, normalization)
     multidata[1:length(z),j]<-z
   }
   colnames(multidata) <- levels(prodata$Precursor)
@@ -515,127 +537,4 @@ metrics_box.plot <- function(prodata) {
   
   return(subplot(RT, PA, TPA, FWHM, nrows = 4) %>%
            layout(autosize = F, width = 700, height = 1000))
-}
-################################################### vioplot2 #####################################
-vioplot2 <- function (x, ..., range = 1.5, h = NULL, ylim = NULL, names = NULL, 
-                      horizontal = FALSE, col = "magenta", border = "black", lty = 1, 
-                      lwd = 1, rectCol = "black", colMed = "white", pchMed = 19, 
-                      at, add = FALSE, wex = 1, drawRect = TRUE, side="both") 
-{
-  datas <- list(x, ...)
-  n <- length(datas)
-  if (missing(at)) 
-    at <- 1:n
-  upper <- vector(mode = "numeric", length = n)
-  lower <- vector(mode = "numeric", length = n)
-  q1 <- vector(mode = "numeric", length = n)
-  q2 <- vector(mode = "numeric", length = n)
-  q3 <- vector(mode = "numeric", length = n)
-  med <- vector(mode = "numeric", length = n)
-  base <- vector(mode = "list", length = n)
-  height <- vector(mode = "list", length = n)
-  baserange <- c(Inf, -Inf)
-  args <- list(display = "none")
-  radj <- ifelse(side == "right", 0, 1)
-  ladj <- ifelse(side == "left", 0, 1)
-  if (!(is.null(h))) 
-    args <- c(args, h = h)
-  med.dens <- rep(NA, n)
-  for (i in 1:n) {
-    data <- datas[[i]]
-    data.min <- min(data)
-    data.max <- max(data)
-    q1[i] <- quantile(data, 0.25)
-    q2[i] <- quantile(data, 0.5)
-    q3[i] <- quantile(data, 0.75)
-    med[i] <- median(data)
-    iqd <- q3[i] - q1[i]
-    upper[i] <- min(q3[i] + range * iqd, data.max)
-    lower[i] <- max(q1[i] - range * iqd, data.min)
-    est.xlim <- c(min(lower[i], data.min), max(upper[i], 
-                                               data.max))
-    smout <- do.call("sm.density", c(list(data, xlim = est.xlim), 
-                                     args))
-    med.dat <- do.call("sm.density", 
-                       c(list(data, xlim=est.xlim,
-                              eval.points=med[i], display = "none")))
-    med.dens[i] <- med.dat$estimate
-    hscale <- 0.4/max(smout$estimate) * wex
-    base[[i]] <- smout$eval.points
-    height[[i]] <- smout$estimate * hscale
-    med.dens[i] <- med.dens[i] * hscale
-    t <- range(base[[i]])
-    baserange[1] <- min(baserange[1], t[1])
-    baserange[2] <- max(baserange[2], t[2])
-  }
-  if (!add) {
-    xlim <- if (n == 1) 
-      at + c(-0.5, 0.5)
-    else range(at) + min(diff(at))/2 * c(-1, 1)
-    if (is.null(ylim)) {
-      ylim <- baserange
-    }
-  }
-  if (is.null(names)) {
-    label <- 1:n
-  }
-  else {
-    label <- names
-  }
-  boxwidth <- 0.05 * wex
-  if (!add) 
-    plot.new()
-  if (!horizontal) {
-    if (!add) {
-      plot.window(xlim = xlim, ylim = ylim)
-      axis(2)
-      axis(1, at = at, label = label)
-    }
-    box()
-    for (i in 1:n) {
-      polygon(x = c(at[i] - radj*height[[i]], rev(at[i] + ladj*height[[i]])), 
-              y = c(base[[i]], rev(base[[i]])), 
-              col = col, border = border, 
-              lty = lty, lwd = lwd)
-      if (drawRect) {
-        lines(at[c(i, i)], c(lower[i], upper[i]), lwd = lwd, 
-              lty = lty)
-        rect(at[i] - radj*boxwidth/2, 
-             q1[i], 
-             at[i] + ladj*boxwidth/2, 
-             q3[i], col = rectCol)
-        # median line segment
-        lines(x = c(at[i] - radj*med.dens[i], 
-                    at[i], 
-                    at[i] + ladj*med.dens[i]),
-              y = rep(med[i],3))
-      }
-    }
-  }
-  else {
-    if (!add) {
-      plot.window(xlim = ylim, ylim = xlim)
-      axis(1)
-      axis(2, at = at, label = label)
-    }
-    box()
-    for (i in 1:n) {
-      polygon(c(base[[i]], rev(base[[i]])), 
-              c(at[i] - radj*height[[i]], rev(at[i] + ladj*height[[i]])), 
-              col = col, border = border, 
-              lty = lty, lwd = lwd)
-      if (drawRect) {
-        lines(c(lower[i], upper[i]), at[c(i, i)], lwd = lwd, 
-              lty = lty)
-        rect(q1[i], at[i] - radj*boxwidth/2, q3[i], at[i] + 
-               ladj*boxwidth/2, col = rectCol)
-        lines(y = c(at[i] - radj*med.dens[i], 
-                    at[i], 
-                    at[i] + ladj*med.dens[i]),
-              x = rep(med[i],3))
-      }
-    }
-  }
-  invisible(list(upper = upper, lower = lower, median = med, 
-                 q1 = q1, q3 = q3))
 }

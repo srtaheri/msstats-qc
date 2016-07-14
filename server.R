@@ -51,36 +51,7 @@ shinyServer(function(input,output,session) {
   }, options = list(pageLength = 25))
   ################################################################# plots ###################################################
   
-  render.tab <- function(normalize.metric, plot.method, normalization.type, main.title, y.title1, y.title2){
-    
-    prodata <- data$df
-    validate(
-      need(!is.null(prodata), "Please upload your data")
-    )
-    plots <- list()
-    
-    if(input$pepSelection == "all peptides") {
-      
-      results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
-        z <- prepare_column(prodata, j, input$L, input$U, metric = normalize.metric, normalization = normalization.type)
-        plots[[2*j-1]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
-        plots[[2*j]] <<- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
-      })
-      
-      do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-        layout(autosize = F, width = 1400, height = nlevels(prodata$Precursor)*200)
-    }
-    
-    else {
-      j = which(levels(reorder(prodata$Precursor,prodata$BestRetentionTime)) == input$pepSelection)
-      z <- prepare_column(prodata, j, input$L, input$U, metric = normalize.metric, normalization = normalization.type)
-      
-      plot1 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title1, 1)
-      plot2 <- do.plot(prodata, z,j,input$L,input$U, method=plot.method, main.title, y.title2, 2)
-      
-      subplot(plot1,plot2)
-    }
-  }
+  
   ################################################################################################################
   output$XmR_select_metric <- renderUI({
 
@@ -117,59 +88,51 @@ shinyServer(function(input,output,session) {
   })
   ####################################################### plot XmR for RT ###################################################################################################################
   output$RT_XmR <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "XmR", normalization.type = FALSE, main.title = "Retention Time", y.title1 = "Individual Value", y.title2 = "Moving Range")
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "Retention Time", plot.method = "XmR", normalization.type = FALSE, y.title1 = "Individual Value", y.title2 = "Moving Range")
   })
   ########################################################## plot XmR for Peak assymetry #####################################################################################################
   output$PA_XmR <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "XmR", normalization.type = FALSE, main.title = "Peak Assymetry", y.title1 = "Individual Value", y.title2 = "Moving Range")
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "Peak Assymetry", plot.method = "XmR", normalization.type = FALSE, y.title1 = "Individual Value", y.title2 = "Moving Range")
   })
   ########################################################## plot XmR FOR MaxFWHM ############################################################################################################
   output$Max_XmR <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "XmR", normalization.type = FALSE, main.title = "FWHM", y.title1 = "Individual Value", y.title2 = "Moving Range")
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "FWHM", plot.method = "XmR", normalization.type = FALSE, y.title1 = "Individual Value", y.title2 = "Moving Range")
   })
   ########################################################## plot XmR FOR total area #########################################################################################################
   output$TA_XmR <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "XmR", normalization.type = FALSE, main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
-  })
-  ########################################################## plot XmR for metric1 #############################################################################################################
-  output$m1 <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "XmR", normalization.type = FALSE, main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
-  })
-  ########################################################## plot XmR for metric2 #############################################################################################################
-  output$m2 <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "XmR", normalization.type = FALSE, main.title = "Total Area", y.title1 = "Individual Value", y.title2 = "Moving Range")
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "Total Area", plot.method = "XmR", normalization.type = FALSE, y.title1 = "Individual Value", y.title2 = "Moving Range")
   })
   ########################################################## plot CUSUM_chart  for RT##########################################################################################################
   output$RT_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Retention Time", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "Retention Time", plot.method = "CUSUM", normalization.type = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
   ########################################################plot CUSUM for Peak assymetry ######################################################################################################
   output$PA_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Peak Assymetry", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "Peak Assymetry", plot.method = "CUSUM", normalization.type = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
   ########################################################### plot CUSUM FOR MaxFWHM #########################################################################################################
   output$Max_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "CUSUM", normalization.type = TRUE, main.title = "FWHM", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")    
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "FWHM", plot.method = "CUSUM", normalization.type = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")    
   })
   ############################################################ plot CUSUM FOR total area ####################################
   output$TA_CUSUM <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "CUSUM", normalization.type = TRUE, main.title = "Total Area", y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "Total Area", plot.method = "CUSUM", normalization.type = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")
   })
   ########################################################## plot Change Point for RT #############################
   output$RT_CP <- renderPlotly({
-    render.tab(normalize.metric = "Retention Time", plot.method = "CP", normalization.type = TRUE, main.title = "Retention Time", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "Retention Time", plot.method = "CP", normalization.type = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation")
   })
   ######################################################## plot Change Point for Peak assymetry ###########
   output$PA_CP <- renderPlotly({
-    render.tab(normalize.metric = "Peak Assymetry", plot.method = "CP", normalization.type = TRUE, main.title = "Peak Assymetry", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "Peak Assymetry", plot.method = "CP", normalization.type = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation")
   })
   ########################################################## plot Change Point FOR MaxFWHM ####################################
   output$Max_CP <- renderPlotly({
-    render.tab(normalize.metric = "FWHM", plot.method = "CP", normalization.type = TRUE, main.title = "FWHM", y.title1 = "Change point for mean", y.title2 = "Change point for variation")    
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "FWHM", plot.method = "CP", normalization.type = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation")    
   })
   ########################################################## plot Change Point FOR total area ##################################
   output$TA_CP <- renderPlotly({
-    render.tab(normalize.metric = "Total Area", plot.method = "CP", normalization.type = TRUE, main.title = "Total Area", y.title1 = "Change point for mean", y.title2 = "Change point for variation")
+    render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = "Total Area", plot.method = "CP", normalization.type = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation")
   })
 
   ########################################################## box plot in Summary tab ##########################################

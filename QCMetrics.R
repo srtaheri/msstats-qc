@@ -1,5 +1,41 @@
-
-CUSUM.data.prepare <- function(prodata, precursor.level, z, L, U, type) {
+getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
+  precursor.data<-prodata[prodata$Precursor==precursor,]
+  z <- 0
+  if(metric == "Retention Time"){
+    z = precursor.data$BestRetentionTime # raw data for retention time
+    #paste("bestsss")
+  } else if(metric == "Peak Assymetry") {
+    z = 2*precursor.data$MinStartTime/(precursor.data$MaxEndTime+precursor.data$MinStartTime) # raw data for peak assymetry
+  } else if(metric == "FWHM") {
+    z = precursor.data$MaxFWHM
+  } else if(metric == "Total Area") {
+    z = precursor.data$TotalArea # raw data for total area
+  } else {
+    print("Error")
+  }
+  if(normalization == TRUE) {
+    mu=mean(z[L:U]) # in-control process mean
+    sd=sd(z[L:U]) # in-control process variance
+    z=scale(z[1:length(z)],mu,sd) # transformation for N(0,1) )
+    return(z)
+  } else if(normalization == FALSE){
+    return(z)
+  }
+  
+}
+#########################################################################################################
+find_metrics <- function(prodata) {
+  all_metrics_availabe <- c("BestRetentionTime",
+                            "MaxFWHM",
+                            "TotalArea","metric1","metric2","meric3","metric4","metric5")
+  
+  a <- all_metrics_availabe[which(all_metrics_availabe %in% colnames(prodata)==T)]
+  
+  return(a)
+  
+}
+################################################################
+CUSUM.data.prepare <- function(prodata, z, precursor.level, L, U, type) {
   k=0.5 
   prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor.level,]
   
@@ -34,7 +70,7 @@ CUSUM.data.prepare <- function(prodata, precursor.level, z, L, U, type) {
   return(plot.data)
 }
 ###################################################################################################
-CP.data.prepare <- function(prodata,j,z, type) {
+CP.data.prepare <- function(prodata, z, type) {
   
   Et <-  numeric(length(z)-1) # this is Ct in type 1, and Dt in type 2.
   SS<- numeric(length(z)-1)
@@ -101,7 +137,7 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
 
   for(j in 1:length(precursors)) {
-    z <- prepare_column(prodata, j, L, U, metric = metric, normalization = T)
+    z <- getMetricData(prodata, j, L, U, metric = metric, normalization = T)
     counter[1:length(z)] <- counter[1:length(z)]+1
     plot.data <- CUSUM.data.prepare(prodata, precursors[j], z, L, U, type)
 
@@ -138,7 +174,7 @@ XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
   
   for(j in 1:length(precursors)) {
-    z <- prepare_column(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
+    z <- getMetricData(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
     counter[1:length(z)] <- counter[1:length(z)]+1
     plot.data <- XmR.data.prepare(prodata, z = z, L = L, U = U, type)
     
@@ -159,7 +195,7 @@ Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type) {
   QCno.out.range <- c()
   
   for(j in 1:length(precursors)) {
-    z <- prepare_column(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
+    z <- getMetricData(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
     plot.data <- XmR.data.prepare(prodata, z = z, L = L, U = U, type = type)
     QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$t >= plot.data$UCL | plot.data$t <= plot.data$LCL, ]$QCno))
   }
@@ -172,7 +208,7 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.
   QCno.out.range <- c()
   
   for(j in 1:length(precursors)) {
-    z <- prepare_column(prodata, j, L, U, metric = metric, normalization = T)
+    z <- getMetricData(prodata, j, L, U, metric = metric, normalization = T)
     precursor.level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
     plot.data <- CUSUM.data.prepare(prodata, precursor.level, z, L, U, type)
     if(CUSUM.type == "poz")
@@ -264,7 +300,7 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.
 #   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
 #   QCno.length <- c()
 #   for(j in 1:length(precursors)) {
-#     z <- prepare_column(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
+#     z <- getMetricData(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
 #     QCno.length <- c(QCno.length,length(z))
 #   }
 #   dat <- data.frame(peptides = precursors,
