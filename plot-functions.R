@@ -1,6 +1,7 @@
 source("QCMetrics.R")
 source("http://pcwww.liv.ac.uk/~william/Geodemographic%20Classifiability/func%20CreateRadialPlot.r")
 source('ggradar.R')
+source('helper-functions.R')
 library(dplyr)
 library(ggplot2)
 library(scales)
@@ -308,148 +309,152 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
  #   )
  # }
 ####################################################################
-#  XmR.Radar.Plot <- function(prodata,L,U,metric) {
-#    precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
-#    
-#    df <- rbind(XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1, group = "Individual Value"),
-#                XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2, group = "Moving Range"))
-# 
-#    coords <- by(df, df[,"group"], function(r){
-#      x <- getPolarCoord(r[,2])
-#      x <- cbind(x$x, x$y)
-#      x <- data.frame(rbind(r, r[1,]), x = x[,1], y = x[,2])
-#      return(x)
-#    })
-#    coords <- rbind(coords[[1]], coords[[2]])
-#    df <- data.frame(coords)
-#    
-#    # Plot
-#    smooth <- 1
-#    bgcolor <- "white"
-#    
-#    p <- plot_ly(data = df, 
-#                 x = x, y = y, mode = "lines", 
-#                 group = group,
-#                 fill = "toself",
-#                 line = list(smoothing = smooth, shape = "spline"),
-#                 hoverinfo = "text") %>% 
-#      
-#      add_trace(data = df, 
-#                x = x, y = y, mode = "markers", 
-#                marker = list(color = "white", 
-#                              size = 10, 
-#                              line = list(width = 2)),
-#                hoverinfo = "none",
-#                showlegend = F) %>% 
-#      
-#      layout(xaxis = list(title = "", showgrid = F, zeroline = F, showticklabels = F,
-#                          domain = c(0.02, 0.48)),
-#             yaxis = list(title = "", showgrid = F, zeroline = F, showticklabels = F,
-#                          domain = c(0, 0.92)),
-#             font = list(family = "serif", size = 15),
-#             legend = list(x = 0.55, y = 0.9, bgcolor = "transparent"),
-#             plot_bgcolor = bgcolor,
-#             paper_bgcolor = bgcolor)
-#    # Add grids
-#    grid <- rbind(getPolarCoord(rep(5, 50), matrix = T, na = T),
-#                  getPolarCoord(rep(10, 50), matrix = T, na = T),
-#                  getPolarCoord(rep(15, 50), matrix = T, na = T),
-#                  getPolarCoord(rep(20, 50), matrix = T, na = T),
-#                  getPolarCoord(rep(25, 50), matrix = T, na = T),
-#                  getPolarCoord(rep(30, 50), matrix = T, na = T),
-#                  getPolarCoord(rep(35, 50), matrix = T, na = T))
-#    
-#    
-#    grid <- as.data.frame(grid)
-#    p <- add_trace(p, data = grid,
-#                   x = x, y = y, mode = "lines",
-#                   line = list(color = "#57788e", dash = "4px", width = 1),
-#                   showlegend = F,
-#                   hoverinfo = "none")
-#    
-#    inner <- getPolarCoord(rep(5.01, 6))
-#    outer <- getPolarCoord(rep(35.02, 6))
-#    
-#    x = t(cbind(inner$x, outer$x))
-#    y = t(cbind(inner$y, outer$y))
-#    
-#    x <- as.numeric(apply(x, 2, function(vec){
-#      return(c(vec, NA))
-#    }))
-#    
-#    y <- as.numeric(apply(y, 2, function(vec){
-#      return(c(vec, NA))
-#    }))
-#    
-#    linegrid <- data.frame(x = x, y = y)
-#    
-#    p <- add_trace(p, data = linegrid,
-#                   x = x, y = y, mode = "lines",
-#                   line = list(color = "#57788e", dash = "4px", width = 1),
-#                   showlegend = F,
-#                   hoverinfo = "none")
-#    
-#    # Add text
-#    labels <- precursors
-#    p <- add_trace(p, data = getPolarCoord(rep(35.04, 6)),
-#                   x = x, y = y, mode = "text", text = labels,
-#                   showlegend = F,
-#                   hoverinfo = "none",
-#                   textfont = list(family = "serif", color = "#808080"))
-#    # Add titles, description etc
-#    
-#    p <- layout(p, 
-#                annotations = list(
-#                  list(xref = "paper", yref = "paper", 
-#                       xanchor = "left", yanchor = "top",
-#                       x = 0.03, y = 1, 
-#                       showarrow = F, 
-#                       text = paste("<b>Radar Plot for",metric ,".</b>"),
-#                       #text = "hello",
-#                       font = list(family = "serif",
-#                                   size = 25, 
-#                                   color = "#4080bf")),
-#                  
-#                  list(xref = "paper", yref = "paper", 
-#                       xanchor = "left", yanchor = "top",
-#                       x = 0.03, y = 0.95, 
-#                       showarrow = F, 
-#                       text = '<em>we can write something here if we want!</em>',
-#                       font = list(family = "serif",
-#                                   size = 16, 
-#                                   color = "#679bcb")),
-#                  
-#                  list(xref = "paper", yref = "paper", 
-#                       xanchor = "left", yanchor = "top",
-#                       x = 0.60, y = 0.20, 
-#                       showarrow = F, 
-#                       align = "left",
-#                       text = "here can be some information about radar plot.",
-#                       font = list(family = "arial",
-#                                   size = 12))
-#                ),
-#                
-#                shapes = list(
-#                  list(
-#                    xref = "paper", yref = "paper",
-#                    x0 = 0, x1 = 0.95,
-#                    y0 = 0, y1 = 1,
-#                    type = "rect",
-#                    layer = "above",
-#                    fillcolor = "rgba(191, 191, 191, 0.1)",
-#                    line = list(color = "transparent"))
-#                ))
-# p
-#   
-#  }
+ XmR.Radar.Plot <- function(prodata,L,U,metric) {
+   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+
+   df <- rbind(XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1, group = "Individual Value"),
+               XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2, group = "Moving Range"))
+print(df)
+   coords <- by(df, df[,"group"], function(r){
+     x <- getPolarCoord(r[,2])
+     x <- cbind(x$x, x$y)
+     x <- data.frame(rbind(r, r[1,]), x = x[,1], y = x[,2])
+     return(x)
+   })
+   coords <- rbind(coords[[1]], coords[[2]])
+   df <- data.frame(coords)
+
+   # Plot
+   smooth <- 1
+   bgcolor <- "white"
+
+   p <- plot_ly(data = df,
+                x = x, y = y, mode = "lines",
+                group = group,
+                fill = "toself",
+                line = list(smoothing = smooth, shape = "spline"),
+                hoverinfo = "text") %>%
+
+     add_trace(data = df,
+               x = x, y = y, mode = "markers",
+               marker = list(color = "white",
+                             size = 10,
+                             line = list(width = 2)),
+               hoverinfo = "none",
+               showlegend = F) %>%
+
+   layout(xaxis = list(title = "", showgrid = F, zeroline = F, showticklabels = F,
+                       domain = c(0.02, 0.48)),
+          yaxis = list(title = "", showgrid = F, zeroline = F, showticklabels = F,
+                       domain = c(0, 0.92)),
+          font = list(family = "serif", size = 15),
+          legend = list(x = 0.55, y = 0.9, bgcolor = "transparent"),
+          plot_bgcolor = bgcolor,
+          paper_bgcolor = bgcolor)
+   # Add grids
+   grid <- rbind(getPolarCoord(rep(5, 50), matrix = T, na = T),
+                 getPolarCoord(rep(10, 80), matrix = T, na = T),
+                 getPolarCoord(rep(15, 150), matrix = T, na = T),
+                 getPolarCoord(rep(20, 170), matrix = T, na = T),
+                 getPolarCoord(rep(25, 200), matrix = T, na = T),
+                 getPolarCoord(rep(30, 220), matrix = T, na = T),
+                 getPolarCoord(rep(35, 250), matrix = T, na = T))
+
+
+   grid <- as.data.frame(grid)
+   p <- add_trace(p, data = grid,
+                  x = x, y = y, mode = "lines",
+                  line = list(color = "#57788e", dash = "4px", width = 1),
+                  showlegend = F,
+                  hoverinfo = "none")
+
+   inner <- getPolarCoord(rep(5.01, 6))
+   outer <- getPolarCoord(rep(35.02, 6))
+
+   x = t(cbind(inner$x, outer$x))
+   y = t(cbind(inner$y, outer$y))
+
+   x <- as.numeric(apply(x, 2, function(vec){
+     return(c(vec, NA))
+   }))
+
+   y <- as.numeric(apply(y, 2, function(vec){
+     return(c(vec, NA))
+   }))
+
+   linegrid <- data.frame(x = x, y = y)
+
+   p <- add_trace(p, data = linegrid,
+                  x = x, y = y, mode = "lines",
+                  line = list(color = "#57788e", dash = "4px", width = 1),
+                  showlegend = F,
+                  hoverinfo = "none")
+
+   # Add text
+   labels <- precursors
+   p <- add_trace(p, data = getPolarCoord(rep(35.04, 6)),
+                  x = x, y = y, mode = "text", text = labels,
+                  showlegend = F,
+                  hoverinfo = "none",
+                  textfont = list(family = "serif", color = "#808080"))
+   # Add titles, description etc
+
+   p <- layout(p,
+               annotations = list(
+                 list(xref = "paper", yref = "paper",
+                      xanchor = "left", yanchor = "top",
+                      x = 0.03, y = 1,
+                      showarrow = F,
+                      text = paste("<b>Radar Plot for",metric ,".</b>"),
+                      #text = "hello",
+                      font = list(family = "serif",
+                                  size = 25,
+                                  color = "#4080bf")),
+
+                 list(xref = "paper", yref = "paper",
+                      xanchor = "left", yanchor = "top",
+                      x = 0.03, y = 0.95,
+                      showarrow = F,
+                      text = '<em>we can write something here if we want!</em>',
+                      font = list(family = "serif",
+                                  size = 16,
+                                  color = "#679bcb")),
+
+                 list(xref = "paper", yref = "paper",
+                      xanchor = "left", yanchor = "top",
+                      x = 0.60, y = 0.20,
+                      showarrow = F,
+                      align = "left",
+                      text = "here can be some information about radar plot.",
+                      font = list(family = "arial",
+                                  size = 12))
+               ),
+
+               shapes = list(
+                 list(
+                   xref = "paper", yref = "paper",
+                   x0 = 0, x1 = 0.95,
+                   y0 = 0, y1 = 1,
+                   type = "rect",
+                   layer = "above",
+                   fillcolor = "rgba(191, 191, 191, 0.1)",
+                   line = list(color = "transparent"))
+               ))
+p
+
+ }
+ ##########################################################################
+ XmR.Radar.Plot.combine <- function(prodata,L,U) {
+   XmR.Radar.Plot(prodata,L,U,metric = "Retention Time")
+ }
 ###########################################################################
-XmR.Radar.Plot <- function(prodata,L,U,metric) {
-  dat <- XmR.Radar.Plot.prepare(prodata,L,U,metric)
-  dat %>%
-    mutate_each(funs(rescale), -group) -> dat
-  print(dat)
-  ggradar(dat)
-}
+# XmR.Radar.Plot <- function(prodata,L,U,metric) {
+#   dat <- XmR.Radar.Plot.prepare(prodata,L,U,metric)
+#   dat %>%
+#     mutate_each(funs(rescale), -group) -> dat
+#   print(dat)
+#   ggradar(dat)
+# }
 #################################################################################################################
  CUSUM.Radar.Plot <- function(prodata,L,U) {
    dat <- CUSUM.Radar.Plot.prepare(prodata,L,U)

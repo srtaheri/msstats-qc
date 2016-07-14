@@ -191,11 +191,11 @@ XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
 }
 ############################################################################################
 Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type) {
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  precursors <- levels(prodata$Precursor)
   QCno.out.range <- c()
   
   for(j in 1:length(precursors)) {
-    z <- getMetricData(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
+    z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
     plot.data <- XmR.data.prepare(prodata, z = z, L = L, U = U, type = type)
     QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$t >= plot.data$UCL | plot.data$t <= plot.data$LCL, ]$QCno))
   }
@@ -296,36 +296,36 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.
 #   
 # }
 ##############################################
-# XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group) {
-#   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
-#   QCno.length <- c()
-#   for(j in 1:length(precursors)) {
-#     z <- getMetricData(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
-#     QCno.length <- c(QCno.length,length(z))
-#   }
-#   dat <- data.frame(peptides = precursors,
-#              OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type),
-#              group         = rep(group,length(precursors)),
-#              orderby       = seq(1:length(precursors)),
-#              metric        = rep("Retention Time - XmR", length(precursors)),
-#              tool          = rep("XmR",length(precursors)),
-#              probability   = (Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type)/QCno.length)
-#              )
-#   
-#   return(dat)
-# }
-#######################################################################
-XmR.Radar.Plot.prepare <- function(prodata,L,U,metric) {
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
-  m2 <- matrix(c(Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = 1),
-                 Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = 2)),
-               nrow = 2, byrow = TRUE)
-  
-  group.names <- c("Individual Value","Moving Range")
-  df2 <- data.frame(group = group.names,m2)
-  colnames(df2)[2:7] <- precursors
-  return(df2)
+XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group) {
+  precursors <- levels(prodata$Precursor)
+  QCno.length <- c()
+  for(j in 1:length(precursors)) {
+    z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
+    QCno.length <- c(QCno.length,length(z))
+  }
+  dat <- data.frame(peptides = precursors,
+             OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type),
+             group         = rep(group,length(precursors)),
+             orderby       = seq(1:length(precursors)),
+             metric        = rep("Retention Time - XmR", length(precursors)),
+             tool          = rep("XmR",length(precursors)),
+             probability   = (Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type)/QCno.length)
+             )
+
+  return(dat)
 }
+#######################################################################
+# XmR.Radar.Plot.prepare <- function(prodata,L,U,metric) {
+#   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+#   m2 <- matrix(c(Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = 1),
+#                  Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = 2)),
+#                nrow = 2, byrow = TRUE)
+#   
+#   group.names <- c("Individual Value","Moving Range")
+#   df2 <- data.frame(group = group.names,m2)
+#   colnames(df2)[2:7] <- precursors
+#   return(df2)
+# }
 #################################################################################################################
 CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {
   

@@ -5,6 +5,7 @@ library(plotly)
 library(RecordLinkage)
 library(hash)
 library(gridExtra)
+library(markdown)
 
 source("plot-functions.R")
 source("data-validation.R")
@@ -153,28 +154,30 @@ shinyServer(function(input,output,session) {
     metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor, normalization = TRUE)
   }, height = 700)
   ######################################################### plot_summary in Summary tab ########################################
-  output$plot_summary <- renderPlot({
-
-    prodata <- data$df
-    validate(
-      need(!is.null(prodata), "Please upload your data")
-    )
+  # output$plot_summary <- renderPlot({
+  # 
+  #   prodata <- data$df
+  #   validate(
+  #     need(!is.null(prodata), "Please upload your data")
+  #   )
     #p1 <- CUSUM.Summary.plot(prodata, input$L, input$U)
     #p2 <- CUSUM.Radar.Plot(prodata,input$L,input$U)
     #p3 <- XmR.Summary.plot(prodata, input$L, input$U)
     #p4 <- XmR.Radar.Plot(prodata,input$L,input$U)
     #grid.arrange(p1,p2,p3,p4, ncol = 1)
     #XmR.Radar.Plot(prodata,input$L,input$U, metric = "Retention Time")
-  }, height = 500)
-  # output$plot_summary <- renderPlotly({
-  #   prodata <- data$df
-  #   validate(
-  #     need(!is.null(prodata), "Please upload your data")
-  #   )
-    #summary.plot(prodata,input$L, input$U)
     
-    
-  #})
+  #}, height = 500)
+  output$plot_summary <- renderPlotly({
+    prodata <- data$df
+    validate(
+      need(!is.null(prodata), "Please upload your data")
+    )
+  XmR.Radar.Plot(prodata,input$L,input$U,metric = "Retention Time")
+  XmR.Radar.Plot(prodata,input$L,input$U,metric = "Peak Assymetry")
+  XmR.Radar.Plot(prodata,input$L,input$U,metric = "FWHM")
+  XmR.Radar.Plot(prodata,input$L,input$U,metric = "Total Area")
+  })
   
   ###########################################################################################################################
   ###########################################################################################################################
