@@ -187,77 +187,107 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.
   return(QCno.out.range)
 }
 #########################################################################################################
-XmR.Radar.Plot.prepare <- function(prodata,L,U) {
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+# XmR.Radar.Plot.prepare <- function(prodata,L,U) {
+#   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
   
-  dat1.ret = data.frame(peptides = precursors,
-                        OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 1),
-                        group         = rep("individual \n value",length(precursors)),
-                        orderby       = seq(1:length(precursors)),
-                        metric        = rep("Retention Time - XmR", length(precursors)),
-                        tool          = rep("XmR",length(precursors)) 
-  )
-  
-  dat2.ret = data.frame(peptides     = precursors,
-                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 2),
-                        group        = rep("moving \n range",length(precursors)),
-                        orderby      = seq(1:length(precursors)),
-                        metric       = rep("Retention Time - XmR", length(precursors)),
-                        tool         = rep("XmR",length(precursors)) 
-  )
-  
-  
-  dat1.pa = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Peak Assymetry",type = 1),
-                       group        = rep("individual \n value",length(precursors)),
-                       orderby      = seq(1:length(precursors)),
-                       metric       = rep("Peak Assymetry - XmR", length(precursors)),
-                       tool         = rep("XmR",length(precursors)) 
-  )
-  dat2.pa = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Peak Assymetry",type = 2),
-                       group        = rep("moving \n range",length(precursors)),
-                       orderby      = seq(1:length(precursors)),
-                       metric       = rep("Peak Assymetry - XmR", length(precursors)),
-                       tool         = rep("XmR",length(precursors)) 
-  )
-  
-  
-  dat1.fwhm = data.frame(peptides     = precursors,
-                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "FWHM",type = 1),
-                         group        = rep("individual \n value",length(precursors)),
-                         orderby      = seq(1:length(precursors)),
-                         metric       = rep("FWHM - XmR", length(precursors)),
-                         tool         = rep("XmR",length(precursors)) 
-  )
-  dat2.fwhm = data.frame(peptides     = precursors,
-                         OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "FWHM",type = 2),
-                         group        = rep("moving \n range",length(precursors)),
-                         orderby      = seq(1:length(precursors)),
-                         metric       = rep("FWHM - XmR", length(precursors)),
-                         tool         = rep("XmR",length(precursors)) 
-  )
-  
-  
-  dat1.ta = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Total Area",type = 1),
-                       group        = rep("individual \n value",length(precursors)),
-                       orderby      = seq(1:length(precursors)),
-                       metric       = rep("Total Area - XmR", length(precursors)),
-                       tool         = rep("XmR",length(precursors)) 
-  )
-  dat2.ta = data.frame(peptides     = precursors,
-                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Total Area",type = 2),
-                       group        = rep("moving \n range",length(precursors)),
-                       orderby      = seq(1:length(precursors)),
-                       metric       = rep("Total Area - XmR", length(precursors)),
-                       tool         = rep("XmR",length(precursors)) 
-  )
-  
-  rbind(dat1.ret,dat2.ret,dat1.pa,dat2.pa,dat1.fwhm,dat2.fwhm,dat1.ta,dat2.ta)
-  
+  # dat1.ret = data.frame(peptides = precursors,
+  #                       OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 1),
+  #                       group         = rep("individual \n value",length(precursors)),
+  #                       orderby       = seq(1:length(precursors)),
+  #                       metric        = rep("Retention Time - XmR", length(precursors)),
+  #                       tool          = rep("XmR",length(precursors))
+  # )
+  # 
+  # dat2.ret = data.frame(peptides     = precursors,
+  #                       OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Retention Time",type = 2),
+  #                       group        = rep("moving \n range",length(precursors)),
+  #                       orderby      = seq(1:length(precursors)),
+  #                       metric       = rep("Retention Time - XmR", length(precursors)),
+  #                       tool         = rep("XmR",length(precursors))
+  # )
 
+  # dat1.pa = data.frame(peptides     = precursors,
+  #                      OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Peak Assymetry",type = 1),
+  #                      group        = rep("individual \n value",length(precursors)),
+  #                      orderby      = seq(1:length(precursors)),
+  #                      metric       = rep("Peak Assymetry - XmR", length(precursors)),
+  #                      tool         = rep("XmR",length(precursors))
+  # )
+  # dat2.pa = data.frame(peptides     = precursors,
+  #                      OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Peak Assymetry",type = 2),
+  #                      group        = rep("moving \n range",length(precursors)),
+  #                      orderby      = seq(1:length(precursors)),
+  #                      metric       = rep("Peak Assymetry - XmR", length(precursors)),
+  #                      tool         = rep("XmR",length(precursors))
+  # )
+  # 
+  # 
+  # dat1.fwhm = data.frame(peptides     = precursors,
+  #                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "FWHM",type = 1),
+  #                        group        = rep("individual \n value",length(precursors)),
+  #                        orderby      = seq(1:length(precursors)),
+  #                        metric       = rep("FWHM - XmR", length(precursors)),
+  #                        tool         = rep("XmR",length(precursors))
+  # )
+  # dat2.fwhm = data.frame(peptides     = precursors,
+  #                        OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "FWHM",type = 2),
+  #                        group        = rep("moving \n range",length(precursors)),
+  #                        orderby      = seq(1:length(precursors)),
+  #                        metric       = rep("FWHM - XmR", length(precursors)),
+  #                        tool         = rep("XmR",length(precursors))
+  # )
+  # 
+  # 
+  # dat1.ta = data.frame(peptides     = precursors,
+  #                      OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Total Area",type = 1),
+  #                      group        = rep("individual \n value",length(precursors)),
+  #                      orderby      = seq(1:length(precursors)),
+  #                      metric       = rep("Total Area - XmR", length(precursors)),
+  #                      tool         = rep("XmR",length(precursors))
+  # )
+  # dat2.ta = data.frame(peptides     = precursors,
+  #                      OutRangeQCno = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = "Total Area",type = 2),
+  #                      group        = rep("moving \n range",length(precursors)),
+  #                      orderby      = seq(1:length(precursors)),
+  #                      metric       = rep("Total Area - XmR", length(precursors)),
+  #                      tool         = rep("XmR",length(precursors))
+  # )
+  # 
+  # rbind(dat1.ret,dat2.ret,dat1.pa,dat2.pa,dat1.fwhm,dat2.fwhm,dat1.ta,dat2.ta)
   
+# rbind(dat1.ret,dat2.ret)
+#   
+# }
+##############################################
+# XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group) {
+#   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+#   QCno.length <- c()
+#   for(j in 1:length(precursors)) {
+#     z <- prepare_column(prodata, j = j, L = L, U = U, metric = metric, normalization = T)
+#     QCno.length <- c(QCno.length,length(z))
+#   }
+#   dat <- data.frame(peptides = precursors,
+#              OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type),
+#              group         = rep(group,length(precursors)),
+#              orderby       = seq(1:length(precursors)),
+#              metric        = rep("Retention Time - XmR", length(precursors)),
+#              tool          = rep("XmR",length(precursors)),
+#              probability   = (Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type)/QCno.length)
+#              )
+#   
+#   return(dat)
+# }
+#######################################################################
+XmR.Radar.Plot.prepare <- function(prodata,L,U,metric) {
+  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  m2 <- matrix(c(Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = 1),
+                 Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = 2)),
+               nrow = 2, byrow = TRUE)
+  
+  group.names <- c("Individual Value","Moving Range")
+  df2 <- data.frame(group = group.names,m2)
+  colnames(df2)[2:7] <- precursors
+  return(df2)
 }
 #################################################################################################################
 CUSUM.Radar.Plot.prepare <- function(prodata,L,U) {

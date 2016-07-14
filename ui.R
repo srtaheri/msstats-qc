@@ -82,7 +82,7 @@ shinyUI(fluidPage(
                            
                           wellPanel(
                             #p("if you want to clear your data and all the tables and plots from the system, click this button"),
-                            actionButton("clear_button", "clear the data and plots"),
+                            actionButton("clear_button", "Clear the data and plots"),
                             bsTooltip("clear_button","click this button to clear your data and all the tables and plots from the system.", placement = "bottom", trigger = "hover",
                                       options = NULL)
                           ),
@@ -116,6 +116,7 @@ shinyUI(fluidPage(
                        tabsetPanel(
                            tabPanel("Plot Summary",
                                     plotOutput("plot_summary")
+                                    #plotlyOutput("plot_summary")
                            ),
                          tabPanel("Boxplot",
                                   plotlyOutput("box_plot", height = 2000)

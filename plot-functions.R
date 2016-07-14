@@ -1,6 +1,9 @@
 source("QCMetrics.R")
+source("http://pcwww.liv.ac.uk/~william/Geodemographic%20Classifiability/func%20CreateRadialPlot.r")
+source('ggradar.R')
 library(dplyr)
 library(ggplot2)
+library(scales)
 
 CUSUM_plot <- function(prodata, z, j, L, U, Main.title, ytitle, type) {
   h <- 5 
@@ -241,6 +244,7 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
    gg <- gg + geom_hline(yintercept=0, alpha=0.5)
    gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
    gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
+   #gg <- gg + geom_smooth(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group))
    gg <- gg + facet_wrap(~metric,nrow = 1)
    gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
@@ -260,26 +264,170 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
 }
  
 #################################################################################################################
- XmR.Radar.Plot <- function(prodata,L,U) {
-
-   dat <- XmR.Radar.Plot.prepare(prodata,L,U) 
-   theme_set(theme_gray(base_size = 10))
-   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group)) +
-     coord_polar() +
-     geom_point() +
-     facet_wrap(~metric,nrow = 1) +
-     geom_path(linejoin = "mitre", lineend = "butt") +
-     ggtitle("Radar plot \n XmR Chart") +
-     xlab("") +
-     ylab("Number of Signals") +
-     theme(
-           axis.title.y=element_text(size=15),
-           axis.text.y=element_text(size=12, hjust=0.5),
-           plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
-           legend.title=element_blank(),
-           legend.text = element_text(size = 12)
-   )
- }
+ # XmR.Radar.Plot <- function(prodata,L,U) {
+ # 
+ #   dat <- XmR.Radar.Plot.prepare(prodata,L,U) 
+ #   write.csv(file="dataRadar.csv",dat)
+ #   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group)) +
+ #   geom_path(aes(group = group)) +
+ #     coord_polar() +
+ #     geom_point() +
+ #     facet_wrap(~metric,nrow = 1) +
+ #     geom_path(linejoin = "mitre", lineend = "butt") +
+ #     ggtitle("Radar plot \n XmR Chart") +
+ #     xlab("") +
+ #     ylab("Number of Signals") +
+ #     theme(
+ #           axis.title.y=element_text(size=15),
+ #           axis.text.y=element_text(size=12, hjust=0.5),
+ #           plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
+ #           legend.title=element_blank(),
+ #           legend.text = element_text(size = 12)
+ #   )
+ # }
+####################################################################
+#  XmR.Radar.Plot <- function(prodata,L,U,metric) {
+#    precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+#    
+#    df <- rbind(XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1, group = "Individual Value"),
+#                XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2, group = "Moving Range"))
+# 
+#    coords <- by(df, df[,"group"], function(r){
+#      x <- getPolarCoord(r[,2])
+#      x <- cbind(x$x, x$y)
+#      x <- data.frame(rbind(r, r[1,]), x = x[,1], y = x[,2])
+#      return(x)
+#    })
+#    coords <- rbind(coords[[1]], coords[[2]])
+#    df <- data.frame(coords)
+#    
+#    # Plot
+#    smooth <- 1
+#    bgcolor <- "white"
+#    
+#    p <- plot_ly(data = df, 
+#                 x = x, y = y, mode = "lines", 
+#                 group = group,
+#                 fill = "toself",
+#                 line = list(smoothing = smooth, shape = "spline"),
+#                 hoverinfo = "text") %>% 
+#      
+#      add_trace(data = df, 
+#                x = x, y = y, mode = "markers", 
+#                marker = list(color = "white", 
+#                              size = 10, 
+#                              line = list(width = 2)),
+#                hoverinfo = "none",
+#                showlegend = F) %>% 
+#      
+#      layout(xaxis = list(title = "", showgrid = F, zeroline = F, showticklabels = F,
+#                          domain = c(0.02, 0.48)),
+#             yaxis = list(title = "", showgrid = F, zeroline = F, showticklabels = F,
+#                          domain = c(0, 0.92)),
+#             font = list(family = "serif", size = 15),
+#             legend = list(x = 0.55, y = 0.9, bgcolor = "transparent"),
+#             plot_bgcolor = bgcolor,
+#             paper_bgcolor = bgcolor)
+#    # Add grids
+#    grid <- rbind(getPolarCoord(rep(5, 50), matrix = T, na = T),
+#                  getPolarCoord(rep(10, 50), matrix = T, na = T),
+#                  getPolarCoord(rep(15, 50), matrix = T, na = T),
+#                  getPolarCoord(rep(20, 50), matrix = T, na = T),
+#                  getPolarCoord(rep(25, 50), matrix = T, na = T),
+#                  getPolarCoord(rep(30, 50), matrix = T, na = T),
+#                  getPolarCoord(rep(35, 50), matrix = T, na = T))
+#    
+#    
+#    grid <- as.data.frame(grid)
+#    p <- add_trace(p, data = grid,
+#                   x = x, y = y, mode = "lines",
+#                   line = list(color = "#57788e", dash = "4px", width = 1),
+#                   showlegend = F,
+#                   hoverinfo = "none")
+#    
+#    inner <- getPolarCoord(rep(5.01, 6))
+#    outer <- getPolarCoord(rep(35.02, 6))
+#    
+#    x = t(cbind(inner$x, outer$x))
+#    y = t(cbind(inner$y, outer$y))
+#    
+#    x <- as.numeric(apply(x, 2, function(vec){
+#      return(c(vec, NA))
+#    }))
+#    
+#    y <- as.numeric(apply(y, 2, function(vec){
+#      return(c(vec, NA))
+#    }))
+#    
+#    linegrid <- data.frame(x = x, y = y)
+#    
+#    p <- add_trace(p, data = linegrid,
+#                   x = x, y = y, mode = "lines",
+#                   line = list(color = "#57788e", dash = "4px", width = 1),
+#                   showlegend = F,
+#                   hoverinfo = "none")
+#    
+#    # Add text
+#    labels <- precursors
+#    p <- add_trace(p, data = getPolarCoord(rep(35.04, 6)),
+#                   x = x, y = y, mode = "text", text = labels,
+#                   showlegend = F,
+#                   hoverinfo = "none",
+#                   textfont = list(family = "serif", color = "#808080"))
+#    # Add titles, description etc
+#    
+#    p <- layout(p, 
+#                annotations = list(
+#                  list(xref = "paper", yref = "paper", 
+#                       xanchor = "left", yanchor = "top",
+#                       x = 0.03, y = 1, 
+#                       showarrow = F, 
+#                       text = paste("<b>Radar Plot for",metric ,".</b>"),
+#                       #text = "hello",
+#                       font = list(family = "serif",
+#                                   size = 25, 
+#                                   color = "#4080bf")),
+#                  
+#                  list(xref = "paper", yref = "paper", 
+#                       xanchor = "left", yanchor = "top",
+#                       x = 0.03, y = 0.95, 
+#                       showarrow = F, 
+#                       text = '<em>we can write something here if we want!</em>',
+#                       font = list(family = "serif",
+#                                   size = 16, 
+#                                   color = "#679bcb")),
+#                  
+#                  list(xref = "paper", yref = "paper", 
+#                       xanchor = "left", yanchor = "top",
+#                       x = 0.60, y = 0.20, 
+#                       showarrow = F, 
+#                       align = "left",
+#                       text = "here can be some information about radar plot.",
+#                       font = list(family = "arial",
+#                                   size = 12))
+#                ),
+#                
+#                shapes = list(
+#                  list(
+#                    xref = "paper", yref = "paper",
+#                    x0 = 0, x1 = 0.95,
+#                    y0 = 0, y1 = 1,
+#                    type = "rect",
+#                    layer = "above",
+#                    fillcolor = "rgba(191, 191, 191, 0.1)",
+#                    line = list(color = "transparent"))
+#                ))
+# p
+#   
+#  }
+###########################################################################
+XmR.Radar.Plot <- function(prodata,L,U,metric) {
+  dat <- XmR.Radar.Plot.prepare(prodata,L,U,metric)
+  dat %>%
+    mutate_each(funs(rescale), -group) -> dat
+  print(dat)
+  ggradar(dat)
+}
 #################################################################################################################
  CUSUM.Radar.Plot <- function(prodata,L,U) {
    dat <- CUSUM.Radar.Plot.prepare(prodata,L,U)
@@ -300,8 +448,12 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
         legend.text = element_text(size = 12)
       )
  }
- 
-
+################################################################################################################# 
+# summary.plot <- function(prodata,L,U) {
+# plot1 <- XmR.Radar.Plot(prodata,L,U,metric = "Retention Time")
+# plot2 <- XmR.Radar.Plot(prodata,L,U,metric = "Peak Assymetry")
+#   subplot(plot1,plot2)
+# }
 #################################################################################################################
 #################################################################################################################
 
@@ -349,12 +501,9 @@ metrics_box.plot <- function(prodata) {
   RT <- plot_ly(prodata, y = BestRetentionTime, color = PrecursorRT, type = "box") %>% 
     layout(yaxis = list(title = "Retention Time"),showlegend = FALSE)
   
-##########HEAD
   prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$MaxEndTime - prodata$MinStartTime) # to plot boxplots in increasing order
   PA <- plot_ly(prodata, y = (MaxEndTime-MinStartTime), color = PrecursorPA, type = "box") %>%
   layout(yaxis = list(title = "Peak Assymetry"),showlegend = FALSE)
-
-##########origin/master
   
   prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$TotalArea) # to plot boxplots in decreasing order
   TPA <- plot_ly(prodata, y = TotalArea, color = PrecursorTA, type = "box") %>% 

@@ -191,63 +191,32 @@ shinyServer(function(input,output,session) {
   }, height = 700)
   ######################################################### plot_summary in Summary tab ########################################
   output$plot_summary <- renderPlot({
-    
+
     prodata <- data$df
     validate(
       need(!is.null(prodata), "Please upload your data")
     )
-    p1 <- CUSUM.Summary.plot(prodata, input$L, input$U)
-    p2 <- CUSUM.Radar.Plot(prodata,input$L,input$U)
-    p3 <- XmR.Summary.plot(prodata, input$L, input$U)
-    p4 <- XmR.Radar.Plot(prodata,input$L,input$U)
+    #p1 <- CUSUM.Summary.plot(prodata, input$L, input$U)
+    #p2 <- CUSUM.Radar.Plot(prodata,input$L,input$U)
+    #p3 <- XmR.Summary.plot(prodata, input$L, input$U)
+    #p4 <- XmR.Radar.Plot(prodata,input$L,input$U)
+    #grid.arrange(p1,p2,p3,p4, ncol = 1)
+    #XmR.Radar.Plot(prodata,input$L,input$U, metric = "Retention Time")
+  }, height = 500)
+  # output$plot_summary <- renderPlotly({
+  #   prodata <- data$df
+  #   validate(
+  #     need(!is.null(prodata), "Please upload your data")
+  #   )
+    #summary.plot(prodata,input$L, input$U)
     
-    grid.arrange(p1,p2,p3,p4, ncol = 1)
     
-  }, height = 1500)
+  #})
   
   ###########################################################################################################################
   ###########################################################################################################################
   ########################################################## "help" tab ################################
   
-  #### Text messages in empty places - This part will be removed in future, when the metrics codes is complete ######
-  # output$EWMA_txt <- renderText({
-  #   paste0("This part is not complete yet, we will complete it in near future.")
-  # })
-  # 
-  # output$Short_run_SPC_txt <- renderText({
-  #   paste0("This part is not complete yet, we will complete it in near future.")
-  # })
-  # 
-  # output$Multivariate_Control_Charts_txt <- renderText({
-  #   paste0("This part is not complete yet, we will complete it in near future.")
-  # })
-  
-  # output$Capability_Analysis_txt <- renderText({
-  #   paste0("This part is not complete yet, we will complete it in near future.")
-  # })
-  
-  # output$MA_XmR_txt <- renderText({
-  #   paste0("This part is not complete yet, we will complete it in near future.")
-  # })
-  # 
-  # output$MA_CUSUM_txt <- renderText({
-  #   paste0("This part is not complete yet, we will complete it in near future.")
-  # })
-  # 
-  # output$CP_MA_txt <- renderText({
-  #   paste0("This part is not complete yet, we will complete it in near future.")
-  # })
-  # 
-  # output$CA_RT_txt <- renderText({
-  #   paste0("This part is not complete yet, we will complete it in near future.")
-  # })
-  # 
-  # output$CA_MA_txt <- renderText({
-  #   paste0("This part is not complete yet, we will complete it in near future.")
-  # })
-  # 
-  # output$OverallQC_txt <- renderText({
-  #   paste0("This part is not complete yet, we will complete it in near future.")
-  # })
+ 
   ############################################################################################################################
 })
