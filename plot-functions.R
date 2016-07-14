@@ -87,7 +87,7 @@ CP_plot <- function(prodata,z,j,Main.title,type, ytitle) {
   precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
   prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
   ## Create variables 
-  plot.data <- CP.data.prepare(prodata,z,j, type)
+  plot.data <- CP.data.prepare(prodata,j, z, type)
   y.max=max(plot.data$Et) # y axis upper limit
   y.min=0 # y axis lower limit
   
@@ -122,7 +122,7 @@ XmR_plot <- function(prodata,z,j,L,U,Main.title, type, ytitle) {
   
   precursor_level <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))[j]
   prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor_level,]
-  plot.data <- XmR.data.prepare(prodata, z, j,L,U, type)
+  plot.data <- XmR.data.prepare(prodata, z, L, U, type)
   #print(plot.data)
   
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)

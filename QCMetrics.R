@@ -62,6 +62,7 @@ CP.data.prepare <- function(prodata,j,z, type) {
   }
   
   tho.hat = which(Et==max(Et)) # change point estimate
+
   return(data.frame(QCno,Et,tho.hat)) # dataframe for change point plot
 }
 ###################################################################################################
