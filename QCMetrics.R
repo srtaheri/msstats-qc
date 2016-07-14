@@ -238,7 +238,7 @@ XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group) {
              OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type),
              group         = rep(group,length(precursors)),
              orderby       = seq(1:length(precursors)),
-             metric        = rep("Retention Time - XmR", length(precursors)),
+             metric        = rep(metric, length(precursors)),
              tool          = rep("XmR",length(precursors)),
              probability   = (Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type)/QCno.length)
              )
@@ -259,9 +259,30 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U, metric,type,group, CUSUM.type)
                     OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = metric,type = type, CUSUM.type),
                     group         = rep(group,length(precursors)),
                     orderby       = seq(1:length(precursors)),
-                    metric        = rep("Retention Time - XmR", length(precursors)),
+                    metric        = rep(metric, length(precursors)),
                     tool          = rep("XmR",length(precursors)),
                     probability   = (Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = metric,type = type, CUSUM.type)/QCno.length)
   )
+  return(dat)
+}
+#################################################################################################
+CUSUM.Radar.Plot.DataFrame <- function(prodata,L,U) {
+  dat <- rbind(CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg")
+          )
   return(dat)
 }

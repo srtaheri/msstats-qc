@@ -154,48 +154,36 @@ shinyServer(function(input,output,session) {
     metrics_scatter.plot(prodata, input$L, input$U, input$metric_precursor, normalization = TRUE)
   }, height = 700)
   ######################################################### plot_summary in Summary tab ########################################
-  # output$plot_summary <- renderPlot({
-  # 
-  #   prodata <- data$df
-  #   validate(
-  #     need(!is.null(prodata), "Please upload your data")
-  #   )
-  #   p1 <- CUSUM.Summary.plot(prodata, input$L, input$U)
-  #   #p2 <- CUSUM.Radar.Plot(prodata,input$L,input$U)
-  #   #p3 <- XmR.Summary.plot(prodata, input$L, input$U)
-  #   #p4 <- XmR.Radar.Plot(prodata,input$L,input$U)
-  #   #grid.arrange(p1,p2,p3,p4, ncol = 1)
-  #   p1
-  # 
-  # }, height = 500)
-  
-  
-  output$plot_summary <- renderPlotly({
+  output$plot_summary <- renderPlot({
+
     prodata <- data$df
     validate(
       need(!is.null(prodata), "Please upload your data")
     )
-
-    # subplot(
-    #   ggplotly(CUSUM.Summary.plot(prodata, input$L, input$U)),
-    #   CUSUM.Radar.Plot.combine(prodata,input$L, input$U),
-    #   ggplotly(XmR.Summary.plot(prodata, input$L, input$U)),
-    #   XmR.Radar.Plot.combine(prodata,input$L, input$U),
-    #   nrows = 4
-    # )%>%
-    #  layout(autosize = F, width = 1500, height = 1500,showlegend = FALSE)
-    subplot(
-      ggplotly(CUSUM.Summary.plot(prodata, input$L, input$U)),
-      CUSUM.Radar.Plot.combine(prodata,input$L, input$U),
-      ggplotly(XmR.Summary.plot(prodata, input$L, input$U)),
-      XmR.Radar.Plot.combine(prodata,input$L, input$U),
-      nrows = 4
-    )%>%
-      layout(autosize = F, width = 1250, height = 3200,showlegend = FALSE)
+    p1 <- CUSUM.Summary.plot(prodata, input$L, input$U)
+    p2 <- CUSUM.Radar.Plot(prodata,input$L,input$U)
+    p3 <- XmR.Summary.plot(prodata, input$L, input$U)
+    p4 <- XmR.Radar.Plot(prodata,input$L,input$U)
+    grid.arrange(p1,p2,p3,p4, ncol = 1)
     
 
-    
-  })
+  }, height = 1500)
+  
+  
+  # output$plot_summary <- renderPlotly({
+  #   prodata <- data$df
+  #   validate(
+  #     need(!is.null(prodata), "Please upload your data")
+  #   )
+  #   subplot(
+  #     ggplotly(CUSUM.Summary.plot(prodata, input$L, input$U)),
+  #     CUSUM.Radar.Plot.combine(prodata,input$L, input$U),
+  #     ggplotly(XmR.Summary.plot(prodata, input$L, input$U)),
+  #     XmR.Radar.Plot.combine(prodata,input$L, input$U),
+  #     nrows = 4
+  #   )%>%
+  #     layout(autosize = F, width = 1250, height = 3200,showlegend = FALSE)
+  # })
   
   ###########################################################################################################################
   ###########################################################################################################################
