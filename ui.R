@@ -156,35 +156,14 @@ shinyUI(fluidPage(
                                              ), # End "XMR" tabPanel and it's tabsetPanel
                          
                          tabPanel("CUSUM",
-                                  tabsetPanel(
-                                    tabPanel("Retention Time", 
-                                             plotlyOutput("RT_CUSUM")
-                                             , tags$head(tags$style(type="text/css"))
-                                             , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                              tags$div("It may take a while to load the plots, please wait...
-                                                                       ",id="loadmessage"))
-                                                              ),
-                                    tabPanel("Total Peak Area",
-                                             plotlyOutput("TA_CUSUM")
-                                             , tags$head(tags$style(type="text/css"))
-                                             , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                              tags$div("It may take a while to load the plots, please wait...
-                                                                       ",id="loadmessage"))
-                                                              ),
-                                    tabPanel("Full Width at Half Maximum (FWHM)", 
-                                             plotlyOutput("Max_CUSUM")
-                                             , tags$head(tags$style(type="text/css"))
-                                             , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                              tags$div("It may take a while to load the plots, please wait...
-                                                                       ",id="loadmessage"))
-                                                              ),
-                                    tabPanel("Peak Assymetry", 
-                                             plotlyOutput("PA_CUSUM")
-                                             , tags$head(tags$style(type="text/css"))
-                                             , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                              tags$div("It may take a while to load the plots, please wait...
-                                                                       ",id="loadmessage"))
-                                                              )
+                                  sidebarLayout(
+                                    sidebarPanel(
+                                      uiOutput("CUSUM_select_metric")
+                                    ), # end sidebarPanel
+                                    mainPanel(
+                                      uiOutput("CUSUM_tabset")
+                                    ) # end mainPanel
+                                  ) # end sidebarLayout
                                     #,
                                     # tabPanel("Mass Accuracy" 
                                     #          , textOutput("MA_CUSUM_txt")
@@ -194,7 +173,7 @@ shinyUI(fluidPage(
                                     #                           tags$div("It may take a while to load the plots, please wait...
                                     #                                    ",id="loadmessage"))
                                     #                           )
-                                             ))
+                                             )
                          #, # End tabpanle "CUSUM" and tabsetPanel of it
                          #tabPanel("EWMA", textOutput("EWMA_txt")),
                          #tabPanel("Short run SPC", textOutput("Short_run_SPC_txt")),
@@ -242,35 +221,14 @@ shinyUI(fluidPage(
 ), # End "Multi" tabPanel and it's tabsetPanel
               
               tabPanel("Change Point Analysis",
-                       tabsetPanel(
-                         tabPanel("Retention Time"
-                                  , plotlyOutput("RT_CP")
-                                  , tags$head(tags$style(type="text/css"))
-                                  , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                   tags$div("It may take a while to load the plots, please wait...
-                                                            ",id="loadmessage"))
-                                                   ),
-                         tabPanel("Total Peak Area"
-                                  , plotlyOutput("TA_CP")
-                                  , tags$head(tags$style(type="text/css"))
-                                  , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                   tags$div("It may take a while to load the plots, please wait...
-                                                            ",id="loadmessage"))
-                                                   ),
-                         tabPanel("Full Width at Half Maximum (FWHM)"
-                                  , plotlyOutput("Max_CP")
-                                  , tags$head(tags$style(type="text/css"))
-                                  , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                   tags$div("It may take a while to load the plots, please wait...
-                                                            ",id="loadmessage"))
-                                                   ),
-                         tabPanel("Peak Assymetry"
-                                  ,plotlyOutput("PA_CP")
-                                  , tags$head(tags$style(type="text/css"))
-                                  , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                   tags$div("It may take a while to load the plots, please wait...
-                                                            ",id="loadmessage"))
-                                                   )
+                       sidebarLayout(
+                         sidebarPanel(
+                           uiOutput("CP_select_metric")
+                         ), # end sidebarPanel
+                         mainPanel(
+                           uiOutput("CP_tabset")
+                         ) # end mainPanel
+                       ) # end sidebarLayout
                          #,
                          # tabPanel("Mass Accuracy"
                          #          , textOutput("CP_MA_txt")
@@ -300,7 +258,7 @@ shinyUI(fluidPage(
                          #                           tags$div("It may take a while to load the plots, please wait...
                          #                                    ",id="loadmessage"))
                          #                           )
-                                  )), # end "Capability Analysis" tabPanel and it's tabsetPanel
+                                  ), # end "Capability Analysis" tabPanel and it's tabsetPanel
               #tabPanel("Overall QC Performance", textOutput("OverallQC_txt")),
               tabPanel("Help",
                        tabsetPanel(

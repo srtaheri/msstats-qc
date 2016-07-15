@@ -11,7 +11,7 @@ getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
   } else if(metric == "Total Area") {
     z = precursor.data$TotalArea # raw data for total area
   } else {
-    print("Error")
+    z = precursor.data[,metric]
   }
   if(normalization == TRUE) {
     mu=mean(z[L:U]) # in-control process mean
@@ -25,13 +25,13 @@ getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
 }
 #########################################################################################################
 find_metrics <- function(prodata) {
-  all_metrics_availabe <- c("BestRetentionTime",
-                            "MaxFWHM",
-                            "TotalArea","metric1","metric2","meric3","metric4","metric5")
+  prodata <- prodata[, (which(colnames(prodata)=="Annotations")+1):ncol(prodata)]
   
-  a <- all_metrics_availabe[which(all_metrics_availabe %in% colnames(prodata)==T)]
+  nums <- sapply(prodata, is.numeric)
   
-  return(a)
+  other.metrics <- colnames(prodata[,nums])
+  
+  return(other.metrics)
   
 }
 ################################################################

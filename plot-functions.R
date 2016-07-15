@@ -235,6 +235,8 @@ XmR.Summary.plot <- function(prodata,L,U) {
   
 }
 ###############################################################################################
+expm1_trans <-  function() trans_new("expm1", "expm1", "log1p")
+
 CUSUM.Summary.plot <- function(prodata, L, U) {
   h <- 5
   data.rt.1   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 1)
@@ -265,8 +267,9 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
    gg <- ggplot(dat)
    gg <- gg + geom_hline(yintercept=0, alpha=0.5)
    gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
-   gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
-   #gg <- gg + geom_smooth(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group))
+   #gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
+   gg <- gg + stat_smooth(method="loess", aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group))
+   #gg <- gg + scale_y_continuous(trans=log1p_trans(), limits = c(0,30)) + coord_trans(y=expm1_trans())
    gg <- gg + facet_wrap(~metric,nrow = 1)
    gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
@@ -297,7 +300,7 @@ XmR.Radar.Plot <- function(prodata,L,U) {
                XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 2,group = "Moving Range"),
                XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 1,group = "Individual Value"),
                XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 2,group = "Moving Range"))
-  print(dat)
+  
   #write.csv(file="dataRadar.csv",dat)
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group, fill=group)) +
     coord_polar() +
@@ -319,7 +322,6 @@ XmR.Radar.Plot <- function(prodata,L,U) {
 #################################################################################################################
 CUSUM.Radar.Plot <- function(prodata,L,U) {
   dat <- CUSUM.Radar.Plot.DataFrame(prodata,L,U)
-  print(dat)
   theme_set(theme_gray(base_size = 10))
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group, fill = group)) +
     coord_polar() +
