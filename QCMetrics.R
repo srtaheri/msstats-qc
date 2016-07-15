@@ -25,14 +25,14 @@ getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
 }
 #########################################################################################################
 find_metrics <- function(prodata) {
-  prodata <- prodata[, (which(colnames(prodata)=="Annotations")+1):ncol(prodata)]
-  
-  nums <- sapply(prodata, is.numeric)
-  
-  other.metrics <- colnames(prodata[,nums])
-  
-  return(other.metrics)
-  
+  if("Annotations" %in% colnames(prodata)){
+    prodata <- as.data.frame(prodata[, which(colnames(prodata)=="Annotations"):ncol(prodata)])
+    nums <- sapply(prodata, is.numeric)
+    other.metrics <- colnames(prodata[,nums])
+    return(other.metrics)
+  } else {
+    return(c())
+  }
 }
 ################################################################
 CUSUM.data.prepare <- function(prodata, z, precursor.level, L, U, type) {
