@@ -265,12 +265,20 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
   
    dat <- rbind(data.rt.1,data.rt.2,data.pa.1,data.pa.2,data.fwhm.1,data.fwhm.2,data.ta.1,data.ta.2)
    #write.csv(file="dataHAHA.csv",dat)
+   
    gg <- ggplot(dat)
    gg <- gg + geom_hline(yintercept=0, alpha=0.5)
    #gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
    #gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
    gg <- gg + stat_smooth(method="loess", aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group))
-   #gg <- gg + scale_y_continuous(trans=log1p_trans(), limits = c(0,30)) + coord_trans(y=expm1_trans())
+   gg <- gg + scale_color_manual(breaks = c("Individual Value CUSUM+",
+                                            "Individual Value CUSUM-",
+                                            "Moving Range CUSUM+",
+                                            "Moving Range CUSUM-"),
+                                 values = c("Individual Value CUSUM+" = "#E69F00",
+                                            "Individual Value CUSUM-" = "#56B4E9",
+                                            "Moving Range CUSUM+" = "#009E73",
+                                            "Moving Range CUSUM-" = "#D55E00"))
    gg <- gg + facet_wrap(~metric,nrow = 1)
    gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
@@ -323,16 +331,25 @@ XmR.Radar.Plot <- function(prodata,L,U) {
 #################################################################################################################
 CUSUM.Radar.Plot <- function(prodata,L,U) {
   dat <- CUSUM.Radar.Plot.DataFrame(prodata,L,U)
-  theme_set(theme_gray(base_size = 10))
+  
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group, fill = group)) +
     coord_polar() +
     geom_point() +
+    scale_fill_manual(breaks = c("Individual Value CUSUM+",
+                                 "Individual Value CUSUM-",
+                                 "Moving Range CUSUM+",
+                                 "Moving Range CUSUM-"),
+                      values = c("Individual Value CUSUM+" = "#E69F00",
+                                 "Individual Value CUSUM-" = "#56B4E9",
+                                 "Moving Range CUSUM+" = "#009E73",
+                                 "Moving Range CUSUM-" = "#D55E00")) +
     facet_wrap(~metric,nrow = 1) +
     #geom_path(linejoin = "mitre", lineend = "butt") +
     geom_polygon(alpha=0.6)+
     ggtitle("Radar plot \n CUSUM Chart") +
     xlab("") +
     ylab("Number of Signals") +
+
     theme(
       axis.title.y=element_text(size=15),
       axis.text.y=element_text(size=12, hjust=0.5),
