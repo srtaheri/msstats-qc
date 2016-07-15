@@ -57,8 +57,6 @@ shinyServer(function(input,output,session) {
   output$XmR_select_metric <- renderUI({
 
     checkboxGroupInput("XmR_checkbox_select","choose your prefered metric to view plots",
-                       #choices = c("Retention Time" = "RT_XmR","Peak Assymetry" = "PA_XmR",
-                         #          "Full Width at Half Maximum (FWHM)" = "Max_XmR","Total Peak Area" = "TA_XmR"),
                        choices = c("Peak Assymetry","BestRetentionTime",
                                    "MaxFWHM",
                                    "TotalArea", find_metrics(data$df)),
@@ -78,9 +76,7 @@ shinyServer(function(input,output,session) {
     
     Tabs <- lapply(input$XmR_checkbox_select,
                    function(x) {
-                     out <- NULL
                      if(has.key(x, map_XmR)) {
-                       out <- map_XmR[[x]]
                        tabPanel(x,
                                 plotlyOutput(map_XmR[[x]]),
                                 tags$head(tags$style(type="text/css")),
