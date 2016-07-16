@@ -184,42 +184,22 @@ XmR.plot <- function(prodata, metricData, precursor, L, U, ytitle, type) {
 }
 #################################################################################################################
 XmR.Summary.plot <- function(prodata,L,U) {
-  data.rt.1   <- XmR.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 1) %>% 
-    mutate(group = "Individual value") %>% mutate(metric = "Retention Time")
-  data.rt.2   <- XmR.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 2)%>% 
-    mutate(group = "Moving Range") %>% mutate(metric = "Retention Time")
-  data.rt.2$pr.y <- -(data.rt.2$pr.y)
   
+  dat <- XmR.Summary.DataFrame(prodata, L, U)
   
-  data.pa.1   <- XmR.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 1)%>% 
-    mutate(group = "Individual value") %>% mutate(metric = "Peak Assymetry")
-  data.pa.2   <- XmR.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 2)%>% 
-    mutate(group = "Moving Range") %>% mutate(metric = "Peak Assymetry")
-  data.pa.2$pr.y <- -(data.pa.2$pr.y)
-  
-  
-  data.fwhm.1 <- XmR.Summary.prepare(prodata, metric = "FWHM", L, U,type = 1)%>% 
-    mutate(group = "Individual value") %>% mutate(metric = "FWHM")
-  data.fwhm.2 <- XmR.Summary.prepare(prodata, metric = "FWHM", L, U,type = 2)%>% 
-    mutate(group = "Moving Range") %>% mutate(metric = "FWHM")
-   data.fwhm.2$pr.y <- -(data.fwhm.2$pr.y)
-  
-  
-  
-  data.ta.1   <- XmR.Summary.prepare(prodata, metric = "Total Area", L, U,type = 1)%>% 
-    mutate(group = "Individual value") %>% mutate(metric = "Total Area")
-  data.ta.2   <- XmR.Summary.prepare(prodata, metric = "Total Area", L, U,type = 2)%>% 
-    mutate(group = "Moving Range") %>% mutate(metric = "Total Area")
-   data.ta.2$pr.y <- -(data.ta.2$pr.y)
-  
-  
-  dat <- rbind(data.rt.1,data.rt.2,data.pa.1,data.pa.2,data.fwhm.1,data.fwhm.2,data.ta.1,data.ta.2)
-  theme_set(theme_gray(base_size = 10))
   gg <- ggplot(dat)
   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
   #gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
   #gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
   gg <- gg + geom_smooth(method="loess",aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
+  gg <- gg + scale_color_manual(breaks = c("Individual Value XmR+",
+                                           "Individual Value XmR-",
+                                           "Moving Range XmR+",
+                                           "Moving Range XmR-"),
+                                values = c("Individual Value XmR+" = "#E69F00",
+                                           "Individual Value XmR-" = "#56B4E9",
+                                           "Moving Range XmR+" = "#009E73",
+                                           "Moving Range XmR-" = "#D55E00"))
   gg <- gg + facet_wrap(~metric,nrow = 1)
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
   gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
@@ -236,35 +216,9 @@ XmR.Summary.plot <- function(prodata,L,U) {
   
 }
 ###############################################################################################
-expm1_trans <-  function() trans_new("expm1", "expm1", "log1p")
-
 CUSUM.Summary.plot <- function(prodata, L, U) {
-  h <- 5
-  data.rt.1   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 1)
-  data.rt.2   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 2)
-  data.rt.2$pr.y <- -(data.rt.2$pr.y)
-  
-  
-  
-  data.pa.1   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 1)
-  data.pa.2   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 2)
-  data.pa.2$pr.y <- -(data.pa.2$pr.y)
- 
-  
-  
-  data.fwhm.1 <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type = 1)
-  data.fwhm.2 <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type = 2)
-  data.fwhm.2$pr.y <- -(data.fwhm.2$pr.y)
-  
-  
-  
-  data.ta.1   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 1)
-  data.ta.2   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 2)
-  data.ta.2$pr.y <- -(data.ta.2$pr.y)
-  
-  
-   dat <- rbind(data.rt.1,data.rt.2,data.pa.1,data.pa.2,data.fwhm.1,data.fwhm.2,data.ta.1,data.ta.2)
-   #write.csv(file="dataHAHA.csv",dat)
+   h <- 5
+   dat <- CUSUM.Summary.DataFrame(prodata, L, U)
    
    gg <- ggplot(dat)
    gg <- gg + geom_hline(yintercept=0, alpha=0.5)
@@ -296,24 +250,32 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
    gg
   
 }
- 
-
 ####################################################################
 XmR.Radar.Plot <- function(prodata,L,U) {
 
-  dat <- rbind(XmR.Radar.Plot.prepare(prodata,L,U,metric = "Retention Time",type = 1,group = "Individual Value"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Retention Time",type = 2,group = "Moving Range"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 1,group = "Individual Value"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 2,group = "Moving Range"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 1,group = "Individual Value"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 2,group = "Moving Range"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 1,group = "Individual Value"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 2,group = "Moving Range"))
-  
+  dat <- XmR.Radar.Plot.DataFrame(prodata,L,U)
+  print(dat)
   #write.csv(file="dataRadar.csv",dat)
+  #df <- data.frame(x1 = 0, x2 = 0.5, y1 = 0, y2 = 0.5)
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group, fill=group)) +
     coord_polar() +
     geom_point() +
+    scale_fill_manual(breaks = c("Individual Value XmR+",
+                                  "Individual Value XmR-",
+                                  "Moving Range XmR+",
+                                  "Moving Range XmR-"),
+                       values = c("Individual Value XmR+" = "#E69F00",
+                                  "Individual Value XmR-" = "#56B4E9",
+                                  "Moving Range XmR+" = "#009E73",
+                                  "Moving Range XmR-" = "#D55E00")) +
+    scale_color_manual(breaks = c("Individual Value XmR+",
+                                 "Individual Value XmR-",
+                                 "Moving Range XmR+",
+                                 "Moving Range XmR-"),
+                      values = c("Individual Value XmR+" = "#E69F00",
+                                 "Individual Value XmR-" = "#56B4E9",
+                                 "Moving Range XmR+" = "#009E73",
+                                 "Moving Range XmR-" = "#D55E00")) +
     facet_wrap(~metric,nrow = 1) +
     geom_polygon(alpha=0.6)+
     ggtitle("Radar plot \n XmR Chart") +
@@ -326,6 +288,7 @@ XmR.Radar.Plot <- function(prodata,L,U) {
           legend.title=element_blank(),
           legend.text = element_text(size = 12)
   )
+  #geom_curve(aes(x = x1, y = y1, xend = x2, yend = y2, colour = "curve"), data = df) 
 }
 
 #################################################################################################################
@@ -343,6 +306,14 @@ CUSUM.Radar.Plot <- function(prodata,L,U) {
                                  "Individual Value CUSUM-" = "#56B4E9",
                                  "Moving Range CUSUM+" = "#009E73",
                                  "Moving Range CUSUM-" = "#D55E00")) +
+    scale_color_manual(breaks = c("Individual Value XmR+",
+                                  "Individual Value XmR-",
+                                  "Moving Range XmR+",
+                                  "Moving Range XmR-"),
+                       values = c("Individual Value XmR+" = "#E69F00",
+                                  "Individual Value XmR-" = "#56B4E9",
+                                  "Moving Range XmR+" = "#009E73",
+                                  "Moving Range XmR-" = "#D55E00")) +
     facet_wrap(~metric,nrow = 1) +
     #geom_path(linejoin = "mitre", lineend = "butt") +
     geom_polygon(alpha=0.6)+
