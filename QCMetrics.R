@@ -171,25 +171,19 @@ CUSUM.Summary.DataFrame <- function(prodata, L, U) {
   data.rt.2   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 2)
   data.rt.2$pr.y <- -(data.rt.2$pr.y)
   
-  
-  
-  data.pa.1   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 1)
-  data.pa.2   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 2)
-  data.pa.2$pr.y <- -(data.pa.2$pr.y)
-  
-  
+  data.ta.1   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 1)
+  data.ta.2   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 2)
+  data.ta.2$pr.y <- -(data.ta.2$pr.y)
   
   data.fwhm.1 <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type = 1)
   data.fwhm.2 <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type = 2)
   data.fwhm.2$pr.y <- -(data.fwhm.2$pr.y)
   
+  data.pa.1   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 1)
+  data.pa.2   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 2)
+  data.pa.2$pr.y <- -(data.pa.2$pr.y)
   
-  
-  data.ta.1   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 1)
-  data.ta.2   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 2)
-  data.ta.2$pr.y <- -(data.ta.2$pr.y)
-  
-  dat <- rbind(data.rt.1,data.rt.2,data.pa.1,data.pa.2,data.fwhm.1,data.fwhm.2,data.ta.1,data.ta.2)
+  dat <- rbind(data.rt.1,data.rt.2,data.ta.1,data.ta.2,data.fwhm.1,data.fwhm.2,data.pa.1,data.pa.2)
   
   return(dat)
 }
@@ -230,34 +224,22 @@ XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
 ###########################################################################################
 XmR.Summary.DataFrame <- function(prodata, L, U) {
   data.rt.1   <- XmR.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 1) 
- # %>% mutate(group = "Individual value") %>% mutate(metric = "Retention Time")
   data.rt.2   <- XmR.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 2)
-  #%>% mutate(group = "Moving Range") %>% mutate(metric = "Retention Time")
   data.rt.2$pr.y <- -(data.rt.2$pr.y)
   
-  
-  data.pa.1   <- XmR.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 1)
-  #%>% mutate(group = "Individual value") %>% mutate(metric = "Peak Assymetry")
-  data.pa.2   <- XmR.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 2)
-  #%>% mutate(group = "Moving Range") %>% mutate(metric = "Peak Assymetry")
-  data.pa.2$pr.y <- -(data.pa.2$pr.y)
-  
-  
-  data.fwhm.1 <- XmR.Summary.prepare(prodata, metric = "FWHM", L, U,type = 1)
-  #%>% mutate(group = "Individual value") %>% mutate(metric = "FWHM")
-  data.fwhm.2 <- XmR.Summary.prepare(prodata, metric = "FWHM", L, U,type = 2)
-  #%>%mutate(group = "Moving Range") %>% mutate(metric = "FWHM")
-  data.fwhm.2$pr.y <- -(data.fwhm.2$pr.y)
-  
-  
-  
   data.ta.1   <- XmR.Summary.prepare(prodata, metric = "Total Area", L, U,type = 1)
-  #%>% mutate(group = "Individual value") %>% mutate(metric = "Total Area")
   data.ta.2   <- XmR.Summary.prepare(prodata, metric = "Total Area", L, U,type = 2)
-  #%>% mutate(group = "Moving Range") %>% mutate(metric = "Total Area")
   data.ta.2$pr.y <- -(data.ta.2$pr.y)
   
-  dat <- rbind(data.rt.1,data.rt.2,data.pa.1,data.pa.2,data.fwhm.1,data.fwhm.2,data.ta.1,data.ta.2)
+  data.fwhm.1 <- XmR.Summary.prepare(prodata, metric = "FWHM", L, U,type = 1)
+  data.fwhm.2 <- XmR.Summary.prepare(prodata, metric = "FWHM", L, U,type = 2)
+  data.fwhm.2$pr.y <- -(data.fwhm.2$pr.y)
+  
+  data.pa.1   <- XmR.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 1)
+  data.pa.2   <- XmR.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 2)
+  data.pa.2$pr.y <- -(data.pa.2$pr.y)
+  
+  dat <- rbind(data.rt.1,data.rt.2,data.ta.1,data.ta.2,data.fwhm.1,data.fwhm.2,data.pa.1,data.pa.2)
   
   return(dat)
 }
@@ -292,7 +274,6 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.
   }
   return(QCno.out.range)
 }
-
 ###############################################################################################################
 XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group, XmR.type) {
   precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
@@ -318,18 +299,18 @@ XmR.Radar.Plot.DataFrame <- function(prodata,L,U) {
                XmR.Radar.Plot.prepare(prodata,L,U,metric = "Retention Time",type = 1,group = "Individual Value XmR-", XmR.type = "neg"),
                XmR.Radar.Plot.prepare(prodata,L,U,metric = "Retention Time",type = 2,group = "Moving Range XmR+", XmR.type = "poz"),
                XmR.Radar.Plot.prepare(prodata,L,U,metric = "Retention Time",type = 2,group = "Moving Range XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 1,group = "Individual Value XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 1,group = "Individual Value XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 2,group = "Moving Range XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 2,group = "Moving Range XmR-", XmR.type = "neg"),
+               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 1,group = "Individual Value XmR+", XmR.type = "poz"),
+               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 1,group = "Individual Value XmR-", XmR.type = "neg"),
+               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 2,group = "Moving Range XmR+", XmR.type = "poz"),
+               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 2,group = "Moving Range XmR-", XmR.type = "neg"),
                XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 1,group = "Individual Value XmR+", XmR.type = "poz"),
                XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 1,group = "Individual Value XmR-", XmR.type = "neg"),
                XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 2,group = "Moving Range XmR+", XmR.type = "poz"),
                XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 2,group = "Moving Range XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 1,group = "Individual Value XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 1,group = "Individual Value XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 2,group = "Moving Range XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 2,group = "Moving Range XmR-", XmR.type = "neg"))
+               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 1,group = "Individual Value XmR+", XmR.type = "poz"),
+               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 1,group = "Individual Value XmR-", XmR.type = "neg"),
+               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 2,group = "Moving Range XmR+", XmR.type = "poz"),
+               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 2,group = "Moving Range XmR-", XmR.type = "neg"))
   return(dat)
 }
 #################################################################################################################
@@ -356,18 +337,18 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata,L,U) {
                CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
                CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
                CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg"),
                CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
                CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
                CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
                CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg")
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
+               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg")
           )
   return(dat)
 }
