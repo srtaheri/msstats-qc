@@ -41,18 +41,16 @@ getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
 }
 #########################################################################################################
 find_custom_metrics <- function(prodata) {
-  #if("Annotations" %in% colnames(prodata)){
     prodata <- prodata[, which(colnames(prodata)=="Annotations"):ncol(prodata),drop = FALSE]
     nums <- sapply(prodata, is.numeric)
     other.metrics <- colnames(prodata[,nums])[1:ifelse(length(colnames(prodata[,nums]))<11,
                                                        length(colnames(prodata[,nums])),
                                                        10)
                                               ] # limiting custom metrics up to 10 metrics and not more
-    
+    if(any(is.na(other.metrics))) {
+      return(c())
+    }
     return(other.metrics)
-  #} else {
-  #  return(c())
-  #}
 }
 ################################################################
 CUSUM.data.prepare <- function(prodata, z, precursor.level, L, U, type) {
