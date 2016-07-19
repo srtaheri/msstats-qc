@@ -54,12 +54,10 @@ shinyServer(function(input,output,session) {
   })
   ######Show table of data #####################################################################################################
   output$prodata_table <- renderDataTable({
-    data$df[,input$show_prodata_columns, drop = FALSE]
+    data$df[,input$show_prodata_columns, drop = FALSE] # drop = F, is for not considering the last column as arrow and consider it as data frame
   }, options = list(pageLength = 25))
   ################################################################# plots ###################################################
-  
-  
-  ################################################################################################################
+  ###########################################################################################################################
   output$XmR_select_metric <- renderUI({
 
     checkboxGroupInput("XmR_checkbox_select","choose your prefered metric to view plots",

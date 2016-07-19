@@ -24,7 +24,7 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric,
     })
     
     do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-      layout(autosize = F, width = 1400, height = nlevels(prodata$Precursor)*20)
+      layout(autosize = F, width = 1400, height = nlevels(prodata$Precursor)*200)
   }
   
   else {
