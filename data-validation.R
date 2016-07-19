@@ -70,7 +70,11 @@ input.sanity.check <- function(prodata, processout, finalfile) {
   peakAss <- 2*prodata$MinStartTime/(prodata$MaxEndTime+prodata$MinStartTime)
   prodata.first <- prodata[,1:which(colnames(prodata)=="MaxEndTime")]
   prodata.first[,"Peak Assymetry"]<- 2*prodata$MinStartTime/(prodata$MaxEndTime+prodata$MinStartTime)
-  prodata <- cbind(prodata.first, prodata[,(which(colnames(prodata)=="MaxEndTime")+1):ncol(prodata)])
+  prodata <- cbind(prodata.first, prodata[,(which(colnames(prodata)=="MaxEndTime")+1):ncol(prodata), drop = FALSE])
+  
+  if(!("Annotations" %in% colnames(prodata))) {
+    prodata[,"Annotations"] <- NA
+  }
   
   # ## conditions
   required_column_names <- c("Precursor","Retention Time","Full Width at Half Maximum","Total Peak Area","MinStartTime"
