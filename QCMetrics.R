@@ -1,22 +1,38 @@
+COL.BEST.RET <- "Retention Time"
+COL.FWHM <- "Full Width at Half Maximum"
+COL.TOTAL.AREA <- "Total Peak Area"
+COL.PEAK.ASS <- "Peak Assymetry"
+
 getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
   precursor.data<-prodata[prodata$Precursor==precursor,]
   z <- 0
-  if(metric == "Retention Time"){
-    z = precursor.data$BestRetentionTime # raw data for retention time
-    #paste("bestsss")
-  } else if(metric == "Peak Assymetry") {
-    z = 2*precursor.data$MinStartTime/(precursor.data$MaxEndTime+precursor.data$MinStartTime) # raw data for peak assymetry
-  } else if(metric == "FWHM") {
-    z = precursor.data$MaxFWHM
-  } else if(metric == "Total Area") {
-    z = precursor.data$TotalArea # raw data for total area
-  } else {
-    z = precursor.data[,metric]
+  # if(metric == "Retention Time"){
+  #   z = precursor.data[,COL.BEST.RET] # raw data for retention time
+  #   #paste("bestsss")
+  # } else if(metric == "Peak Assymetry") {
+  #   z = 2*precursor.data$MinStartTime/(precursor.data$MaxEndTime+precursor.data$MinStartTime) # raw data for peak assymetry
+  # } else if(metric == "FWHM") {
+  #   z = precursor.data$MaxFWHM
+  # } else if(metric == "Total Area") {
+  #   z = precursor.data$TotalArea # raw data for total area
+  # } else {
+  #   z = precursor.data[,metric]
+  # }
+  z = precursor.data[,metric]
+  if(precursor=="GFCGLSQPK" && metric=="Full Width at Half Maximum"){
+    #print("Hi GFCGLSQPK")
+    #print(z)
   }
   if(normalization == TRUE) {
     mu=mean(z[L:U]) # in-control process mean
     sd=sd(z[L:U]) # in-control process variance
+    #print("SD is:")
+    #print(sd)
     z=scale(z[1:length(z)],mu,sd) # transformation for N(0,1) )
+    if(precursor=="GFCGLSQPK" && metric=="Full Width at Half Maximum"){
+      #print("BYE GFCGLSQPK")
+      #print(z)
+    }
     return(z)
   } else if(normalization == FALSE){
     return(z)
@@ -24,7 +40,7 @@ getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
   
 }
 #########################################################################################################
-find_metrics <- function(prodata) {
+find_custom_metrics <- function(prodata) {
   if("Annotations" %in% colnames(prodata)){
     prodata <- as.data.frame(prodata[, which(colnames(prodata)=="Annotations"):ncol(prodata)])
     nums <- sapply(prodata, is.numeric)
@@ -62,7 +78,14 @@ CUSUM.data.prepare <- function(prodata, z, precursor.level, L, U, type) {
   }
 
   QCno = 1:length(z)
-
+# print("QCno is : ")
+# print(QCno)
+# print("CUSUM poz is : ")
+# print(Cpoz)
+# print("CUSUM neg is : ")
+# print(-Cneg)
+# print("Annotations is : ")
+# print(prodata_grouped_by_precursor$Annotations)
   plot.data = 
     data.frame(QCno = QCno
                ,CUSUM.poz = Cpoz
@@ -74,17 +97,14 @@ CUSUM.data.prepare <- function(prodata, z, precursor.level, L, U, type) {
 }
 ###################################################################################################
 CP.data.prepare <- function(prodata, z, type) {
-  
   Et <-  numeric(length(z)-1) # this is Ct in type 1, and Dt in type 2.
   SS<- numeric(length(z)-1)
   SST<- numeric(length(z)-1)
   tho.hat <- 0
   
-  #Main = Main.title
-  
   if(type == 1) {
     ## Change point analysis for mean (Single step change model)
-    for(i in 1:length(z)-1) {
+    for(i in 1:(length(z)-1)) {
       Et[i]=(length(z)-i)*(((1/(length(z)-i))*sum(z[(i+1):length(z)]))-0)^2 #change point function
     }
     QCno=1:(length(z)-1) 
@@ -99,9 +119,8 @@ CP.data.prepare <- function(prodata, z, type) {
     }
     QCno=1:length(z)
   }
-  
   tho.hat = which(Et==max(Et)) # change point estimate
-
+  
   return(data.frame(QCno,Et,tho.hat)) # dataframe for change point plot
 }
 ###################################################################################################
@@ -137,7 +156,7 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
   y.neg <- rep(0,nrow(prodata))
   counter <- rep(0,nrow(prodata))
 
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
 
   for(j in 1:length(precursors)) {
     z <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T)
@@ -166,25 +185,17 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
   return(plot.data)
 }
 ############################################################################################
-CUSUM.Summary.DataFrame <- function(prodata, L, U) {
-  data.rt.1   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 1)
-  data.rt.2   <- CUSUM.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 2)
-  data.rt.2$pr.y <- -(data.rt.2$pr.y)
-  
-  data.ta.1   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 1)
-  data.ta.2   <- CUSUM.Summary.prepare(prodata, metric = "Total Area", L, U,type = 2)
-  data.ta.2$pr.y <- -(data.ta.2$pr.y)
-  
-  data.fwhm.1 <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type = 1)
-  data.fwhm.2 <- CUSUM.Summary.prepare(prodata, metric = "FWHM", L, U,type = 2)
-  data.fwhm.2$pr.y <- -(data.fwhm.2$pr.y)
-  
-  data.pa.1   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 1)
-  data.pa.2   <- CUSUM.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 2)
-  data.pa.2$pr.y <- -(data.pa.2$pr.y)
-  
-  dat <- rbind(data.rt.1,data.rt.2,data.ta.1,data.ta.2,data.fwhm.1,data.fwhm.2,data.pa.1,data.pa.2)
-  
+CUSUM.Summary.DataFrame <- function(prodata, data.metrics, L, U) {
+  dat <- data.frame(QCno = c(),
+                    pr.y = c(),
+                    group = c(),
+                    metric = c())
+  for (metric in data.metrics) {
+    data.1   <- CUSUM.Summary.prepare(prodata, metric = metric, L, U,type = 1)
+    data.2   <- CUSUM.Summary.prepare(prodata, metric = metric, L, U,type = 2)
+    data.2$pr.y <- -(data.2$pr.y)
+    dat <- rbind(dat,data.1,data.2)
+  }
   return(dat)
 }
 ############################################################################################
@@ -194,7 +205,7 @@ XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
   y.neg <- rep(0,nrow(prodata))
   counter <- rep(0,nrow(prodata))
   
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   
   for(j in 1:length(precursors)) {
     z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
@@ -222,30 +233,22 @@ XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
   return(plot.data)
 }
 ###########################################################################################
-XmR.Summary.DataFrame <- function(prodata, L, U) {
-  data.rt.1   <- XmR.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 1) 
-  data.rt.2   <- XmR.Summary.prepare(prodata, metric = "Retention Time", L, U,type = 2)
-  data.rt.2$pr.y <- -(data.rt.2$pr.y)
-  
-  data.ta.1   <- XmR.Summary.prepare(prodata, metric = "Total Area", L, U,type = 1)
-  data.ta.2   <- XmR.Summary.prepare(prodata, metric = "Total Area", L, U,type = 2)
-  data.ta.2$pr.y <- -(data.ta.2$pr.y)
-  
-  data.fwhm.1 <- XmR.Summary.prepare(prodata, metric = "FWHM", L, U,type = 1)
-  data.fwhm.2 <- XmR.Summary.prepare(prodata, metric = "FWHM", L, U,type = 2)
-  data.fwhm.2$pr.y <- -(data.fwhm.2$pr.y)
-  
-  data.pa.1   <- XmR.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 1)
-  data.pa.2   <- XmR.Summary.prepare(prodata, metric = "Peak Assymetry", L, U,type = 2)
-  data.pa.2$pr.y <- -(data.pa.2$pr.y)
-  
-  dat <- rbind(data.rt.1,data.rt.2,data.ta.1,data.ta.2,data.fwhm.1,data.fwhm.2,data.pa.1,data.pa.2)
-  
+XmR.Summary.DataFrame <- function(prodata, data.metrics, L, U) {
+  dat <- data.frame(QCno = c(),
+                    pr.y = c(),
+                    group = c(),
+                    metric = c())
+  for (metric in data.metrics) {
+    data.1   <- XmR.Summary.prepare(prodata, metric = metric, L, U,type = 1) 
+    data.2   <- XmR.Summary.prepare(prodata, metric = metric, L, U,type = 2)
+    data.2$pr.y <- -(data.2$pr.y)
+    dat <- rbind(dat, data.1, data.2)
+  }
   return(dat)
 }
 ############################################################################################
 Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type, XmR.type) {
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   QCno.out.range <- c()
   
   for(j in 1:length(precursors)) {
@@ -261,7 +264,7 @@ Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type, XmR.type
 #############################################################################################
 Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.type) {
   h <- 5
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   QCno.out.range <- c()
   
   for(j in 1:length(precursors)) {
@@ -276,7 +279,7 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.
 }
 ###############################################################################################################
 XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group, XmR.type) {
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   QCno.length <- c()
   for(j in 1:length(precursors)) {
     z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
@@ -294,28 +297,23 @@ XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group, XmR.type) {
   return(dat)
 }
 ################################################################################################
-XmR.Radar.Plot.DataFrame <- function(prodata,L,U) {
-  dat <- rbind(XmR.Radar.Plot.prepare(prodata,L,U,metric = "Retention Time",type = 1,group = "Individual Value XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Retention Time",type = 1,group = "Individual Value XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Retention Time",type = 2,group = "Moving Range XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Retention Time",type = 2,group = "Moving Range XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 1,group = "Individual Value XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 1,group = "Individual Value XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 2,group = "Moving Range XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Total Area",type = 2,group = "Moving Range XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 1,group = "Individual Value XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 1,group = "Individual Value XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 2,group = "Moving Range XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "FWHM",type = 2,group = "Moving Range XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 1,group = "Individual Value XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 1,group = "Individual Value XmR-", XmR.type = "neg"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 2,group = "Moving Range XmR+", XmR.type = "poz"),
-               XmR.Radar.Plot.prepare(prodata,L,U,metric = "Peak Assymetry",type = 2,group = "Moving Range XmR-", XmR.type = "neg"))
+XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
+  dat <- data.frame(peptides = c(), OutRangeQCno = c(), group = c(),
+                    orderby = c(), metric = c(), tool = c(),
+                    probability   = c()
+                    )
+  for (metric in data.metrics) {
+    data.1 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Individual Value XmR+", XmR.type = "poz")
+    data.2 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Individual Value XmR-", XmR.type = "neg")
+    data.3 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Moving Range XmR+", XmR.type = "poz")
+    data.4 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Moving Range XmR-", XmR.type = "neg")
+    dat <- rbind(dat, data.1, data.2, data.3, data.4)
+  }
   return(dat)
 }
 #################################################################################################################
 CUSUM.Radar.Plot.prepare <- function(prodata,L,U, metric,type,group, CUSUM.type) {
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   QCno.length <- c()
   for(j in 1:length(precursors)) {
     z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
@@ -332,23 +330,17 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U, metric,type,group, CUSUM.type)
   return(dat)
 }
 #################################################################################################
-CUSUM.Radar.Plot.DataFrame <- function(prodata,L,U) {
-  dat <- rbind(CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Retention Time",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Total Area",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "FWHM",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 1,group = "Individual Value CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 1,group = "Individual Value CUSUM-", CUSUM.type = "neg"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 2,group = "Moving Range CUSUM+", CUSUM.type = "poz"),
-               CUSUM.Radar.Plot.prepare(prodata,L,U, metric = "Peak Assymetry",type = 2,group = "Moving Range CUSUM-", CUSUM.type = "neg")
-          )
+CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
+  dat <- data.frame(peptides = c(), OutRangeQCno = c(), group = c(),
+                    orderby = c(), metric = c(), tool = c(),
+                    probability   = c()
+  )
+  for (metric in data.metrics) {
+   data.1 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 1, group = "Individual Value CUSUM+", CUSUM.type = "poz")
+   data.2 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 1, group = "Individual Value CUSUM-", CUSUM.type = "neg")
+   data.3 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 2, group = "Moving Range CUSUM+", CUSUM.type = "poz")
+   data.4 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 2, group = "Moving Range CUSUM-", CUSUM.type = "neg")
+   dat <- rbind(dat, data.1, data.2, data.3, data.4)
+  }
   return(dat)
 }

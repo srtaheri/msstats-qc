@@ -7,12 +7,13 @@ library(ggplot2)
 library(scales)
 
 CUSUM.outrange.thld <- 5
+
 #################################################################################################################
 render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric, plot.method, normalization.type, y.title1, y.title2){
   validate(
     need(!is.null(prodata), "Please upload your data")
   )
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   plots <- list()
   
   if(precursorSelection == "all peptides") {
@@ -23,7 +24,7 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric,
     })
     
     do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
-      layout(autosize = F, width = 1400, height = nlevels(prodata$Precursor)*200)
+      layout(autosize = F, width = 1400, height = nlevels(prodata$Precursor)*20)
   }
   
   else {
@@ -33,6 +34,17 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric,
     plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, method=plot.method,  y.title2, 2)
     
     subplot(plot1,plot2)
+  }
+}
+#################################################################################################################
+
+do.plot <- function(prodata, z, precursor, L, U, method,  y.title, type) {
+  if(method=="CUSUM") {
+    CUSUM.plot(prodata, z, precursor, L, U,  y.title, type)
+  } else if(method=="CP") {
+    CP.plot(prodata, z, precursor, y.title, type)
+  } else if(method=="XmR") {
+    XmR.plot(prodata, z, precursor, L, U, y.title, type)
   }
 }
 #################################################################################################
@@ -183,9 +195,9 @@ XmR.plot <- function(prodata, metricData, precursor, L, U, ytitle, type) {
 
 }
 #################################################################################################################
-XmR.Summary.plot <- function(prodata,L,U) {
+XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
   
-  dat <- XmR.Summary.DataFrame(prodata, L, U)
+  dat <- XmR.Summary.DataFrame(prodata,data.metrics, L, U)
   
   gg <- ggplot(dat)
   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
@@ -216,9 +228,9 @@ XmR.Summary.plot <- function(prodata,L,U) {
   
 }
 ###############################################################################################
-CUSUM.Summary.plot <- function(prodata, L, U) {
+CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
    h <- 5
-   dat <- CUSUM.Summary.DataFrame(prodata, L, U)
+   dat <- CUSUM.Summary.DataFrame(prodata, data.metrics, L, U)
    
    gg <- ggplot(dat)
    gg <- gg + geom_hline(yintercept=0, alpha=0.5)
@@ -251,10 +263,10 @@ CUSUM.Summary.plot <- function(prodata, L, U) {
   
 }
 ####################################################################
-XmR.Radar.Plot <- function(prodata,L,U) {
+XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
 
-  dat <- XmR.Radar.Plot.DataFrame(prodata,L,U)
-  print(dat)
+  dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
+  #print(dat)
   #write.csv(file="dataRadar.csv",dat)
   #df <- data.frame(x1 = 0, x2 = 0.5, y1 = 0, y2 = 0.5)
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group, fill=group)) +
@@ -292,8 +304,8 @@ XmR.Radar.Plot <- function(prodata,L,U) {
 }
 
 #################################################################################################################
-CUSUM.Radar.Plot <- function(prodata,L,U) {
-  dat <- CUSUM.Radar.Plot.DataFrame(prodata,L,U)
+CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
+  dat <- CUSUM.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
   
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group, fill = group)) +
     coord_polar() +
@@ -330,17 +342,6 @@ CUSUM.Radar.Plot <- function(prodata,L,U) {
     )
 }
 #################################################################################################################
-#################################################################################################################
-
-do.plot <- function(prodata, z, precursor, L, U, method,  y.title, type) {
-  if(method=="CUSUM") {
-    CUSUM.plot(prodata, z, precursor, L, U,  y.title, type)
-  } else if(method=="CP") {
-    CP.plot(prodata, z, precursor, y.title, type)
-  } else if(method=="XmR") {
-    XmR.plot(prodata, z, precursor, L, U, y.title, type)
-  }
-}
 
 #### Panel.cor for drawing scatter plot matrix ############################################################################
 panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
@@ -361,34 +362,47 @@ panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
 }
 #########################################################################################################################
 metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
+  #print(metric)
   multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
-  precursors <- levels(reorder(prodata$Precursor,prodata$BestRetentionTime))
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   for (j in 1:nlevels(prodata$Precursor)) {
     z <- getMetricData(prodata, precursors[j], L, U, metric, normalization)
     multidata[1:length(z),j]<-z
   }
   colnames(multidata) <- precursors
   multidata=data.frame(multidata)
+  #print(multidata)
   pairs(multidata, upper.panel = panel.cor, col = "blue")
 }
 #########################################################################################################################
-metrics_box.plot <- function(prodata) {
-  prodata$PrecursorRT <- reorder(prodata$Precursor,prodata$BestRetentionTime) # to plot boxplots y axis (Retention Time) in decreasing order
-  RT <- plot_ly(prodata, y = BestRetentionTime, color = PrecursorRT, type = "box") %>% 
-    layout(yaxis = list(title = "Retention Time"),showlegend = FALSE)
-  
-  prodata$PrecursorPA <- reorder(prodata$Precursor,prodata$MaxEndTime - prodata$MinStartTime) # to plot boxplots in increasing order
-  PA <- plot_ly(prodata, y = (MaxEndTime-MinStartTime), color = PrecursorPA, type = "box") %>%
-  layout(yaxis = list(title = "Peak Assymetry"),showlegend = FALSE)
-  
-  prodata$PrecursorTA <- reorder(prodata$Precursor,prodata$TotalArea) # to plot boxplots in decreasing order
-  TPA <- plot_ly(prodata, y = TotalArea, color = PrecursorTA, type = "box") %>% 
-    layout(yaxis = list(title = "Total Peak Area"),showlegend = FALSE)
-  
-  prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata$MaxFWHM) 
-  FWHM <- plot_ly(prodata, y = MaxFWHM, color = PrecursorFWHM, type = "box") %>% 
-    layout(yaxis = list(title = "FWHM"),showlegend = FALSE)
-  
-  return(subplot(RT, PA, TPA, FWHM, nrows = 4) %>%
-           layout(autosize = F, width = 700, height = 1000))
+metrics_box.plot <- function(prodata, data.metrics) {
+  plots <- list()
+  for(i in 1:length(data.metrics)) {
+    metric <- data.metrics[i]
+    precursor.data <- reorder(prodata$Precursor,prodata[,metric])
+    plots[[i]] <- plot_ly(prodata, y = prodata[,metric], color = precursor.data, type = "box") %>% 
+      layout(yaxis = list(title = metric),showlegend = FALSE)
+  }
+
+  p <- do.call(subplot,c(plots,nrows=length(plots))) %>% 
+    layout(autosize = F, width = 700, height = 1000)
+  return(p)
+  # prodata$PrecursorRT <- reorder(prodata$Precursor,prodata[,COL.BEST.RET]) # to plot boxplots y axis (Retention Time) in decreasing order
+  # RT <- plot_ly(prodata, y = prodata[,COL.BEST.RET], color = PrecursorRT, type = "box") %>% 
+  #   layout(yaxis = list(title = "Retention Time"),showlegend = FALSE)
+  # 
+  # prodata$PrecursorPA <- reorder(prodata$Precursor,prodata[,COL.PEAK.ASS]) # to plot boxplots in increasing order
+  # PA <- plot_ly(prodata, y = prodata[,COL.PEAK.ASS], color = PrecursorPA, type = "box") %>%
+  # layout(yaxis = list(title = "Peak Assymetry"),showlegend = FALSE)
+  # 
+  # prodata$PrecursorTA <- reorder(prodata$Precursor,prodata[,COL.TOTAL.AREA]) # to plot boxplots in decreasing order
+  # TPA <- plot_ly(prodata, y = prodata[,COL.TOTAL.AREA], color = PrecursorTA, type = "box") %>%
+  #   layout(yaxis = list(title = "Total Peak Area"),showlegend = FALSE)
+  # 
+  # prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata[,COL.FWHM])
+  # FWHM <- plot_ly(prodata, y = prodata[,COL.FWHM], color = PrecursorFWHM, type = "box") %>%
+  #   layout(yaxis = list(title = "FWHM"),showlegend = FALSE)
+  #return(subplot(RT,PA,nrows = 2) %>% layout(autosize = F, width = 700, height = 500, title = "hi",yaxis = list(title = "Retention Time")))
+  # return(subplot(RT, PA, TPA, FWHM, nrows = 4) %>%
+  #          layout(autosize = F, width = 700, height = 1000))
 }

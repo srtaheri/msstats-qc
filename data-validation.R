@@ -2,11 +2,11 @@
 # we suggest users to use and  which our code is based on. for example "BestRetentionTime" and "Max FWHM" which are the first element
 # of each vector in the list, are our suggestion so we wrote them in the fisrt place.
 best_colnames <- list(
-  c("BestRetentionTime" ,"Best.RT","best retention time", "retention time","rt","best ret time","intensity"),
-  c("MaxFWHM","fwhm","max.fwhm"),
-  c("TotalArea","total area","TA","T.Area"),
-  c("MinStartTime","min start time"),
-  c("MaxEndTime", "max end time"),
+  c("Retention Time","BestRetentionTime" ,"Best.RT","best retention time", "retention time","rt","best ret time","intensity","Best RT"),
+  c("Full Width at Half Maximum","MaxFWHM","fwhm","max.fwhm", "Max FWHM"),
+  c("Total Peak Area","Total Area","TotalArea","total area","TA","T.Area"),
+  c("MinStartTime","min start time","Min Start Time"),
+  c("MaxEndTime", "max end time","Max End Time"),
   c("Precursor","PeptideSequence"),
   c("Annotations","anotations")
 )
@@ -57,6 +57,41 @@ a <- clearString(x)
   }
 }
 
+input.sanity.check <- function(prodata, processout, finalfile) {
+  ## preparing data
+  prodata[prodata==""] <- NA
+  colnames(prodata) <- unlist(lapply(colnames(prodata), function(x)guessColumnName(x)))
+  
+  prodata[,"Full Width at Half Maximum"] <- as.numeric(gsub(",","",prodata[,"Full Width at Half Maximum"]))
+  prodata[,"Total Peak Area"] <- as.numeric(gsub(",","",prodata[,"Total Peak Area"]))
+  prodata[,"Retention Time"] <- as.numeric(gsub(",","",prodata[,"Retention Time"]))
+  prodata$MaxEndTime <- as.numeric(gsub(",","",prodata$MaxEndTime))
+  prodata$MinStartTime <- as.numeric(gsub(",","",prodata$MinStartTime))
+  peakAss <- 2*prodata$MinStartTime/(prodata$MaxEndTime+prodata$MinStartTime)
+  prodata.first <- prodata[,1:which(colnames(prodata)=="MaxEndTime")]
+  prodata.first[,"Peak Assymetry"]<- 2*prodata$MinStartTime/(prodata$MaxEndTime+prodata$MinStartTime)
+  prodata <- cbind(prodata.first, prodata[,(which(colnames(prodata)=="MaxEndTime")+1):ncol(prodata)])
+  
+  # ## conditions
+  required_column_names <- c("Precursor","Retention Time","Full Width at Half Maximum","Total Peak Area","MinStartTime"
+                             ,"MaxEndTime")
+  provided_column_names <- colnames(prodata)
+  if(all(required_column_names %in% provided_column_names)) {
+    processout <- rbind(processout, c("The column names : provided - okay"))
+    write.table(processout, file = finalfile, row.names = FALSE)
+  } else if(!all(required_column_names %in% provided_column_names)) {
+    missedInput <- which(!(required_column_names %in% provided_column_names))
+    processout <- rbind(processout, c(paste("ERROR : The required input : ",
+                                            paste(required_column_names[missedInput], collapse = ", "),
+                                            " are not provided in input - stop")))
+    #paste0("ERROR : The required input :", required_column_names[missedInput], ",are not provided in input - stop")
+    #write.table(processout, file = finalfile, row.names = FALSE)
+    #stop("Please check the required input. The required input needs (Precursor, BestRetentionTime, MaxFWHM, TotalArea, MinStartTime)")
+    
+  }
+  return(prodata)
+}
+
 ### Input_checking function #########################################################################################
 input_checking <- function(data){
 
@@ -64,7 +99,7 @@ input_checking <- function(data){
   allfiles <- list.files()
   
   num <- 0
-  filenaming <- "msstatsqc"
+  filenaming <- "./log/msstatsqc"
   finalfile <- "msstatsqc.log"
   
   while(is.element(finalfile,allfiles)) {
@@ -73,40 +108,17 @@ input_checking <- function(data){
   }
   
   session <- sessionInfo()
-  sink("sessionInfo.txt")
+  sink("./log/sessionInfo.txt")
   print(session)
   sink()
   
-  processout <- as.matrix(read.table("sessionInfo.txt", header=T, sep="\t"))
+  processout <- as.matrix(read.table("./log/sessionInfo.txt", header=T, sep="\t"))
   write.table(processout, file=finalfile, row.names=FALSE)
   
   processout <- rbind(processout, as.matrix(c(" "," ","MSstatsqc - dataProcess function"," "),ncol=1))
-  ## preparing data
-  data[data==""] <- NA
-  colnames(data) <- unlist(lapply(colnames(data), function(x)guessColumnName(x)))
   
-  data$MaxFWHM <- as.numeric(gsub(",","",data$MaxFWHM))
-  data$TotalArea <- as.numeric(gsub(",","",data$TotalArea))
-  data$BestRetentionTime <- as.numeric(gsub(",","",data$BestRetentionTime))
-  data$MaxEndTime <- as.numeric(gsub(",","",data$MaxEndTime))
-  data$MinStartTime <- as.numeric(gsub(",","",data$MinStartTime))
-  # ## conditions
-  required_column_names <- c("Precursor","BestRetentionTime","MaxFWHM","TotalArea","MinStartTime"
-                             ,"MaxEndTime")
-  provided_column_names <- colnames(data)
-  if(all(required_column_names %in% provided_column_names)) {
-    processout <- rbind(processout, c("The column names : provided - okay"))
-    write.table(processout, file = finalfile, row.names = FALSE)
-  } else if(!all(required_column_names %in% provided_column_names)) {
-    missedInput <- which(!(requiredInputUpper %in% providedInputUpper))
-    processout <- rbind(processout, c(paste("ERROR : The required input : ",
-                                            paste(required_column_names[missedInput], collapse = ", "),
-                                            " are not provided in input - stop")))
-    #paste0("ERROR : The required input :", required_column_names[missedInput], ",are not provided in input - stop")
-    write.table(processout, file = finalfile, row.names = FALSE)
-    stop("Please check the required input. The required input needs (Precursor, BestRetentionTime, MaxFWHM, TotalArea, MinStartTime)")
-    
-  }
+  data <- input.sanity.check(data, processout, finalfile)
+  
   
   return(data)
 }

@@ -122,10 +122,9 @@ shinyUI(fluidPage(
                                   plotlyOutput("box_plot", height = 2000)
                          ),
                          tabPanel("Scatterplot",
-                                  selectInput("metric_precursor", "Choose the metric",
-                                              choices = c("Retention Time","Total Area","FWHM","Peak Assymetry")),
+                                  uiOutput("scatter_plot_metric_selection"),
                                   plotOutput("scatter_plot")
-                         )
+                                 )
                        )
                        ),
              
