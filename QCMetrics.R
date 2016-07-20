@@ -6,18 +6,10 @@ COL.PEAK.ASS <- "Peak Assymetry"
 getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
   precursor.data<-prodata[prodata$Precursor==precursor,]
   z <- 0
-  # if(metric == "Retention Time"){
-  #   z = precursor.data[,COL.BEST.RET] # raw data for retention time
-  #   #paste("bestsss")
-  # } else if(metric == "Peak Assymetry") {
-  #   z = 2*precursor.data$MinStartTime/(precursor.data$MaxEndTime+precursor.data$MinStartTime) # raw data for peak assymetry
-  # } else if(metric == "FWHM") {
-  #   z = precursor.data$MaxFWHM
-  # } else if(metric == "Total Area") {
-  #   z = precursor.data$TotalArea # raw data for total area
-  # } else {
-  #   z = precursor.data[,metric]
-  # }
+  if(is.null(metric)){
+    return(NULL)  
+  }
+  
   z = precursor.data[,metric]
   if(precursor=="GFCGLSQPK" && metric=="Full Width at Half Maximum"){
     #print("Hi GFCGLSQPK")

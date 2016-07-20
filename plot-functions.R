@@ -367,6 +367,8 @@ metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   for (j in 1:nlevels(prodata$Precursor)) {
     z <- getMetricData(prodata, precursors[j], L, U, metric, normalization)
+    if(is.null(z))
+      return(NULL)
     multidata[1:length(z),j]<-z
   }
   colnames(multidata) <- precursors
