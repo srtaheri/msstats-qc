@@ -6,6 +6,13 @@ COL.PEAK.ASS <- "Peak Assymetry"
 getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
   precursor.data<-prodata[prodata$Precursor==precursor,]
   z <- 0
+
+
+  if(is.null(metric)){
+    return(NULL)  
+  }
+  
+
   z = precursor.data[,metric]
   if(normalization == TRUE) {
     mu=mean(z[L:U]) # in-control process mean

@@ -152,8 +152,10 @@ shinyServer(function(input,output,session) {
   })
   ########################################################## scatterplot matrix in Summary tab #################################
   output$scatter_plot_metric_selection <- renderUI({
-     selectInput("scatter_metric_select", "Choose the metric",
-                 choices = c(data$metrics), selected = COL.FWHM)
+
+     return(selectInput("scatter_metric_select", "Choose the metric",
+                 choices = c(data$metrics), selected = COL.FWHM))
+    
   })
   output$scatter_plot <- renderPlot({
     prodata <- data$df

@@ -1,4 +1,5 @@
 *.log
 .Rapp.history
 .Rhistory
+.RData
 sessionInfo.txt
