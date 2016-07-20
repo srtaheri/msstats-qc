@@ -76,8 +76,8 @@ CUSUM.data.prepare <- function(prodata, z, precursor.level, L, U, type) {
   return(plot.data)
 }
 ###################################################################################################
-CP.data.prepare <- function(prodata, z,precursor.level, type) {
-  prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor.level,]
+CP.data.prepare <- function(prodata, z, type) {
+  
   Et <-  numeric(length(z)-1) # this is Ct in type 1, and Dt in type 2.
   SS<- numeric(length(z)-1)
   SST<- numeric(length(z)-1)
@@ -106,7 +106,7 @@ CP.data.prepare <- function(prodata, z,precursor.level, type) {
   # print(tho.hat)
   # print(prodata_grouped_by_precursor$Annotations)
   #plot.data <- data.frame(QCno,Et,tho.hat,Annotations=prodata_grouped_by_precursor$Annotations) # dataframe for change point plot
-  plot.data <- data.frame(QCno,Et,tho.hat,Annotations=prodata_grouped_by_precursor$Annotations)
+  plot.data <- data.frame(QCno,Et,tho.hat)
   print(plot.data)
   return(plot.data)
 }

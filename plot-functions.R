@@ -123,7 +123,7 @@ CUSUM.plot <- function(prodata, metricData, precursor, L, U,  ytitle, type) {
 CP.plot <- function(prodata, metricData, precursor, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursor,]
   ## Create variables 
-  plot.data <- CP.data.prepare(prodata, metricData, precursor, type)
+  plot.data <- CP.data.prepare(prodata, metricData, type)
   y.max=max(plot.data$Et) # y axis upper limit
   y.min=0 # y axis lower limit
   
@@ -267,7 +267,8 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
 
   dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
   #write.csv(file="dataRadar.csv",dat)
-  ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group, fill=group)) +
+  ggplot(dat, aes(y = OutRangeQCno, x = substring(reorder(peptides,orderby), first = 1, last = 3),
+                  group = group, colour = group, fill=group)) +
     coord_polar() +
     geom_point() +
     scale_fill_manual(breaks = c("Individual Value XmR+",
@@ -305,7 +306,8 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
 CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
   dat <- CUSUM.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
   
-  ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group, fill = group)) +
+  ggplot(dat, aes(y = OutRangeQCno, x = substring(reorder(peptides,orderby), first = 1, last = 3),
+                  group = group, colour = group, fill = group)) +
     coord_polar() +
     geom_point() +
     scale_fill_manual(breaks = c("Individual Value CUSUM+",
@@ -369,7 +371,7 @@ metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
       return(NULL)
     multidata[1:length(z),j]<-z
   }
-  colnames(multidata) <- precursors
+  colnames(multidata) <- substring(precursors, first = 1, last = 3)
   multidata=data.frame(multidata)
   #print(multidata)
   pairs(multidata, upper.panel = panel.cor, col = "blue")
@@ -379,7 +381,7 @@ metrics_box.plot <- function(prodata, data.metrics) {
   plots <- list()
   for(i in 1:length(data.metrics)) {
     metric <- data.metrics[i]
-    precursor.data <- reorder(prodata$Precursor,prodata[,metric])
+    precursor.data <- substring(reorder(prodata$Precursor,prodata[,metric]), first = 1, last = 3)
     plots[[i]] <- plot_ly(prodata, y = prodata[,metric], color = precursor.data, type = "box") %>% 
       layout(yaxis = list(title = metric),showlegend = FALSE)
   }
