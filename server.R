@@ -17,6 +17,7 @@ shinyServer(function(input,output,session) {
   COL.FWHM <- "Full Width at Half Maximum"
   COL.TOTAL.AREA <- "Total Peak Area"
   COL.PEAK.ASS <- "Peak Assymetry"
+  
 
   #### Read data  ##################################################################################################
   data <- reactiveValues(df = NULL, metrics = NULL)
@@ -26,17 +27,17 @@ shinyServer(function(input,output,session) {
     file1 <- input$filein
     data$df <- input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
     data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
-  })
+  }, priority = 20)
   
   observeEvent(input$sample_button, {
     data$df <- input_checking(read.csv("./Datasets/Sampledata_CPTAC_Study_9_1_Site54.csv"))
     data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
-  })
+  }, priority = 20)
   
   observeEvent(input$clear_button, {
     data$df <- NULL
     data$metrics <- NULL
-  })
+  }, priority = 20)
   ##### Precursor type selection #####################################################################################
   output$pepSelect <- renderUI({
     prodata <- data$df
@@ -74,11 +75,13 @@ shinyServer(function(input,output,session) {
     Tabs <- lapply(input$XmR_checkbox_select,
                    function(x) {
                        tabPanel(x,
-                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = x, plot.method = "XmR", normalization.type = FALSE, y.title1 = "Individual Value", y.title2 = "Moving Range")),
                                 tags$head(tags$style(type="text/css")),
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                  tags$div("It may take a while to load the plots, please wait...",
-                                                          id="loadmessage")))
+                                                          id="loadmessage")),
+                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = x, plot.method = "XmR", normalization.type = FALSE, y.title1 = "Individual Value", y.title2 = "Moving Range"))
+                                
+                                )
                    })
     do.call(tabsetPanel, Tabs)
   })
@@ -101,14 +104,12 @@ shinyServer(function(input,output,session) {
                    function(x) {
                
                        tabPanel(x,
-                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = x, plot.method = "CUSUM", normalization.type = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation")),
                                 tags$head(tags$style(type="text/css")),
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                  tags$div("It may take a while to load the plots, please wait...",
-                                                          id="loadmessage"))
-                       )
-                     
-                     
+                                                          id="loadmessage")),
+                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = x, plot.method = "CUSUM", normalization.type = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation"))
+                                )
                    })
     
     do.call(tabsetPanel, Tabs)
@@ -126,22 +127,17 @@ shinyServer(function(input,output,session) {
     
   })
   #################################################################################################################
-  # map_CP <- hash(keys= c("BestRetentionTime","Peak Assymetry",
-  #                           "MaxFWHM",
-  #                           "TotalArea"),
-  #                   values=c("RT_CP","PA_CP","Max_CP","TA_CP"))
-  
   output$CP_tabset <- renderUI({
     
     Tabs <- lapply(input$CP_checkbox_select,
                    function(x) {
                        tabPanel(x,
-                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = x, plot.method = "CP", normalization.type = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation")),
                                 tags$head(tags$style(type="text/css")),
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                  tags$div("It may take a while to load the plots, please wait...",
-                                                          id="loadmessage"))
-                       )
+                                                          id="loadmessage")),
+                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = x, plot.method = "CP", normalization.type = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation"))
+                                )
                    })
     
     do.call(tabsetPanel, Tabs)
@@ -159,7 +155,6 @@ shinyServer(function(input,output,session) {
      selectInput("scatter_metric_select", "Choose the metric",
                  choices = c(data$metrics), selected = COL.FWHM)
   })
-
   output$scatter_plot <- renderPlot({
     prodata <- data$df
       validate(
@@ -167,7 +162,8 @@ shinyServer(function(input,output,session) {
       )
     metrics_scatter.plot(prodata,input$L, input$U, metric = input$scatter_metric_select, normalization = T)
   }, height = 1500) 
-  
+  outputOptions(output, "scatter_plot_metric_selection", priority = 10)
+  outputOptions(output, "scatter_plot", priority = 1)
   ######################################################### plot_summary in Summary tab ########################################
   output$plot_summary <- renderPlot({
 
@@ -183,22 +179,7 @@ shinyServer(function(input,output,session) {
     
 
   }, height = 1500)
-  
-  
-  # output$plot_summary <- renderPlotly({
-  #   prodata <- data$df
-  #   validate(
-  #     need(!is.null(prodata), "Please upload your data")
-  #   )
-  #   subplot(
-  #     ggplotly(CUSUM.Summary.plot(prodata, input$L, input$U)),
-  #     CUSUM.Radar.Plot.combine(prodata,input$L, input$U),
-  #     ggplotly(XmR.Summary.plot(prodata, input$L, input$U)),
-  #     XmR.Radar.Plot.combine(prodata,input$L, input$U),
-  #     nrows = 4
-  #   )%>%
-  #     layout(autosize = F, width = 1250, height = 3200,showlegend = FALSE)
-  # })
+
   
   ###########################################################################################################################
   ###########################################################################################################################

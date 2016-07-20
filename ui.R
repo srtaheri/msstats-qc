@@ -81,7 +81,6 @@ shinyUI(fluidPage(
                            ),
                            
                           wellPanel(
-                            #p("if you want to clear your data and all the tables and plots from the system, click this button"),
                             actionButton("clear_button", "Clear the data and plots"),
                             bsTooltip("clear_button","click this button to clear your data and all the tables and plots from the system.", placement = "bottom", trigger = "hover",
                                       options = NULL)
@@ -115,14 +114,28 @@ shinyUI(fluidPage(
               tabPanel("Metric Summary",
                        tabsetPanel(
                            tabPanel("Plot Summary",
+                                    tags$head(tags$style(type="text/css")),
+                                    conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                     tags$div("It may take a while to load the plots, please wait...",
+                                                              id="loadmessage")),
                                     plotOutput("plot_summary")
                                     #plotlyOutput("plot_summary")
+           
                            ),
                          tabPanel("Boxplot",
+                                  tags$head(tags$style(type="text/css")),
+                                  conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                   tags$div("It may take a while to load the plots, please wait...",
+                                                            id="loadmessage")),
                                   plotlyOutput("box_plot", height = 2000)
+           
                          ),
                          tabPanel("Scatterplot",
                                   uiOutput("scatter_plot_metric_selection"),
+                                  tags$head(tags$style(type="text/css")),
+                                  conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                   tags$div("It may take a while to load the plots, please wait...",
+                                                            id="loadmessage")),
                                   plotOutput("scatter_plot")
                                  )
                        )
