@@ -6,33 +6,11 @@ COL.PEAK.ASS <- "Peak Assymetry"
 getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
   precursor.data<-prodata[prodata$Precursor==precursor,]
   z <- 0
-  # if(metric == "Retention Time"){
-  #   z = precursor.data[,COL.BEST.RET] # raw data for retention time
-  #   #paste("bestsss")
-  # } else if(metric == "Peak Assymetry") {
-  #   z = 2*precursor.data$MinStartTime/(precursor.data$MaxEndTime+precursor.data$MinStartTime) # raw data for peak assymetry
-  # } else if(metric == "FWHM") {
-  #   z = precursor.data$MaxFWHM
-  # } else if(metric == "Total Area") {
-  #   z = precursor.data$TotalArea # raw data for total area
-  # } else {
-  #   z = precursor.data[,metric]
-  # }
   z = precursor.data[,metric]
-  if(precursor=="GFCGLSQPK" && metric=="Full Width at Half Maximum"){
-    #print("Hi GFCGLSQPK")
-    #print(z)
-  }
   if(normalization == TRUE) {
     mu=mean(z[L:U]) # in-control process mean
     sd=sd(z[L:U]) # in-control process variance
-    #print("SD is:")
-    #print(sd)
     z=scale(z[1:length(z)],mu,sd) # transformation for N(0,1) )
-    if(precursor=="GFCGLSQPK" && metric=="Full Width at Half Maximum"){
-      #print("BYE GFCGLSQPK")
-      #print(z)
-    }
     return(z)
   } else if(normalization == FALSE){
     return(z)
@@ -80,14 +58,7 @@ CUSUM.data.prepare <- function(prodata, z, precursor.level, L, U, type) {
   }
 
   QCno = 1:length(z)
-# print("QCno is : ")
-# print(QCno)
-# print("CUSUM poz is : ")
-# print(Cpoz)
-# print("CUSUM neg is : ")
-# print(-Cneg)
-# print("Annotations is : ")
-# print(prodata_grouped_by_precursor$Annotations)
+  
   plot.data = 
     data.frame(QCno = QCno
                ,CUSUM.poz = Cpoz
@@ -98,7 +69,8 @@ CUSUM.data.prepare <- function(prodata, z, precursor.level, L, U, type) {
   return(plot.data)
 }
 ###################################################################################################
-CP.data.prepare <- function(prodata, z, type) {
+CP.data.prepare <- function(prodata, z,precursor.level, type) {
+  prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor.level,]
   Et <-  numeric(length(z)-1) # this is Ct in type 1, and Dt in type 2.
   SS<- numeric(length(z)-1)
   SST<- numeric(length(z)-1)
@@ -122,8 +94,14 @@ CP.data.prepare <- function(prodata, z, type) {
     QCno=1:length(z)
   }
   tho.hat = which(Et==max(Et)) # change point estimate
-  
-  return(data.frame(QCno,Et,tho.hat)) # dataframe for change point plot
+  # print(QCno)
+  # print(Et)
+  # print(tho.hat)
+  # print(prodata_grouped_by_precursor$Annotations)
+  #plot.data <- data.frame(QCno,Et,tho.hat,Annotations=prodata_grouped_by_precursor$Annotations) # dataframe for change point plot
+  plot.data <- data.frame(QCno,Et,tho.hat,Annotations=prodata_grouped_by_precursor$Annotations)
+  print(plot.data)
+  return(plot.data)
 }
 ###################################################################################################
 XmR.data.prepare <- function(prodata, z, L,U, type) {

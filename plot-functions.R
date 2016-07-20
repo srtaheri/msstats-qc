@@ -123,7 +123,7 @@ CUSUM.plot <- function(prodata, metricData, precursor, L, U,  ytitle, type) {
 CP.plot <- function(prodata, metricData, precursor, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursor,]
   ## Create variables 
-  plot.data <- CP.data.prepare(prodata, metricData, type)
+  plot.data <- CP.data.prepare(prodata, metricData, precursor, type)
   y.max=max(plot.data$Et) # y axis upper limit
   y.min=0 # y axis lower limit
   
@@ -266,9 +266,7 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
 XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
 
   dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
-  #print(dat)
   #write.csv(file="dataRadar.csv",dat)
-  #df <- data.frame(x1 = 0, x2 = 0.5, y1 = 0, y2 = 0.5)
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby), group = group, colour = group, fill=group)) +
     coord_polar() +
     geom_point() +
