@@ -198,14 +198,9 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
   
   dat <- XmR.Summary.DataFrame(prodata,data.metrics, L, U)
   tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics)
-  #tho.hat.df[which(tho.hat.df[,3] == "Moving Range"),]
-  # print("hi")
-   #print(tho.hat.df)
-  # print("bye")
+
   gg <- ggplot(dat)
   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
-  #gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
-  #gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
   gg <- gg + geom_smooth(method="loess",aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
   gg <- gg + geom_point(data = tho.hat.df, aes(x = tho.hat.df$tho.hat, y = tho.hat.df$y), color = "red")
   gg <- gg + scale_color_manual(breaks = c("Individual Value XmR+",
@@ -235,13 +230,12 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
 CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
    h <- 5
    dat <- CUSUM.Summary.DataFrame(prodata, data.metrics, L, U)
+   tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics)
    
    gg <- ggplot(dat)
    gg <- gg + geom_hline(yintercept=0, alpha=0.5)
-   #gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
-   #gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
    gg <- gg + stat_smooth(method="loess", aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group))
-   #gg <- gg + geom_point(data = CP.data.prepare(prodata, z, type), aes(x = tho.hat, y = 1.1))
+   gg <- gg + geom_point(data = tho.hat.df, aes(x = tho.hat.df$tho.hat, y = tho.hat.df$y), color = "red")
    gg <- gg + scale_color_manual(breaks = c("Individual Value CUSUM+",
                                             "Individual Value CUSUM-",
                                             "Moving Range CUSUM+",
@@ -251,7 +245,7 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
                                             "Moving Range CUSUM+" = "#009E73",
                                             "Moving Range CUSUM-" = "#D55E00"))
    gg <- gg + facet_wrap(~metric,nrow = 1)
-   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),
+   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.2,1.2),
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
    gg <- gg + ggtitle("CUSUM Chart")
    
@@ -272,6 +266,7 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
 
   dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
   #write.csv(file="dataRadar.csv",dat)
+
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby),
                   group = group, colour = group, fill=group)) +
     coord_polar() +
@@ -367,7 +362,7 @@ panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
 }
 #########################################################################################################################
 metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
-  #print(metric)
+  
   multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   for (j in 1:nlevels(prodata$Precursor)) {
@@ -378,7 +373,6 @@ metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
   }
   colnames(multidata) <- substring(precursors, first = 1, last = 3)
   multidata=data.frame(multidata)
-  #print(multidata)
   pairs(multidata, upper.panel = panel.cor, col = "blue")
 }
 #########################################################################################################################
@@ -394,22 +388,4 @@ metrics_box.plot <- function(prodata, data.metrics) {
   p <- do.call(subplot,c(plots,nrows=length(plots))) %>% 
     layout(autosize = F, width = 700, height = 1000)
   return(p)
-  # prodata$PrecursorRT <- reorder(prodata$Precursor,prodata[,COL.BEST.RET]) # to plot boxplots y axis (Retention Time) in decreasing order
-  # RT <- plot_ly(prodata, y = prodata[,COL.BEST.RET], color = PrecursorRT, type = "box") %>% 
-  #   layout(yaxis = list(title = "Retention Time"),showlegend = FALSE)
-  # 
-  # prodata$PrecursorPA <- reorder(prodata$Precursor,prodata[,COL.PEAK.ASS]) # to plot boxplots in increasing order
-  # PA <- plot_ly(prodata, y = prodata[,COL.PEAK.ASS], color = PrecursorPA, type = "box") %>%
-  # layout(yaxis = list(title = "Peak Assymetry"),showlegend = FALSE)
-  # 
-  # prodata$PrecursorTA <- reorder(prodata$Precursor,prodata[,COL.TOTAL.AREA]) # to plot boxplots in decreasing order
-  # TPA <- plot_ly(prodata, y = prodata[,COL.TOTAL.AREA], color = PrecursorTA, type = "box") %>%
-  #   layout(yaxis = list(title = "Total Peak Area"),showlegend = FALSE)
-  # 
-  # prodata$PrecursorFWHM <- reorder(prodata$Precursor,prodata[,COL.FWHM])
-  # FWHM <- plot_ly(prodata, y = prodata[,COL.FWHM], color = PrecursorFWHM, type = "box") %>%
-  #   layout(yaxis = list(title = "FWHM"),showlegend = FALSE)
-  #return(subplot(RT,PA,nrows = 2) %>% layout(autosize = F, width = 700, height = 500, title = "hi",yaxis = list(title = "Retention Time")))
-  # return(subplot(RT, PA, TPA, FWHM, nrows = 4) %>%
-  #          layout(autosize = F, width = 700, height = 1000))
 }

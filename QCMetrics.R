@@ -100,7 +100,7 @@ CP.data.prepare <- function(prodata, z, type) {
   }
   tho.hat = which(Et==max(Et)) # change point estimate
   plot.data <- data.frame(QCno,Et,tho.hat)
-print(plot.data)
+
   return(plot.data)
 }
 ###################################################################################################
@@ -278,6 +278,7 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.
 ###############################################################################################################
 XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group, XmR.type) {
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
   for(j in 1:length(precursors)) {
     z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
@@ -312,6 +313,7 @@ XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
 #################################################################################################################
 CUSUM.Radar.Plot.prepare <- function(prodata,L,U, metric,type,group, CUSUM.type) {
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
   for(j in 1:length(precursors)) {
     z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
