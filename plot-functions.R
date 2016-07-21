@@ -215,6 +215,7 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.2,1.2),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
   gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
   gg <- gg + ggtitle("XmR Chart")
+  theme_set(theme_gray(base_size = 15)) # this will change the size of all the texts in all ggplot functions
   gg <- gg + theme(plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
                    axis.text.x=element_text(size=12, vjust=0.5),
                    axis.text.y=element_text(size=12, hjust=0.5),
