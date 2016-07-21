@@ -167,6 +167,9 @@ shinyServer(function(input,output,session) {
   outputOptions(output, "scatter_plot_metric_selection", priority = 10)
   outputOptions(output, "scatter_plot", priority = 1)
   ######################################################### plot_summary in Summary tab ########################################
+  my_height <- reactive({
+    my_height <- ceiling(length(data$metrics)/4)*1200
+  })
   output$plot_summary <- renderPlot({
 
     prodata <- data$df
@@ -180,9 +183,9 @@ shinyServer(function(input,output,session) {
     grid.arrange(p1,p2,p3,p4, ncol = 1)
     
 
-  }, height = 1500)
+  }, height = my_height )
 
-  
+  #1500
   ###########################################################################################################################
   ###########################################################################################################################
   ########################################################## "help" tab ################################

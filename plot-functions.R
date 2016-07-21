@@ -211,7 +211,7 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
                                            "Individual Value XmR-" = "#56B4E9",
                                            "Moving Range XmR+" = "#009E73",
                                            "Moving Range XmR-" = "#D55E00"))
-  gg <- gg + facet_wrap(~metric,nrow = 1)
+  gg <- gg + facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4))
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.2,1.2),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
   gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
   gg <- gg + ggtitle("XmR Chart")
@@ -245,7 +245,7 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
                                             "Individual Value CUSUM-" = "#56B4E9",
                                             "Moving Range CUSUM+" = "#009E73",
                                             "Moving Range CUSUM-" = "#D55E00"))
-   gg <- gg + facet_wrap(~metric,nrow = 1)
+   gg <- gg + facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4))
    gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.2,1.2),
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
    gg <- gg + ggtitle("CUSUM Chart")
@@ -288,7 +288,7 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
                                  "Individual Value XmR-" = "#56B4E9",
                                  "Moving Range XmR+" = "#009E73",
                                  "Moving Range XmR-" = "#D55E00")) +
-    facet_wrap(~metric,nrow = 1) +
+    facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4)) +
     geom_polygon(alpha=0.6)+
     ggtitle("Radar plot \n XmR Chart") +
     xlab("") +
@@ -327,7 +327,7 @@ CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
                                   "Individual Value XmR-" = "#56B4E9",
                                   "Moving Range XmR+" = "#009E73",
                                   "Moving Range XmR-" = "#D55E00")) +
-    facet_wrap(~metric,nrow = 1) +
+    facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4)) +
     #geom_path(linejoin = "mitre", lineend = "butt") +
     geom_polygon(alpha=0.6)+
     ggtitle("Radar plot \n CUSUM Chart") +
