@@ -15,6 +15,9 @@ getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
   if(normalization == TRUE) {
     mu=mean(z[L:U]) # in-control process mean
     sd=sd(z[L:U]) # in-control process variance
+    print(paste(metric, precursor,"and length of z is:",length(z)))
+    print(sd)
+    if(sd == 0) {sd <- 0.0001}
     z=scale(z[1:length(z)],mu,sd) # transformation for N(0,1) )
     return(z)
   } else if(normalization == FALSE){
@@ -278,13 +281,13 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.
 ###############################################################################################################
 XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group, XmR.type) {
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-  precursors <- substring(precursors, first = 1, last = 3)
+  precursors2 <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
   for(j in 1:length(precursors)) {
     z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
     QCno.length <- c(QCno.length,length(z))
   }
-  dat <- data.frame(peptides = precursors,
+  dat <- data.frame(peptides = precursors2,
              OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type, XmR.type),
              group         = rep(group,length(precursors)),
              orderby       = seq(1:length(precursors)),
@@ -313,13 +316,13 @@ XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
 #################################################################################################################
 CUSUM.Radar.Plot.prepare <- function(prodata,L,U, metric,type,group, CUSUM.type) {
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-  precursors <- substring(precursors, first = 1, last = 3)
+  precursors2 <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
   for(j in 1:length(precursors)) {
     z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
     QCno.length <- c(QCno.length,length(z))
   }
-  dat <- data.frame(peptides = precursors,
+  dat <- data.frame(peptides = precursors2,
                     OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = metric,type = type, CUSUM.type),
                     group         = rep(group,length(precursors)),
                     orderby       = seq(1:length(precursors)),
