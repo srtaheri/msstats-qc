@@ -2,17 +2,15 @@ COL.BEST.RET <- "Retention Time"
 COL.FWHM <- "Full Width at Half Maximum"
 COL.TOTAL.AREA <- "Total Peak Area"
 COL.PEAK.ASS <- "Peak Assymetry"
-
+#############################################################################################
 getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
   precursor.data<-prodata[prodata$Precursor==precursor,]
   z <- 0
-
 
   if(is.null(metric)){
     return(NULL)  
   }
   
-
   z = precursor.data[,metric]
   if(normalization == TRUE) {
     mu=mean(z[L:U]) # in-control process mean
@@ -101,14 +99,27 @@ CP.data.prepare <- function(prodata, z, type) {
     QCno=1:length(z)
   }
   tho.hat = which(Et==max(Et)) # change point estimate
-  # print(QCno)
-  # print(Et)
-  # print(tho.hat)
-  # print(prodata_grouped_by_precursor$Annotations)
-  #plot.data <- data.frame(QCno,Et,tho.hat,Annotations=prodata_grouped_by_precursor$Annotations) # dataframe for change point plot
   plot.data <- data.frame(QCno,Et,tho.hat)
-  print(plot.data)
+print(plot.data)
   return(plot.data)
+}
+###################################################################################################
+get_CP_tho.hat <- function(prodata, L, U, data.metrics) {
+  tho.hat <- data.frame(tho.hat = c(), metric = c(), group = c(), y=c())
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  for(metric in data.metrics) {
+    for (j in 1:nlevels(prodata$Precursor)) {
+      z <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = TRUE)
+      mix <- rbind(
+        data.frame(tho.hat = CP.data.prepare(prodata, z, type = 1)$tho.hat[1], metric = metric, group = "Individual Value", y=1.1),
+        data.frame(tho.hat = CP.data.prepare(prodata, z, type = 2)$tho.hat[1], metric = metric, group = "Moving Range", y=-1.1)
+      )
+      tho.hat <- rbind(tho.hat, mix)
+      
+    }
+  }
+  
+  return(tho.hat)
 }
 ###################################################################################################
 XmR.data.prepare <- function(prodata, z, L,U, type) {

@@ -19,8 +19,8 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric,
   if(precursorSelection == "all peptides") {
     results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
       metricData <- getMetricData(prodata, precursors[j], L, U, metric = normalize.metric, normalization = normalization.type)
-      plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, method=plot.method, y.title1, 1)
-      plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, method=plot.method, y.title2, 2)
+      plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, method=plot.method, y.title1, type = 1)
+      plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, method=plot.method, y.title2, type = 2)
     })
     
     do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
@@ -30,8 +30,8 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric,
   else {
     metricData <- getMetricData(prodata, precursorSelection, L, U, metric = normalize.metric, normalization = normalization.type)
     
-    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, method=plot.method,  y.title1, 1)
-    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, method=plot.method,  y.title2, 2)
+    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, method=plot.method,  y.title1, type = 1)
+    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, method=plot.method,  y.title2, type = 2)
     
     subplot(plot1,plot2)
   }
@@ -157,7 +157,6 @@ CP.plot <- function(prodata, metricData, precursor, ytitle, type) {
 XmR.plot <- function(prodata, metricData, precursor, L, U, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursor,]
   plot.data <- XmR.data.prepare(prodata, metricData, L, U, type)
-  #print(plot.data)
   
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
   #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
@@ -198,12 +197,17 @@ XmR.plot <- function(prodata, metricData, precursor, L, U, ytitle, type) {
 XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
   
   dat <- XmR.Summary.DataFrame(prodata,data.metrics, L, U)
-  
+  tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics)
+  #tho.hat.df[which(tho.hat.df[,3] == "Moving Range"),]
+  # print("hi")
+   #print(tho.hat.df)
+  # print("bye")
   gg <- ggplot(dat)
   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
   #gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
   #gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
   gg <- gg + geom_smooth(method="loess",aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
+  gg <- gg + geom_point(data = tho.hat.df, aes(x = tho.hat.df$tho.hat, y = tho.hat.df$y), color = "red")
   gg <- gg + scale_color_manual(breaks = c("Individual Value XmR+",
                                            "Individual Value XmR-",
                                            "Moving Range XmR+",
@@ -213,7 +217,7 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
                                            "Moving Range XmR+" = "#009E73",
                                            "Moving Range XmR-" = "#D55E00"))
   gg <- gg + facet_wrap(~metric,nrow = 1)
-  gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.1,1.1),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
+  gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.2,1.2),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
   gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
   gg <- gg + ggtitle("XmR Chart")
   gg <- gg + theme(plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
@@ -237,6 +241,7 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
    #gg <- gg + geom_point(aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
    #gg <- gg + geom_line(aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group), size=0.3)
    gg <- gg + stat_smooth(method="loess", aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group))
+   #gg <- gg + geom_point(data = CP.data.prepare(prodata, z, type), aes(x = tho.hat, y = 1.1))
    gg <- gg + scale_color_manual(breaks = c("Individual Value CUSUM+",
                                             "Individual Value CUSUM-",
                                             "Moving Range CUSUM+",
@@ -267,7 +272,7 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
 
   dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
   #write.csv(file="dataRadar.csv",dat)
-  ggplot(dat, aes(y = OutRangeQCno, x = substring(reorder(peptides,orderby), first = 1, last = 3),
+  ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby),
                   group = group, colour = group, fill=group)) +
     coord_polar() +
     geom_point() +
@@ -306,7 +311,7 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
 CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
   dat <- CUSUM.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
   
-  ggplot(dat, aes(y = OutRangeQCno, x = substring(reorder(peptides,orderby), first = 1, last = 3),
+  ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby),
                   group = group, colour = group, fill = group)) +
     coord_polar() +
     geom_point() +
