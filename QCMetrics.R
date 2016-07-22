@@ -15,8 +15,6 @@ getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
   if(normalization == TRUE) {
     mu=mean(z[L:U]) # in-control process mean
     sd=sd(z[L:U]) # in-control process variance
-    print(paste(metric, precursor,"and length of z is:",length(z)))
-    print(sd)
     if(sd == 0) {sd <- 0.0001}
     z=scale(z[1:length(z)],mu,sd) # transformation for N(0,1) )
     return(z)
