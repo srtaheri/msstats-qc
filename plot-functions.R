@@ -312,7 +312,8 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
           axis.text.y=element_text(size=12, hjust=0.5),
           plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
           legend.title=element_blank(),
-          legend.text = element_text(size = 12)
+          legend.text = element_text(size = 12),
+          panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted")
   )
   #geom_curve(aes(x = x1, y = y1, xend = x2, yend = y2, colour = "curve"), data = df)
 }
@@ -342,7 +343,6 @@ CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
                                   "Moving Range XmR+" = "#009E73",
                                   "Moving Range XmR-" = "#D55E00")) +
     facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4)) +
-    #geom_path(linejoin = "mitre", lineend = "butt") +
     geom_polygon(alpha=0.6)+
     ggtitle("Radar plot \n CUSUM Chart") +
     xlab("") +
@@ -353,7 +353,8 @@ CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
       axis.text.y=element_text(size=12, hjust=0.5),
       plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
       legend.title=element_blank(),
-      legend.text = element_text(size = 12)
+      legend.text = element_text(size = 12),
+      panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted")
     )
 }
 #################################################################################################################
