@@ -38,7 +38,6 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric,
   }
 }
 #################################################################################################################
-
 do.plot <- function(prodata, z, precursor, L, U, method,  y.title, type) {
   if(method=="CUSUM") {
     CUSUM.plot(prodata, z, precursor, L, U,  y.title, type)
@@ -119,7 +118,6 @@ CUSUM.plot <- function(prodata, metricData, precursor, L, U,  ytitle, type) {
   
   return(p)
 }
-
 #########################################################################################################################
 CP.plot <- function(prodata, metricData, precursor, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursor,]
@@ -153,7 +151,6 @@ CP.plot <- function(prodata, metricData, precursor, ytitle, type) {
               ,showlegend = FALSE,name=""
     )
 }
-
 #########################################################################################################################
 XmR.plot <- function(prodata, metricData, precursor, L, U, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursor,]
@@ -217,8 +214,8 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
                                 guide='legend')
   gg <- gg + guides(colour = guide_legend(override.aes = list(linetype=c(1,1,1,1,0),shape=c(NA,NA,NA,NA,16))))
   gg <- gg + facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4))
-  gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
-  gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
+  #gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
+  #gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.4,1.4),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
   gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
   gg <- gg + ggtitle("XmR Chart")
@@ -257,8 +254,8 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
                                  guide='legend')
    gg <- gg + guides(colour = guide_legend(override.aes = list(linetype=c(1,1,1,1,0),shape=c(NA,NA,NA,NA,16))))
    gg <- gg + facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4))
-   gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
-   gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
+   #gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
+   #gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
    gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.4,1.4),
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
    gg <- gg + ggtitle("CUSUM Chart")
@@ -315,7 +312,7 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
           legend.text = element_text(size = 12),
           panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted")
   )
-  #geom_curve(aes(x = x1, y = y1, xend = x2, yend = y2, colour = "curve"), data = df)
+  
 }
 
 #################################################################################################################
@@ -334,14 +331,14 @@ CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
                                  "Individual Value CUSUM-" = "#56B4E9",
                                  "Moving Range CUSUM+" = "#009E73",
                                  "Moving Range CUSUM-" = "#D55E00")) +
-    scale_color_manual(breaks = c("Individual Value XmR+",
-                                  "Individual Value XmR-",
-                                  "Moving Range XmR+",
-                                  "Moving Range XmR-"),
-                       values = c("Individual Value XmR+" = "#E69F00",
-                                  "Individual Value XmR-" = "#56B4E9",
-                                  "Moving Range XmR+" = "#009E73",
-                                  "Moving Range XmR-" = "#D55E00")) +
+    scale_color_manual(breaks = c("Individual Value CUSUM+",
+                                  "Individual Value CUSUM-",
+                                  "Moving Range CUSUM+",
+                                  "Moving Range CUSUM-"),
+                       values = c("Individual Value CUSUM+" = "#E69F00",
+                                  "Individual Value CUSUM-" = "#56B4E9",
+                                  "Moving Range CUSUM+" = "#009E73",
+                                  "Moving Range CUSUM-" = "#D55E00")) +
     facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4)) +
     geom_polygon(alpha=0.6)+
     ggtitle("Radar plot \n CUSUM Chart") +
