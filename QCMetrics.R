@@ -175,10 +175,10 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
   plot.data <- data.frame(QCno = rep(1:max_QCno,2),
                           pr.y = c(pr.y.poz, pr.y.neg),
                           group = ifelse(rep(type==1,2*max_QCno), 
-                                         c(rep("Individual Value CUSUM+",max_QCno),
-                                           rep("Individual Value CUSUM-",max_QCno)),
-                                         c(rep("Moving Range CUSUM+",max_QCno),
-                                           rep("Moving Range CUSUM-",max_QCno))),
+                                         c(rep("Metric mean increase",max_QCno),
+                                           rep("Metric mean decrease",max_QCno)),
+                                         c(rep("Metric dispersion increase",max_QCno),
+                                           rep("Metric dispersion decrease",max_QCno))),
                           metric = rep(metric,max_QCno*2)
      )
   return(plot.data)
@@ -224,10 +224,10 @@ XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
   plot.data <- data.frame(QCno = rep(1:max_QCno,2),
                           pr.y = c(pr.y.poz, pr.y.neg),
                           group = ifelse(rep(type==1,2*max_QCno), 
-                                         c(rep("Individual Value XmR+",max_QCno),
-                                           rep("Individual Value XmR-",max_QCno)),
-                                         c(rep("Moving Range XmR+",max_QCno),
-                                           rep("Moving Range XmR-",max_QCno))),
+                                         c(rep("Metric mean increase",max_QCno),
+                                           rep("Metric mean decrease",max_QCno)),
+                                         c(rep("Metric dispersion increase",max_QCno),
+                                           rep("Metric dispersion decrease",max_QCno))),
                           metric = rep(metric,max_QCno*2))
   return(plot.data)
 }
@@ -303,10 +303,10 @@ XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
                     probability   = c()
                     )
   for (metric in data.metrics) {
-    data.1 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Individual Value XmR+", XmR.type = "poz")
-    data.2 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Individual Value XmR-", XmR.type = "neg")
-    data.3 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Moving Range XmR+", XmR.type = "poz")
-    data.4 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Moving Range XmR-", XmR.type = "neg")
+    data.1 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Metric mean increase", XmR.type = "poz")
+    data.2 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Metric mean decrease", XmR.type = "neg")
+    data.3 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Metric dispersion increase", XmR.type = "poz")
+    data.4 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Metric dispersion decrease", XmR.type = "neg")
     dat <- rbind(dat, data.1, data.2, data.3, data.4)
   }
   return(dat)
@@ -337,10 +337,10 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
                     probability   = c()
   )
   for (metric in data.metrics) {
-   data.1 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 1, group = "Individual Value CUSUM+", CUSUM.type = "poz")
-   data.2 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 1, group = "Individual Value CUSUM-", CUSUM.type = "neg")
-   data.3 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 2, group = "Moving Range CUSUM+", CUSUM.type = "poz")
-   data.4 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 2, group = "Moving Range CUSUM-", CUSUM.type = "neg")
+   data.1 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 1, group = "Metric mean increase", CUSUM.type = "poz")
+   data.2 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 1, group = "Metric mean decrease", CUSUM.type = "neg")
+   data.3 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 2, group = "Metric dispersion increase", CUSUM.type = "poz")
+   data.4 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 2, group = "Metric dispersion decrease", CUSUM.type = "neg")
    dat <- rbind(dat, data.1, data.2, data.3, data.4)
   }
   return(dat)

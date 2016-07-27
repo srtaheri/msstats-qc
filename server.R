@@ -176,10 +176,10 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data")
     )
-    p1 <- CUSUM.Summary.plot(prodata, data.metrics = data$metrics, input$L, input$U)
-    p2 <- CUSUM.Radar.Plot(prodata, data.metrics = data$metrics, input$L,input$U)
-    p3 <- XmR.Summary.plot(prodata, data.metrics = data$metrics, input$L, input$U)
-    p4 <- XmR.Radar.Plot(prodata, data.metrics = data$metrics,input$L,input$U)
+    p1 <- XmR.Summary.plot(prodata, data.metrics = data$metrics, input$L, input$U)
+    p2 <- XmR.Radar.Plot(prodata, data.metrics = data$metrics,input$L,input$U)
+    p3 <- CUSUM.Summary.plot(prodata, data.metrics = data$metrics, input$L, input$U)
+    p4 <- CUSUM.Radar.Plot(prodata, data.metrics = data$metrics, input$L,input$U)
     grid.arrange(p1,p2,p3,p4, ncol = 1)
     
 

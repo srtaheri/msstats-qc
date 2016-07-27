@@ -200,32 +200,32 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
   gg <- ggplot(dat)
   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
   gg <- gg + geom_smooth(method="loess",aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
-  gg <- gg + geom_point(data = tho.hat.df, aes(x = tho.hat.df$tho.hat, y = tho.hat.df$y, colour = "tho.hat in change point"))
-  gg <- gg + scale_color_manual(breaks = c("Individual Value XmR+",
-                                           "Individual Value XmR-",
-                                           "Moving Range XmR+",
-                                           "Moving Range XmR-",
-                                           "tho.hat in change point"),
-                                values = c("Individual Value XmR+" = "#E69F00",
-                                           "Individual Value XmR-" = "#56B4E9",
-                                           "Moving Range XmR+" = "#009E73",
-                                           "Moving Range XmR-" = "#D55E00",
-                                           "tho.hat in change point" = "red"),
+  gg <- gg + geom_point(data = tho.hat.df, aes(x = tho.hat.df$tho.hat, y = tho.hat.df$y, colour = "Change point"))
+  gg <- gg + scale_color_manual(breaks = c("Metric mean increase",
+                                           "Metric mean decrease",
+                                           "Metric dispersion increase",
+                                           "Metric dispersion decrease",
+                                           "Change point"),
+                                values = c("Metric mean increase" = "#E69F00",
+                                           "Metric mean decrease" = "#56B4E9",
+                                           "Metric dispersion increase" = "#009E73",
+                                           "Metric dispersion decrease" = "#D55E00",
+                                           "Change point" = "red"),
                                 guide='legend')
   gg <- gg + guides(colour = guide_legend(override.aes = list(linetype=c(1,1,1,1,0),shape=c(NA,NA,NA,NA,16))))
   gg <- gg + facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4))
   #gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
   #gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.4,1.4),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
-  gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
-  gg <- gg + ggtitle("XmR Chart")
+  gg <- gg + labs(x = "QC Numbers", y = "% of out of control \nprecursors")  
+  gg <- gg + ggtitle("Overall Summary \nXmR")
   theme_set(theme_gray(base_size = 15)) # this will change the size of all the texts in all ggplot functions
   gg <- gg + theme(plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
-                   axis.text.x=element_text(size=12, vjust=0.5),
-                   axis.text.y=element_text(size=12, hjust=0.5),
-                   axis.title.y=element_text(size=15),
-                   axis.title.x=element_text(size=15),
-                   legend.text = element_text(size = 12),
+                   axis.text.x=element_text(size=10, vjust=0.5),
+                   axis.text.y=element_text(size=10, hjust=0.5),
+                   axis.title.y=element_text(size=10),
+                   axis.title.x=element_text(size=10),
+                   legend.text = element_text(size = 10),
                    legend.title=element_blank()
   )
   gg
@@ -240,17 +240,17 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
    gg <- ggplot(dat)
    gg <- gg + geom_hline(yintercept=0, alpha=0.5)
    gg <- gg + stat_smooth(method="loess", aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group))
-   gg <- gg + geom_point(data = tho.hat.df, aes(x = tho.hat.df$tho.hat, y = tho.hat.df$y, colour = "tho.hat in change point"))
-   gg <- gg + scale_color_manual(breaks = c("Individual Value CUSUM+",
-                                            "Individual Value CUSUM-",
-                                            "Moving Range CUSUM+",
-                                            "Moving Range CUSUM-",
-                                            "tho.hat in change point"),
-                                 values = c("Individual Value CUSUM+" = "#E69F00",
-                                            "Individual Value CUSUM-" = "#56B4E9",
-                                            "Moving Range CUSUM+" = "#009E73",
-                                            "Moving Range CUSUM-" = "#D55E00",
-                                            "tho.hat in change point" = "red"),
+   gg <- gg + geom_point(data = tho.hat.df, aes(x = tho.hat.df$tho.hat, y = tho.hat.df$y, colour = "Change point"))
+   gg <- gg + scale_color_manual(breaks = c("Metric mean increase",
+                                            "Metric mean decrease",
+                                            "Metric dispersion increase",
+                                            "Metric dispersion decrease",
+                                            "Change point"),
+                                 values = c("Metric mean increase" = "#E69F00",
+                                            "Metric mean decrease" = "#56B4E9",
+                                            "Metric dispersion increase" = "#009E73",
+                                            "Metric dispersion decrease" = "#D55E00",
+                                            "Change point" = "red"),
                                  guide='legend')
    gg <- gg + guides(colour = guide_legend(override.aes = list(linetype=c(1,1,1,1,0),shape=c(NA,NA,NA,NA,16))))
    gg <- gg + facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4))
@@ -258,15 +258,15 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
    #gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
    gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.4,1.4),
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
-   gg <- gg + ggtitle("CUSUM Chart")
+   gg <- gg + ggtitle("Overall Summary \nCUSUM")
    
-   gg <- gg + labs(x = "QC Numbers", y = "Percentage of peptides with signal")
+   gg <- gg + labs(x = "QC Numbers", y = "% of out of control \nprecursors")
    gg <- gg + theme(plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
-                    axis.text.x=element_text(size=12, vjust=0.5),
-                    axis.text.y=element_text(size=12, hjust=0.5),
-                    axis.title.y=element_text(size=15),
-                    axis.title.x=element_text(size=15),
-                    legend.text = element_text(size = 12),
+                    axis.text.x=element_text(size=10, vjust=0.5),
+                    axis.text.y=element_text(size=10, hjust=0.5),
+                    axis.title.y=element_text(size=10),
+                    axis.title.x=element_text(size=10),
+                    legend.text = element_text(size = 10),
                     legend.title=element_blank()
                     )
 
@@ -283,33 +283,34 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
                   group = group, colour = group, fill=group)) +
     coord_polar() +
     geom_point() +
-    scale_fill_manual(breaks = c("Individual Value XmR+",
-                                  "Individual Value XmR-",
-                                  "Moving Range XmR+",
-                                  "Moving Range XmR-"),
-                       values = c("Individual Value XmR+" = "#E69F00",
-                                  "Individual Value XmR-" = "#56B4E9",
-                                  "Moving Range XmR+" = "#009E73",
-                                  "Moving Range XmR-" = "#D55E00")) +
-    scale_color_manual(breaks = c("Individual Value XmR+",
-                                 "Individual Value XmR-",
-                                 "Moving Range XmR+",
-                                 "Moving Range XmR-"),
-                      values = c("Individual Value XmR+" = "#E69F00",
-                                 "Individual Value XmR-" = "#56B4E9",
-                                 "Moving Range XmR+" = "#009E73",
-                                 "Moving Range XmR-" = "#D55E00")) +
+    scale_fill_manual(breaks = c("Metric mean increase",
+                                 "Metric mean decrease",
+                                 "Metric dispersion increase",
+                                 "Metric dispersion decrease"),
+                      values = c("Metric mean increase" = "#E69F00",
+                                 "Metric mean decrease" = "#56B4E9",
+                                 "Metric dispersion increase" = "#009E73",
+                                 "Metric dispersion decrease" = "#D55E00")) +
+    scale_color_manual(breaks = c("Metric mean increase",
+                                  "Metric mean decrease",
+                                  "Metric dispersion increase",
+                                  "Metric dispersion decrease"),
+                       values = c("Metric mean increase" = "#E69F00",
+                                  "Metric mean decrease" = "#56B4E9",
+                                  "Metric dispersion increase" = "#009E73",
+                                  "Metric dispersion decrease" = "#D55E00")) +
     facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4)) +
-    geom_polygon(alpha=0.6)+
-    ggtitle("Radar plot \n XmR Chart") +
+    geom_polygon(alpha=0.5)+
+    ggtitle("Precursor level summary \nXmR") +
     xlab("") +
-    ylab("Number of Signals") +
+    ylab("# of out of control \nQC samples") +
     theme(
-          axis.title.y=element_text(size=15),
-          axis.text.y=element_text(size=12, hjust=0.5),
+          axis.text.x = element_text(size = rel(0.6)),
+          axis.title.y=element_text(size=10),
+          axis.text.y=element_text(size=10, hjust=0.5),
           plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
           legend.title=element_blank(),
-          legend.text = element_text(size = 12),
+          legend.text = element_text(size = 10),
           panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted")
   )
   
@@ -323,34 +324,35 @@ CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
                   group = group, colour = group, fill = group)) +
     coord_polar() +
     geom_point() +
-    scale_fill_manual(breaks = c("Individual Value CUSUM+",
-                                 "Individual Value CUSUM-",
-                                 "Moving Range CUSUM+",
-                                 "Moving Range CUSUM-"),
-                      values = c("Individual Value CUSUM+" = "#E69F00",
-                                 "Individual Value CUSUM-" = "#56B4E9",
-                                 "Moving Range CUSUM+" = "#009E73",
-                                 "Moving Range CUSUM-" = "#D55E00")) +
-    scale_color_manual(breaks = c("Individual Value CUSUM+",
-                                  "Individual Value CUSUM-",
-                                  "Moving Range CUSUM+",
-                                  "Moving Range CUSUM-"),
-                       values = c("Individual Value CUSUM+" = "#E69F00",
-                                  "Individual Value CUSUM-" = "#56B4E9",
-                                  "Moving Range CUSUM+" = "#009E73",
-                                  "Moving Range CUSUM-" = "#D55E00")) +
+    scale_fill_manual(breaks = c("Metric mean increase",
+                                 "Metric mean decrease",
+                                 "Metric dispersion increase",
+                                 "Metric dispersion decrease"),
+                      values = c("Metric mean increase" = "#E69F00",
+                                 "Metric mean decrease" = "#56B4E9",
+                                 "Metric dispersion increase" = "#009E73",
+                                 "Metric dispersion decrease" = "#D55E00")) +
+    scale_color_manual(breaks = c("Metric mean increase",
+                                  "Metric mean decrease",
+                                  "Metric dispersion increase",
+                                  "Metric dispersion decrease"),
+                       values = c("Metric mean increase" = "#E69F00",
+                                  "Metric mean decrease" = "#56B4E9",
+                                  "Metric dispersion increase" = "#009E73",
+                                  "Metric dispersion decrease" = "#D55E00")) +
     facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4)) +
-    geom_polygon(alpha=0.6)+
-    ggtitle("Radar plot \n CUSUM Chart") +
+    geom_polygon(alpha=0.5)+
+    ggtitle("Precursor level summary \nCUSUM") +
     xlab("") +
-    ylab("Number of Signals") +
+    ylab("# of out of control \nQC samples") +
 
     theme(
-      axis.title.y=element_text(size=15),
-      axis.text.y=element_text(size=12, hjust=0.5),
+      axis.text.x = element_text(size = rel(0.6)),
+      axis.title.y=element_text(size=10),
+      axis.text.y=element_text(size=10, hjust=0.5),
       plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
       legend.title=element_blank(),
-      legend.text = element_text(size = 12),
+      legend.text = element_text(size = 10),
       panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted")
     )
 }
