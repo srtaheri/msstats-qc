@@ -196,7 +196,6 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
   
   dat <- XmR.Summary.DataFrame(prodata,data.metrics, L, U)
   tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics)
-
   gg <- ggplot(dat)
   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
   gg <- gg + geom_smooth(method="loess",aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
@@ -220,13 +219,14 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
   gg <- gg + labs(x = "QC Numbers", y = "% of out of control \nprecursors")  
   gg <- gg + ggtitle("Overall Summary \nXmR")
   theme_set(theme_gray(base_size = 15)) # this will change the size of all the texts in all ggplot functions
-  gg <- gg + theme(plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
+  gg <- gg + theme(plot.title = element_text(size=15, face="bold",margin = margin(10, 0, 10, 0)),
                    axis.text.x=element_text(size=10, vjust=0.5),
                    axis.text.y=element_text(size=10, hjust=0.5),
                    axis.title.y=element_text(size=10),
                    axis.title.x=element_text(size=10),
                    legend.text = element_text(size = 10),
-                   legend.title=element_blank()
+                   legend.title=element_blank(),
+                   plot.margin = unit(c(1,3,1,1), "lines")
   )
   gg
   
@@ -261,15 +261,19 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
    gg <- gg + ggtitle("Overall Summary \nCUSUM")
    
    gg <- gg + labs(x = "QC Numbers", y = "% of out of control \nprecursors")
-   gg <- gg + theme(plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
+   gg <- gg + theme(plot.title = element_text(size=15, face="bold",margin = margin(10, 0, 10, 0)),
                     axis.text.x=element_text(size=10, vjust=0.5),
                     axis.text.y=element_text(size=10, hjust=0.5),
                     axis.title.y=element_text(size=10),
                     axis.title.x=element_text(size=10),
                     legend.text = element_text(size = 10),
-                    legend.title=element_blank()
+                    legend.title=element_blank(),
+                    plot.margin = unit(c(1,3,1,1), "lines")
                     )
 
+   gt <- ggplot_gtable(ggplot_build(gg))
+   gt$layout$clip[gt$layout$name == "panel"] <- "off"
+   grid.draw(gt)
    gg
   
 }
@@ -301,17 +305,18 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
                                   "Metric dispersion decrease" = "#D55E00")) +
     facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4)) +
     geom_polygon(alpha=0.5)+
-    ggtitle("Precursor level summary \nXmR") +
+    ggtitle("Precursor Level Summary \nXmR") +
     xlab("") +
     ylab("# of out of control \nQC samples") +
     theme(
           axis.text.x = element_text(size = rel(0.6)),
           axis.title.y=element_text(size=10),
           axis.text.y=element_text(size=10, hjust=0.5),
-          plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
+          plot.title = element_text(size=15, face="bold",margin = margin(10, 0, 10, 0)),
           legend.title=element_blank(),
           legend.text = element_text(size = 10),
-          panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted")
+          panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted"),
+          plot.margin = unit(c(1,3,1,1), "lines")
   )
   
 }
@@ -342,7 +347,7 @@ CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
                                   "Metric dispersion decrease" = "#D55E00")) +
     facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4)) +
     geom_polygon(alpha=0.5)+
-    ggtitle("Precursor level summary \nCUSUM") +
+    ggtitle("Precursor Level Summary \nCUSUM") +
     xlab("") +
     ylab("# of out of control \nQC samples") +
 
@@ -350,10 +355,11 @@ CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
       axis.text.x = element_text(size = rel(0.6)),
       axis.title.y=element_text(size=10),
       axis.text.y=element_text(size=10, hjust=0.5),
-      plot.title = element_text(size=20, face="bold",margin = margin(10, 0, 10, 0)),
+      plot.title = element_text(size=15, face="bold",margin = margin(10, 0, 10, 0)),
       legend.title=element_blank(),
       legend.text = element_text(size = 10),
-      panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted")
+      panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted"),
+      plot.margin = unit(c(1,3,1,1), "lines")
     )
 }
 #################################################################################################################
