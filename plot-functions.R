@@ -216,15 +216,15 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
   gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
   gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.4,1.4),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
-  gg <- gg + labs(x = "QC Numbers", y = "% of out of control \nprecursors")  
+  gg <- gg + labs(x = "QC No", y = "% of out of control \nprecursors")  
   gg <- gg + ggtitle("Overall Summary \nXmR")
   theme_set(theme_gray(base_size = 15)) # this will change the size of all the texts in all ggplot functions
   gg <- gg + theme(plot.title = element_text(size=15, face="bold",margin = margin(10, 0, 10, 0)),
-                   axis.text.x=element_text(size=10, vjust=0.5),
-                   axis.text.y=element_text(size=10, hjust=0.5),
-                   axis.title.y=element_text(size=10),
-                   axis.title.x=element_text(size=10),
-                   legend.text = element_text(size = 10),
+                   axis.text.x=element_text(size=12, vjust=0.5),
+                   axis.text.y=element_text(size=12, hjust=0.5),
+                   axis.title.y=element_text(size=12),
+                   axis.title.x=element_text(size=12),
+                   legend.text = element_text(size = 12),
                    legend.title=element_blank(),
                    plot.margin = unit(c(1,3,1,1), "lines")
   )
@@ -260,13 +260,13 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
    gg <- gg + ggtitle("Overall Summary \nCUSUM")
    
-   gg <- gg + labs(x = "QC Numbers", y = "% of out of control \nprecursors")
+   gg <- gg + labs(x = "QC No", y = "% of out of control \nprecursors")
    gg <- gg + theme(plot.title = element_text(size=15, face="bold",margin = margin(10, 0, 10, 0)),
-                    axis.text.x=element_text(size=10, vjust=0.5),
-                    axis.text.y=element_text(size=10, hjust=0.5),
-                    axis.title.y=element_text(size=10),
-                    axis.title.x=element_text(size=10),
-                    legend.text = element_text(size = 10),
+                    axis.text.x=element_text(size=12, vjust=0.5),
+                    axis.text.y=element_text(size=12, hjust=0.5),
+                    axis.title.y=element_text(size=12),
+                    axis.title.x=element_text(size=12),
+                    legend.text = element_text(size = 12),
                     legend.title=element_blank(),
                     plot.margin = unit(c(1,3,1,1), "lines")
                     )
@@ -309,12 +309,12 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
     xlab("") +
     ylab("# of out of control \nQC samples") +
     theme(
-          axis.text.x = element_text(size = rel(0.6)),
-          axis.title.y=element_text(size=10),
-          axis.text.y=element_text(size=10, hjust=0.5),
+          axis.text.x = element_text(face="bold",size = rel(0.7)),
+          axis.title.y=element_text(size=12),
+          axis.text.y=element_text(size=12, hjust=0.5),
           plot.title = element_text(size=15, face="bold",margin = margin(10, 0, 10, 0)),
           legend.title=element_blank(),
-          legend.text = element_text(size = 10),
+          legend.text = element_text(size = 12),
           panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted"),
           plot.margin = unit(c(1,3,1,1), "lines")
   )
@@ -352,12 +352,12 @@ CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
     ylab("# of out of control \nQC samples") +
 
     theme(
-      axis.text.x = element_text(size = rel(0.6)),
-      axis.title.y=element_text(size=10),
-      axis.text.y=element_text(size=10, hjust=0.5),
+      axis.text.x = element_text(face="bold",size = rel(0.7)),
+      axis.title.y=element_text(size=12),
+      axis.text.y=element_text(size=12, hjust=0.5),
       plot.title = element_text(size=15, face="bold",margin = margin(10, 0, 10, 0)),
       legend.title=element_blank(),
-      legend.text = element_text(size = 10),
+      legend.text = element_text(size = 12),
       panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted"),
       plot.margin = unit(c(1,3,1,1), "lines")
     )
