@@ -4,8 +4,8 @@ library(plotly)
 library(markdown)
 shinyUI(fluidPage(
   shinyjs::useShinyjs(),
-  titlePanel(p(strong("MSstatsQC"),align = "center",style="color:#444444;",style="font-size:150%;",
-               style="font-family:inherit;",windowTitle = MSstatsQC)),
+  titlePanel(title=p(strong("MSstatsQC"),align = "center",style="color:#444444;",style="font-size:150%;",
+               style="font-family:inherit;"),windowTitle = "MSStatsQC"),
   navbarPage(h4("System suitability monitoring tools for quantitative mass spectrometry based proteomic
                 experiments"),
               tabPanel("Home", theme = "bootstrap.css",
