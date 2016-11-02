@@ -5,7 +5,7 @@ library(markdown)
 shinyUI(fluidPage(
   shinyjs::useShinyjs(),
   titlePanel(p(strong("MSstatsQC"),align = "center",style="color:#444444;",style="font-size:150%;",
-               style="font-family:inherit;")),
+               style="font-family:inherit;",windowTitle = MSstatsQC)),
   navbarPage(h4("System suitability monitoring tools for quantitative mass spectrometry based proteomic
                 experiments"),
               tabPanel("Home", theme = "bootstrap.css",
@@ -42,7 +42,7 @@ shinyUI(fluidPage(
                          br(),
                          br(),
                          h5 ("Project Team: "),
-                         h5("Eralp Dogu,",span("e.dogu@neu.edu",style = "color:blue")),
+                         h5("Eralp Dogu,",span("eralp.dogu@gmail.com",style = "color:blue")),
                          h5("Sara Taheri,",span("mohammadtaheri.s@husky.neu.edu",style = "color:blue")),
                          h5("Olga Vitek,",span("o.vitek@neu.edu",style = "color:blue")),
                          br(),
