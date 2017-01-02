@@ -3,23 +3,29 @@ COL.FWHM <- "Full Width at Half Maximum"
 COL.TOTAL.AREA <- "Total Peak Area"
 COL.PEAK.ASS <- "Peak Assymetry"
 #############################################################################################
-getMetricData <- function(prodata, precursor, L, U, metric, normalization) {
-  precursor.data<-prodata[prodata$Precursor==precursor,]
-  z <- 0
+#INPUTS : "prodata" is the data user uploads.
+#         "precursorSelection" is the precursor that user selects in Data Import tab. it can be either one precursor(peptide) or it can be "all peptides"
+#         "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
+#         "metric" is one of these metrics: COL.BEST.RET,COL.FWHM, COL.TOTAL.AREA,COL.PEAK.ASS or a metric that user defines in his data set
+#         "normalization" is either TRUE or FALSE
+#Description of function : it gets the metric column only for the precursor chosen and either return the column as it is or normalize it and then return it
+getMetricData <- function(prodata, precursorSelection, L, U, metric, normalization) {
+  precursor.data<-prodata[prodata$Precursor==precursorSelection,] #"Precursor" is one of the columns in data that shows the name of peptides
+  metricData <- 0
 
   if(is.null(metric)){
     return(NULL)  
   }
   
-  z = precursor.data[,metric]
+  metricData = precursor.data[,metric]
   if(normalization == TRUE) {
-    mu=mean(z[L:U]) # in-control process mean
-    sd=sd(z[L:U]) # in-control process variance
+    mu=mean(metricData[L:U]) # in-control process mean
+    sd=sd(metricData[L:U]) # in-control process variance
     if(sd == 0) {sd <- 0.0001}
-    z=scale(z[1:length(z)],mu,sd) # transformation for N(0,1) )
-    return(z)
+    metricData=scale(metricData[1:length(metricData)],mu,sd) # transformation for N(0,1) )
+    return(metricData)
   } else if(normalization == FALSE){
-    return(z)
+    return(metricData)
   }
   
 }
@@ -37,67 +43,79 @@ find_custom_metrics <- function(prodata) {
     return(other.metrics)
 }
 ################################################################
-CUSUM.data.prepare <- function(prodata, z, precursor.level, L, U, type) {
+#z = metricData
+#INPUT : "prodata" is the data user uploads. 
+#        "metricData" is the column of the data related to the metric we want. Forexample if we want retention time, it gives retention time column 
+#        "precursorSelection" is the precursor that user selects in Data Import tab. it can be either one precursor(peptide) or it can be "all peptides"
+#        "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
+#        "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
+#DESCRIPTION : returns a data frame for CUSUM that contains all the information needed to plot CUSUM
+CUSUM.data.prepare <- function(prodata, metricData, precursorSelection, L, U, type) {
 
   k=0.5 
+  #precursor.data only gets the data for the selected precursor
+  precursor.data <- prodata[prodata$Precursor==precursorSelection,] #"Precursor" is one of the columns in data that shows the name of peptides
   
-  prodata_grouped_by_precursor <- prodata[prodata$Precursor==precursor.level,]
+  v <- numeric(length(metricData))
   
-  v <- numeric(length(z))
+  Cpoz <- numeric(length(metricData))
+  Cneg <- numeric(length(metricData))
   
-  Cpoz <- numeric(length(z))
-  Cneg <- numeric(length(z))
-  
-  for(i in 2:length(z)) {
-    Cpoz[i]=max(0,(z[i]-(k)+Cpoz[i-1]))
-    Cneg[i]=max(0,((-k)-z[i]+Cneg[i-1]))
+  for(i in 2:length(metricData)) {
+    Cpoz[i]=max(0,(metricData[i]-(k)+Cpoz[i-1]))
+    Cneg[i]=max(0,((-k)-metricData[i]+Cneg[i-1]))
   }
   
   if(type==2) {
-    for(i in 2:length(z)) {
-      v[i]=(sqrt(abs(z[i]))-0.822)/0.349
+    for(i in 2:length(metricData)) {
+      v[i]=(sqrt(abs(metricData[i]))-0.822)/0.349
     }
-    for(i in 2:length(z)) {
+    for(i in 2:length(metricData)) {
       Cpoz[i]=max(0,(v[i]-(k)+Cpoz[i-1]))
       Cneg[i]=max(0,((-k)-v[i]+Cneg[i-1]))
     }
   }
 
-  QCno = 1:length(z)
+  QCno = 1:length(metricData)
   
   plot.data = 
     data.frame(QCno = QCno
                ,CUSUM.poz = Cpoz
                ,CUSUM.neg = -Cneg 
-               ,Annotations=prodata_grouped_by_precursor$Annotations
+               ,Annotations=precursor.data$Annotations
                )
   
   return(plot.data)
 }
 ###################################################################################################
-CP.data.prepare <- function(prodata, z, type) {
+#z = metricData
+#INPUT : "prodata" is the data user uploads. 
+#        "metricData" is the column of the data related to the metric we want. Forexample if we want retention time, it gives retention time column 
+#        "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
+#DESCRIPTION : returns a data frame for CP that contains all the information needed to plot Change Point
+CP.data.prepare <- function(prodata, metricData, type) {
   
-  Et <-  numeric(length(z)-1) # this is Ct in type 1, and Dt in type 2.
-  SS<- numeric(length(z)-1)
-  SST<- numeric(length(z)-1)
+  Et <-  numeric(length(metricData)-1) # this is Ct in type 1, and Dt in type 2.
+  SS<- numeric(length(metricData)-1)
+  SST<- numeric(length(metricData)-1)
   tho.hat <- 0
   
   if(type == 1) {
     ## Change point analysis for mean (Single step change model)
-    for(i in 1:(length(z)-1)) {
-      Et[i]=(length(z)-i)*(((1/(length(z)-i))*sum(z[(i+1):length(z)]))-0)^2 #change point function
+    for(i in 1:(length(metricData)-1)) {
+      Et[i]=(length(metricData)-i)*(((1/(length(metricData)-i))*sum(metricData[(i+1):length(metricData)]))-0)^2 #change point function
     }
-    QCno=1:(length(z)-1) 
+    QCno=1:(length(metricData)-1) 
   } else if(type == 2) {
     ## Change point analysis for variance (Single step change model)  
-    for(i in 1:length(z)) {
-      SS[i]=z[i]^2
+    for(i in 1:length(metricData)) {
+      SS[i]=metricData[i]^2
     }
-    for(i in 1:length(z)) {
-      SST[i]=sum(SS[i:length(z)])
-      Et[i]=((SST[i]/2)-((length(z)-i+1)/2)*log(SST[i]/(length(z)-i+1))-(length(z)-i+1)/2) #change point function
+    for(i in 1:length(metricData)) {
+      SST[i]=sum(SS[i:length(metricData)])
+      Et[i]=((SST[i]/2)-((length(metricData)-i+1)/2)*log(SST[i]/(length(metricData)-i+1))-(length(metricData)-i+1)/2) #change point function
     }
-    QCno=1:length(z)
+    QCno=1:length(metricData)
   }
   tho.hat = which(Et==max(Et)) # change point estimate
   plot.data <- data.frame(QCno,Et,tho.hat)
@@ -105,15 +123,18 @@ CP.data.prepare <- function(prodata, z, type) {
   return(plot.data)
 }
 ###################################################################################################
+#INPUT : "prodata" is the data user uploads.
+#        "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
+#        "data.metrics" is all the available metrics. It is defined in server.R
 get_CP_tho.hat <- function(prodata, L, U, data.metrics) {
   tho.hat <- data.frame(tho.hat = c(), metric = c(), group = c(), y=c())
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   for(metric in data.metrics) {
     for (j in 1:nlevels(prodata$Precursor)) {
-      z <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = TRUE)
+      metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = TRUE)
       mix <- rbind(
-        data.frame(tho.hat = CP.data.prepare(prodata, z, type = 1)$tho.hat[1], metric = metric, group = "Individual Value", y=1.1),
-        data.frame(tho.hat = CP.data.prepare(prodata, z, type = 2)$tho.hat[1], metric = metric, group = "Moving Range", y=-1.1)
+        data.frame(tho.hat = CP.data.prepare(prodata, metricData, type = 1)$tho.hat[1], metric = metric, group = "Individual Value", y=1.1),
+        data.frame(tho.hat = CP.data.prepare(prodata, metricData, type = 2)$tho.hat[1], metric = metric, group = "Moving Range", y=-1.1)
       )
       tho.hat <- rbind(tho.hat, mix)
       
@@ -123,30 +144,41 @@ get_CP_tho.hat <- function(prodata, L, U, data.metrics) {
   return(tho.hat)
 }
 ###################################################################################################
-XmR.data.prepare <- function(prodata, z, L,U, type) {
-  t <- numeric(length(z)-1) # z in plot 1, MR in plot 2
+#z = metricData
+#INPUT : "prodata" is the data user uploads.
+#        "metricData" is the column of the data related to the metric we want. Forexample if we want retention time, it gives retention time column 
+#        "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
+#        "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
+#DESCRIPTION : returns a data frame for XmR that contains all the information needed to plot XmR
+XmR.data.prepare <- function(prodata, metricData, L,U, type) {
+  t <- numeric(length(metricData)-1) 
 
-  for(i in 2:length(z)) {
-    t[i]=abs(z[i]-z[i-1]) # Compute moving range of z
+  for(i in 2:length(metricData)) {
+    t[i]=abs(metricData[i]-metricData[i-1]) # Compute moving range of metricData
   }
   #Main=Main.title
   
-  QCno=1:length(z)
+  QCno=1:length(metricData)
   
   if(type == 1) {
-    UCL=mean(z[L:U])+2.66*sd(t[L:U])
-    LCL=mean(z[L:U])-2.66*sd(t[L:U])
-    t <- z
+    UCL=mean(metricData[L:U])+2.66*sd(t[L:U])
+    LCL=mean(metricData[L:U])-2.66*sd(t[L:U])
+    t <- metricData
   } else if(type == 2) {
     ## Calculate MR chart statistics and limits
     
     UCL=3.267*sd(t[1:L-U])
     LCL=0
   }
-  plot.data=data.frame(QCno,z,t,UCL,LCL)
+  plot.data=data.frame(QCno,metricData,t,UCL,LCL)
   return(plot.data)
 }
 ############################################################################################
+#INPUTS : "prodata" is the data user uploads.
+#         "metric" is one of these metrics: COL.BEST.RET,COL.FWHM, COL.TOTAL.AREA,COL.PEAK.ASS or a metric that user defines in his data set
+#         "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
+#        "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
+#DESCRIPTION : returns a data frame that is used in CUSUM.Summary.DataFrame function below to use for plotting summary plot for CUSUM in Summary Tab of shiny app
 CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
   h <- 5
 
@@ -156,11 +188,11 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
   counter <- rep(0,nrow(prodata))
 
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-
+  
   for(j in 1:length(precursors)) {
-    z <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T)
-    counter[1:length(z)] <- counter[1:length(z)]+1
-    plot.data <- CUSUM.data.prepare(prodata, z, precursors[j], L, U, type)
+    metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T)
+    counter[1:length(metricData)] <- counter[1:length(metricData)]+1
+    plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
 
     sub.poz <- plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]
     sub.neg <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
@@ -207,9 +239,9 @@ XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   
   for(j in 1:length(precursors)) {
-    z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
-    counter[1:length(z)] <- counter[1:length(z)]+1
-    plot.data <- XmR.data.prepare(prodata, z = z, L = L, U = U, type)
+    metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
+    counter[1:length(metricData)] <- counter[1:length(metricData)]+1
+    plot.data <- XmR.data.prepare(prodata, metricData , L , U , type)
     
     sub.poz <- plot.data[plot.data$t >= plot.data$UCL, ]
     sub.neg <- plot.data[plot.data$t <= plot.data$LCL, ]
@@ -246,13 +278,34 @@ XmR.Summary.DataFrame <- function(prodata, data.metrics, L, U) {
   return(dat)
 }
 ############################################################################################
+XmR.heatmap.DataFrame <- function(prodata,precursorSelection, L, U, type) {
+
+  metricDataRT <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.BEST.RET, normalization = F)
+  RT <- XmR.data.prepare(prodata, metricDataRT, L, U, type)$t
+  
+  metricDataPA <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.PEAK.ASS, normalization = F)
+  PA <- XmR.data.prepare(prodata, metricDataPA, L, U, type)$t
+  
+  metricDataFWHM <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.FWHM, normalization = F)
+  FWHM <- XmR.data.prepare(prodata, metricDataFWHM, L, U, type)$t
+  
+  metricDataTPA <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.TOTAL.AREA, normalization = F)
+  TPA <- XmR.data.prepare(prodata, metricDataTPA, L, U, type)$t
+  
+  datMean <- data.frame(RT = RT,
+                    PA = PA,
+                    FWHM = FWHM,
+                    TPA = TPA)
+  return(datMean)
+}
+############################################################################################
 Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type, XmR.type) {
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   QCno.out.range <- c()
   
   for(j in 1:length(precursors)) {
-    z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
-    plot.data <- XmR.data.prepare(prodata, z = z, L = L, U = U, type = type)
+    metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
+    plot.data <- XmR.data.prepare(prodata, metricData , L = L, U = U, type = type)
     if(XmR.type == "poz")
       QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$t >= plot.data$UCL, ]$QCno))
     else
@@ -267,8 +320,8 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.
   QCno.out.range <- c()
   
   for(j in 1:length(precursors)) {
-    z <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T)
-    plot.data <- CUSUM.data.prepare(prodata, z, precursors[j], L, U, type)
+    metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T)
+    plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
     if(CUSUM.type == "poz")
       QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno))
     else
@@ -282,8 +335,8 @@ XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group, XmR.type) {
   precursors2 <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
   for(j in 1:length(precursors)) {
-    z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
-    QCno.length <- c(QCno.length,length(z))
+    metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
+    QCno.length <- c(QCno.length,length(metricData))
   }
   dat <- data.frame(peptides = precursors2,
              OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type, XmR.type),
@@ -317,8 +370,8 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U, metric,type,group, CUSUM.type)
   precursors2 <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
   for(j in 1:length(precursors)) {
-    z <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
-    QCno.length <- c(QCno.length,length(z))
+    metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
+    QCno.length <- c(QCno.length,length(metricData))
   }
   dat <- data.frame(peptides = precursors2,
                     OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = metric,type = type, CUSUM.type),
@@ -345,3 +398,4 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
   }
   return(dat)
 }
+#######################################################################################################

@@ -5,12 +5,13 @@ library(plotly)
 library(RecordLinkage)
 library(hash)
 library(gridExtra)
+library(ggExtra)
 library(markdown)
 
 source("plot-functions.R")
 source("data-validation.R")
 source("helper-functions.R")
-
+source("QCMetrics.R")
 
 shinyServer(function(input,output,session) {
   COL.BEST.RET <- "Retention Time"
@@ -79,7 +80,10 @@ shinyServer(function(input,output,session) {
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                  tags$div("It may take a while to load the plots, please wait...",
                                                           id="loadmessage")),
-                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = x, plot.method = "XmR", normalization.type = FALSE, y.title1 = "Individual Value", y.title2 = "Moving Range"))
+                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L,
+                                                             input$U, metric = x,
+                                                             plot.method = "XmR", normalization = FALSE,
+                                                             y.title1 = "Individual Value", y.title2 = "Moving Range"))
                                 
                                 )
                    })
@@ -108,7 +112,7 @@ shinyServer(function(input,output,session) {
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                  tags$div("It may take a while to load the plots, please wait...",
                                                           id="loadmessage")),
-                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = x, plot.method = "CUSUM", normalization.type = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation"))
+                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CUSUM", normalization = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation"))
                                 )
                    })
     
@@ -136,7 +140,7 @@ shinyServer(function(input,output,session) {
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                  tags$div("It may take a while to load the plots, please wait...",
                                                           id="loadmessage")),
-                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, normalize.metric = x, plot.method = "CP", normalization.type = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation"))
+                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CP", normalization = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation"))
                                 )
                    })
     
@@ -170,6 +174,7 @@ shinyServer(function(input,output,session) {
   my_height <- reactive({
     my_height <- ceiling(length(data$metrics)/4)*1200
   })
+  
   output$plot_summary <- renderPlot({
 
     prodata <- data$df
@@ -191,10 +196,26 @@ shinyServer(function(input,output,session) {
   }, height = my_height )
 
   #1500
-  ###########################################################################################################################
-  ###########################################################################################################################
-  ########################################################## "help" tab ################################
-  
+  ############################# heat_map in Summary tab #############################################
+
+  output$heat_map_metric_selection <- renderUI({
+    
+    checkboxGroupInput("heat_map_checkbox_select","choose your prefered metric to view plots",
+                       choices = c(data$metrics),
+                       selected = c(COL.PEAK.ASS,COL.BEST.RET,
+                                    COL.FWHM, COL.TOTAL.AREA)
+    )
+    
+  })
+###################################################  
+  output$heat_map <- renderPlot({
+    prodata <- data$df
+    validate(
+      need(!is.null(prodata), "Please upload your data")
+    )
+    metricData <- getMetricData(prodata, precursor = input$pepSelection, input$L, input$U, metric = COL.PEAK.ASS, normalization = FALSE)
+    metrics_heat.map(prodata,metricData ,precursorSelection = input$pepSelection, input$L, input$U, type = 1)
+  })
  
   ############################################################################################################################
 })

@@ -1,5 +1,5 @@
 # here we put a selection of most column names that users use. The first element of each vector should be the best name that
-# we suggest users to use and  which our code is based on. for example "BestRetentionTime" and "Max FWHM" which are the first element
+# we suggest users to use and  which our code is based on. for example "Retention Time" and "Full Width at Half Maximum" which are the first element
 # of each vector in the list, are our suggestion so we wrote them in the fisrt place.
 best_colnames <- list(
   c("Retention Time","BestRetentionTime" ,"Best.RT","best retention time", "retention time","rt","best ret time","intensity","Best RT"),

@@ -6,11 +6,22 @@ library(dplyr)
 library(ggplot2)
 library(scales)
 library(grid)
+library(tidyr)
+library(viridis)
+library(extrafont)
 
 CUSUM.outrange.thld <- 5
 
 #################################################################################################################
-render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric, plot.method, normalization.type, y.title1, y.title2){
+#INPUT : "prodata" is the data user uploads.
+#        "precursorSelection" is the precursor that user selects in Data Import tab. it can be either one precursor(peptide) or it can be "all peptides"
+#        "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
+#        "metric" is one of these metrics: COL.BEST.RET,COL.FWHM, COL.TOTAL.AREA,COL.PEAK.ASS or a metric that user defines in his data set
+#        "plot.method" is one of XmR, CUSUM or CP methods
+#        "normalization" is either TRUE or FALSE
+#        "y.title1" and "y.title2" are titles of left and right plot which are Individual Value and Moving Range
+# DESCRIPTION : Draws together the "Individual Value" and "Moving Range plots" (left and right plot) for each metric and method. 
+render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.method, normalization, y.title1, y.title2){
   validate(
     need(!is.null(prodata), "Please upload your data")
   )
@@ -19,7 +30,7 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric,
   
   if(precursorSelection == "all peptides") {
     results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
-      metricData <- getMetricData(prodata, precursors[j], L, U, metric = normalize.metric, normalization = normalization.type)
+      metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = normalization)
       plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, method=plot.method, y.title1, type = 1)
       plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, method=plot.method, y.title2, type = 2)
     })
@@ -29,32 +40,47 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, normalize.metric,
   }
   
   else {
-    metricData <- getMetricData(prodata, precursorSelection, L, U, metric = normalize.metric, normalization = normalization.type)
+    metricData <- getMetricData(prodata, precursorSelection, L, U, metric = metric, normalization)
     
-    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, method=plot.method,  y.title1, type = 1)
-    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, method=plot.method,  y.title2, type = 2)
+    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title1, type = 1)
+    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2)
     
     subplot(plot1,plot2)
   }
 }
 #################################################################################################################
-do.plot <- function(prodata, z, precursor, L, U, method,  y.title, type) {
-  if(method=="CUSUM") {
-    CUSUM.plot(prodata, z, precursor, L, U,  y.title, type)
-  } else if(method=="CP") {
-    CP.plot(prodata, z, precursor, y.title, type)
-  } else if(method=="XmR") {
-    XmR.plot(prodata, z, precursor, L, U, y.title, type)
+# INPUTS : "prodata" is the data user uploads.
+#          "metricData" is the column of the data related to the metric we want. Forexample if we want retention time, it gives retention time column
+#          "precursorSelection" is the precursor that user selects in Data Import tab. it can be either one precursor(peptide) or it can be "all peptides"
+#          "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
+#          "plot.method" is one of XmR, CUSUM or CP methods
+#          "y.title" is the title of the plot which is either Individual Value or Moving Range
+#          "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
+#DESCRIPTION : draw one plot (which is either Individual Value or Moving Range based on the type user chooses) for each metric and method
+do.plot <- function(prodata, metricData, precursorSelection, L, U, plot.method,  y.title, type) {
+  if(plot.method=="CUSUM") {
+    CUSUM.plot(prodata, metricData, precursorSelection, L, U,  y.title, type)
+  } else if(plot.method=="CP") {
+    CP.plot(prodata, metricData, precursorSelection, y.title, type)
+  } else if(plot.method=="XmR") {
+    XmR.plot(prodata, metricData, precursorSelection, L, U, y.title, type)
   }
 }
 #################################################################################################
-CUSUM.plot <- function(prodata, metricData, precursor, L, U,  ytitle, type) {
-  plot.data <- CUSUM.data.prepare(prodata, metricData, precursor, L, U, type)
+# INPUTS : "prodata" is the data user uploads.
+#          "metricData" is the column of the data related to the metric we want. Forexample if we want retention time, it gives retention time column
+#          "precursorSelection" is the precursor that user selects in Data Import tab. it can be either one precursor(peptide) or it can be "all peptides"
+#          "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
+#          "ytitle" is the title of the plot which is either Individual Value or Moving Range
+#          "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
+#DESCRIPTION: draws one CUSUM plot based on type for each given metric
+CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, type) {
+  plot.data <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)
   
   #ymax=ifelse(max(plot.data$CUSUM)>=CUSUM.outrange.thld,(max(plot.data$CUSUM)),CUSUM.outrange.thld)
   #ymin=ifelse(min(plot.data$CUSUM)<=-CUSUM.outrange.thld,(min(plot.data$CUSUM)),-CUSUM.outrange.thld)
   x <- list(
-    title =  paste("QCno - ", precursor),
+    title =  paste("QCno - ", precursorSelection),
     range = c(0, max(plot.data$QCno))
   )
   y <- list(
@@ -119,15 +145,21 @@ CUSUM.plot <- function(prodata, metricData, precursor, L, U,  ytitle, type) {
   return(p)
 }
 #########################################################################################################################
-CP.plot <- function(prodata, metricData, precursor, ytitle, type) {
-  precursor.data <- prodata[prodata$Precursor==precursor,]
+# INPUTS : "prodata" is the data user uploads.
+#          "metricData" is the column of the data related to the metric we want. Forexample if we want retention time, it gives retention time column
+#          "precursorSelection" is the precursor that user selects in Data Import tab. it can be either one precursor(peptide) or it can be "all peptides"
+#          "ytitle" is the title of the plot which is either Individual Value or Moving Range
+#          "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
+#DESCRIPTION: draws one CP plot based on type for each given metric
+CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
+  precursor.data <- prodata[prodata$Precursor==precursorSelection,]
   ## Create variables 
   plot.data <- CP.data.prepare(prodata, metricData, type)
   y.max=max(plot.data$Et) # y axis upper limit
   y.min=0 # y axis lower limit
   
   x <- list(
-    title = paste("QCno - ", precursor)
+    title = paste("QCno - ", precursorSelection)
   )
   y <- list(
     title = ytitle
@@ -152,15 +184,22 @@ CP.plot <- function(prodata, metricData, precursor, ytitle, type) {
     )
 }
 #########################################################################################################################
-XmR.plot <- function(prodata, metricData, precursor, L, U, ytitle, type) {
-  precursor.data <- prodata[prodata$Precursor==precursor,]
+# INPUTS : "prodata" is the data user uploads.
+#          "metricData" is the column of the data related to the metric we want. Forexample if we want retention time, it gives retention time column
+#          "precursorSelection" is the precursor that user selects in Data Import tab. it can be either one precursor(peptide) or it can be "all peptides"
+#          "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
+#          "ytitle" is the title of the plot which is either Individual Value or Moving Range
+#          "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
+#DESCRIPTION: draws one XmR plot based on type for each given metric
+XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type) {
+  precursor.data <- prodata[prodata$Precursor==precursorSelection,]
   plot.data <- XmR.data.prepare(prodata, metricData, L, U, type)
-  
+  print(plot.data)
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
   #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
   
   x <- list(
-    title = paste("QCno - ", precursor)
+    title = paste("QCno - ", precursorSelection)
   )
   y <- list(
     title = ytitle
@@ -409,4 +448,50 @@ metrics_box.plot <- function(prodata, data.metrics) {
   p <- do.call(subplot,c(plots,nrows=length(plots))) %>% 
     layout(autosize = F, width = 700, height = 1000)
   return(p)
+}
+#####################################################################################################
+metrics_heat.map <- function(prodata,metricData,precursorSelection, L, U, type) {
+  
+  XmRMean <- XmR.heatmap.DataFrame(prodata,precursorSelection, L, U, type = 1)
+  #B <- CP.data.prepare(prodata, metricData, type)$Et
+  #C <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.poz
+  #D <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.neg
+  print("hello")
+  #data <- data.frame(A,C,D)
+  ReportDate<-prodata[prodata$Precursor==precursorSelection,]
+  ReportDate <- ReportDate$AcquiredTime
+  XmRMean$ReportDate <- ReportDate
+  df<- tbl_df(XmRMean)
+  
+  df2<-gather(df,key=Metric,value = Value,-ReportDate)
+   
+  df2<- df2 %>% group_by(Metric)%>%
+  mutate(Rescaled = scales::rescale(Value))
+  df2$Metric<-as.factor(df2$Metric)
+  df2$Metric=with(df2,factor(Metric, levels=rev(levels(Metric))))
+   
+   p <- ggplot(df2,aes(ReportDate,Metric,fill=factor(Value)))+
+     geom_tile(colour="white",size=.1) +
+     coord_equal() +
+     scale_fill_viridis(discrete = TRUE,option = "C", direction = -1)+
+     guides(fill=guide_legend(title="# By Day"))+
+     #scale_x_date(date_breaks = "1 day",date_labels="%d-%b-%y")+
+     theme_minimal(base_size = 10, base_family = "Trebuchet MS")+
+     removeGrid()+rotateTextX()+
+     ggtitle("Example Company Indicators - Events per weekday Dec 2016",subtitle = "# Events per metric per day")+
+     labs(x=NULL, y=NULL)+
+     theme(plot.title=element_text(hjust=0))+
+     theme(axis.ticks=element_blank())+
+     theme(axis.text=element_text(size=7))+
+     theme(legend.title=element_text(size=8))+
+     theme(legend.text=element_text(size=6))+
+     theme(legend.position="none")
+  # 
+  # labels1df<-filter(df2,Value<=29)
+  # labels2df<-filter(df2,Value>=30)
+  # 
+   #p<-p+geom_text(data=labels1df,aes(ReportDate,Metric,label=Value,fontface="bold"),size=2.5)
+   #p<-p+geom_text(data=labels2df,aes(ReportDate,Metric,label=Value,fontface="bold"),colour="white",size=2.5)
+   p
+  # getMetricData gives us the column we want (RT, or PA, OR FWHM,...)
 }
