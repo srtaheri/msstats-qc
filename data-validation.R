@@ -2,6 +2,7 @@
 # we suggest users to use and  which our code is based on. for example "Retention Time" and "Full Width at Half Maximum" which are the first element
 # of each vector in the list, are our suggestion so we wrote them in the fisrt place.
 best_colnames <- list(
+  c("AcquiredTime","Acquired.Time","time"),
   c("Retention Time","BestRetentionTime" ,"Best.RT","best retention time", "retention time","rt","best ret time","intensity","Best RT"),
   c("Full Width at Half Maximum","MaxFWHM","fwhm","max.fwhm", "Max FWHM"),
   c("Total Peak Area","Total Area","TotalArea","total area","TA","T.Area"),

@@ -478,13 +478,13 @@ metrics_heat.map <- function(prodata,metricData,precursorSelection, L, U, type) 
      #scale_x_date(date_breaks = "1 day",date_labels="%d-%b-%y")+
      theme_minimal(base_size = 10, base_family = "Trebuchet MS")+
      removeGrid()+rotateTextX()+
-     ggtitle("Example Company Indicators - Events per weekday Dec 2016",subtitle = "# Events per metric per day")+
+     ggtitle("XmR heat map - Mean",subtitle = "# Events per metric per date and time")+
      labs(x=NULL, y=NULL)+
      theme(plot.title=element_text(hjust=0))+
      theme(axis.ticks=element_blank())+
-     theme(axis.text=element_text(size=7))+
-     theme(legend.title=element_text(size=8))+
-     theme(legend.text=element_text(size=6))+
+     theme(axis.text=element_text(size=14))+
+     theme(legend.title=element_text(size=16))+
+     theme(legend.text=element_text(size=12))+
      theme(legend.position="none")
   # 
   # labels1df<-filter(df2,Value<=29)

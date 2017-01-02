@@ -213,6 +213,10 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data")
     )
+    validate(
+      need(!is.null(prodata$AcquiredTime),"To view heatmap, the data set should include AcquiredTime column.")
+    )
+    if(is.null(prodata$AcquiredTime)) return(NULL)
     metricData <- getMetricData(prodata, precursor = input$pepSelection, input$L, input$U, metric = COL.PEAK.ASS, normalization = FALSE)
     metrics_heat.map(prodata,metricData ,precursorSelection = input$pepSelection, input$L, input$U, type = 1)
   })
