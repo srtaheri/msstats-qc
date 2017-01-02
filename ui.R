@@ -139,7 +139,7 @@ shinyUI(fluidPage(
                                   plotOutput("scatter_plot")
                                  ),
                          tabPanel("heat Map",
-                                  uiOutput("heat_map_metric_selection"),
+                                  #uiOutput("heat_map_metric_selection"),
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                    tags$div("It may take a while to load the plots, please wait...",

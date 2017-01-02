@@ -198,15 +198,15 @@ shinyServer(function(input,output,session) {
   #1500
   ############################# heat_map in Summary tab #############################################
 
-  output$heat_map_metric_selection <- renderUI({
-    
-    checkboxGroupInput("heat_map_checkbox_select","choose your prefered metric to view plots",
-                       choices = c(data$metrics),
-                       selected = c(COL.PEAK.ASS,COL.BEST.RET,
-                                    COL.FWHM, COL.TOTAL.AREA)
-    )
-    
-  })
+  # output$heat_map_metric_selection <- renderUI({
+  #   
+  #   checkboxGroupInput("heat_map_checkbox_select","choose your prefered metric to view plots",
+  #                      choices = c(data$metrics),
+  #                      selected = c(COL.PEAK.ASS,COL.BEST.RET,
+  #                                   COL.FWHM, COL.TOTAL.AREA)
+  #   )
+  #   
+  # })
 ###################################################  
   output$heat_map <- renderPlot({
     prodata <- data$df
