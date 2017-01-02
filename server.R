@@ -27,11 +27,19 @@ shinyServer(function(input,output,session) {
   observeEvent(input$filein, {
     file1 <- input$filein
     data$df <- input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
+    validate(
+      need(!is.null(data$df), "Please upload your data"),
+      need(is.data.frame(data$df), data$df)
+    )
     data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
   }, priority = 20)
   
   observeEvent(input$sample_button, {
     data$df <- input_checking(read.csv("./Datasets/Sampledata_CPTAC_Study_9_1_Site54.csv"))
+    validate(
+      need(!is.null(data$df), "Please upload your data"),
+      need(is.data.frame(data$df), data$df)
+    )
     data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
   }, priority = 20)
   
@@ -43,7 +51,8 @@ shinyServer(function(input,output,session) {
   output$pepSelect <- renderUI({
     prodata <- data$df
     validate(
-      need(!is.null(prodata), "Please upload your data")
+      need(!is.null(prodata), "Please upload your data"),
+      need(is.data.frame(prodata), prodata)
     )
     selectInput("pepSelection","Choose precursor type"
                             ,choices = c(levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
@@ -55,9 +64,13 @@ shinyServer(function(input,output,session) {
     checkboxGroupInput("show_prodata_columns", "columns of your data", choices = colnames(prodata), selected = colnames(prodata))
   })
   ######Show table of data #####################################################################################################
-  output$prodata_table <- renderDataTable({
-    data$df[,input$show_prodata_columns, drop = FALSE] # drop = F, is for not considering the last column as arrow and consider it as data frame
-  }, options = list(pageLength = 25))
+   output$prodata_table <- renderDataTable({
+     validate(
+       need(!is.null(data$df), "Please upload your data"),
+       need(is.data.frame(data$df), data$df)
+     )
+     data$df[,input$show_prodata_columns, drop = FALSE] # drop = F, is for not considering the last column as arrow and consider it as data frame
+   }, options = list(pageLength = 25))
   ################################################################# plots ###################################################
   ###########################################################################################################################
   output$XmR_select_metric <- renderUI({
@@ -150,7 +163,8 @@ shinyServer(function(input,output,session) {
   output$box_plot <- renderPlotly({
     prodata <- data$df
     validate(
-      need(!is.null(prodata), "Please upload your data")
+      need(!is.null(prodata), "Please upload your data"),
+      need(is.data.frame(prodata), prodata)
     )
     metrics_box.plot(prodata, data.metrics = data$metrics)
   })
@@ -164,7 +178,8 @@ shinyServer(function(input,output,session) {
   output$scatter_plot <- renderPlot({
     prodata <- data$df
       validate(
-        need(!is.null(prodata), "Please upload your data")
+        need(!is.null(prodata), "Please upload your data"),
+        need(is.data.frame(prodata), prodata)
       )
     metrics_scatter.plot(prodata,input$L, input$U, metric = input$scatter_metric_select, normalization = T)
   }, height = 1500) 
@@ -179,7 +194,8 @@ shinyServer(function(input,output,session) {
 
     prodata <- data$df
     validate(
-      need(!is.null(prodata), "Please upload your data")
+      need(!is.null(prodata), "Please upload your data"),
+      need(is.data.frame(prodata), prodata)
     )
     #Text1 = textGrob("Mean",gp=gpar(col="gray40",fontsize = 11,face="bold"))
     #Text2 = textGrob("Dispersion",gp=gpar(col="gray40",fontsize = 11,face="bold"))
@@ -211,7 +227,8 @@ shinyServer(function(input,output,session) {
   output$heat_map <- renderPlot({
     prodata <- data$df
     validate(
-      need(!is.null(prodata), "Please upload your data")
+      need(!is.null(prodata), "Please upload your data"),
+      need(is.data.frame(prodata), prodata)
     )
     validate(
       need(!is.null(prodata$AcquiredTime),"To view heatmap, the data set should include AcquiredTime column.")

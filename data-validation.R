@@ -1,3 +1,8 @@
+COL.BEST.RET <- "Retention Time"
+COL.FWHM <- "Full Width at Half Maximum"
+COL.TOTAL.AREA <- "Total Peak Area"
+COL.PEAK.ASS <- "Peak Assymetry"
+#########################################################################################
 # here we put a selection of most column names that users use. The first element of each vector should be the best name that
 # we suggest users to use and  which our code is based on. for example "Retention Time" and "Full Width at Half Maximum" which are the first element
 # of each vector in the list, are our suggestion so we wrote them in the fisrt place.
@@ -33,7 +38,7 @@ clearString <- function(x){
 #### guessColumnName function ###########################################################################################
 
 # This function receives the data and check the column names of data and changes the column names if it is not the
-# same names as our suggested sample data to fit our suggested sample data.guessColumnName <- function(x){
+# same names as our suggested sample data to fit our suggested sample data
 guessColumnName <- function(x){  
  
 a <- clearString(x)
@@ -59,42 +64,58 @@ a <- clearString(x)
 }
 
 input.sanity.check <- function(prodata, processout, finalfile) {
-  ## preparing data
-  prodata[prodata==""] <- NA
+  error_message <- ""
+  
+  # get the column names and change them to the column names that we want (For ecample we want Retention Time but a user might use RT, this function auotomatically change RT to Retention Time)
   colnames(prodata) <- unlist(lapply(colnames(prodata), function(x)guessColumnName(x)))
   
+  
+  ### conditions
+  # check that the data includes all the requiered columns and if not tell user what column is missing
+  required_column_names <- c("Precursor","Retention Time","Full Width at Half Maximum","Total Peak Area","MinStartTime"
+                             ,"MaxEndTime")
+  provided_column_names <- colnames(prodata)
+  if(!all(required_column_names %in% provided_column_names)) {
+    missedInput <- which(!(required_column_names %in% provided_column_names))
+    error_message <- paste("ERROR : The required input(inputs) : ",
+                           paste(required_column_names[missedInput], collapse = ", "),
+                           " is(are) not provided in data set. Please add it to your data and try again.")
+    return(error_message)
+  }
+
+  # if(!is.numeric(prodata$COL.BEST.RET)) {
+  #   error_message <- "All the values of Retention Time should be numeric. Please check the values to make sure all the inputs are numeric and then try again."
+  #   return(error_message)
+  # }
+  
+  # if(!is.numeric(prodata$COL.FWHM)) {
+  #   error_message <- "All the values of Full Width at Half Maximum should be numeric. Please check the values to make sure all the inputs are numeric and then try again."
+  #   return(error_message)
+  # }
+  
+print(prodata$COL.BEST.RET)
+  
+  # if there is any missing value in data replace it with NA
+  prodata[prodata==""] <- NA
+  # some times numeric values of some users are like 333,222 which is not acceptable and we convert it to 333222 by replacing "," to ""
   prodata[,"Full Width at Half Maximum"] <- as.numeric(gsub(",","",prodata[,"Full Width at Half Maximum"]))
   prodata[,"Total Peak Area"] <- as.numeric(gsub(",","",prodata[,"Total Peak Area"]))
   prodata[,"Retention Time"] <- as.numeric(gsub(",","",prodata[,"Retention Time"]))
   prodata$MaxEndTime <- as.numeric(gsub(",","",prodata$MaxEndTime))
   prodata$MinStartTime <- as.numeric(gsub(",","",prodata$MinStartTime))
+  # Define peak assymetry
   peakAss <- 2*prodata$MinStartTime/(prodata$MaxEndTime+prodata$MinStartTime)
+  # locate a new column named "Peak Assymetry" right after the column named "MaxEndTime"
   prodata.first <- prodata[,1:which(colnames(prodata)=="MaxEndTime")]
-  prodata.first[,"Peak Assymetry"]<- 2*prodata$MinStartTime/(prodata$MaxEndTime+prodata$MinStartTime)
+  prodata.first[,"Peak Assymetry"]<- peakAss
   prodata <- cbind(prodata.first, prodata[,(which(colnames(prodata)=="MaxEndTime")+1):ncol(prodata), drop = FALSE])
-  
+  # some data migh have annotation column, some might not have. If it doesn't, we create an empty "Annotation" column at the very end column of the data
   if(!("Annotations" %in% colnames(prodata))) {
     prodata[,"Annotations"] <- NA
   }
   
-  # ## conditions
-  required_column_names <- c("Precursor","Retention Time","Full Width at Half Maximum","Total Peak Area","MinStartTime"
-                             ,"MaxEndTime")
-  provided_column_names <- colnames(prodata)
-  if(all(required_column_names %in% provided_column_names)) {
-    processout <- rbind(processout, c("The column names : provided - okay"))
-    write.table(processout, file = finalfile, row.names = FALSE)
-  } else if(!all(required_column_names %in% provided_column_names)) {
-    missedInput <- which(!(required_column_names %in% provided_column_names))
-    processout <- rbind(processout, c(paste("ERROR : The required input : ",
-                                            paste(required_column_names[missedInput], collapse = ", "),
-                                            " are not provided in input - stop")))
-    #paste0("ERROR : The required input :", required_column_names[missedInput], ",are not provided in input - stop")
-    #write.table(processout, file = finalfile, row.names = FALSE)
-    #stop("Please check the required input. The required input needs (Precursor, BestRetentionTime, MaxFWHM, TotalArea, MinStartTime)")
-    
-  }
   return(prodata)
+  
 }
 
 ### Input_checking function #########################################################################################
