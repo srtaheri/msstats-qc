@@ -178,7 +178,7 @@ XmR.data.prepare <- function(prodata, metricData, L,U, type) {
 #         "metric" is one of these metrics: COL.BEST.RET,COL.FWHM, COL.TOTAL.AREA,COL.PEAK.ASS or a metric that user defines in his data set
 #         "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
 #        "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
-#DESCRIPTION : returns a data frame that is used in CUSUM.Summary.DataFrame function below to use for plotting summary plot for CUSUM in Summary Tab of shiny app
+#DESCRIPTION : returns a data frame that is used in CUSUM.Summary.DataFrame function below to use for summary plot of CUSUM in Summary Tab of shiny app
 CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
   h <- 5
 
@@ -230,6 +230,7 @@ CUSUM.Summary.DataFrame <- function(prodata, data.metrics, L, U) {
   return(dat)
 }
 ############################################################################################
+#DESCRIPTION : for each metric returns a data frame of QCno, probability of out of control peptide for dispersion or mean plot
 XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
   QCno    <- 1:nrow(prodata)
   y.poz <- rep(0,nrow(prodata))
@@ -261,9 +262,11 @@ XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
                                          c(rep("Metric dispersion increase",max_QCno),
                                            rep("Metric dispersion decrease",max_QCno))),
                           metric = rep(metric,max_QCno*2))
+  
   return(plot.data)
 }
 ###########################################################################################
+#DESCRIPTION : returns a data frame for all the metrics, probability of out of range peptides, wheter it is for metric mean or metric dispersion and i is an increase or decrease
 XmR.Summary.DataFrame <- function(prodata, data.metrics, L, U) {
   dat <- data.frame(QCno = c(),
                     pr.y = c(),

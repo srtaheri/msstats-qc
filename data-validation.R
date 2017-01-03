@@ -93,7 +93,7 @@ input.sanity.check <- function(prodata, processout, finalfile) {
   #   return(error_message)
   # }
   
-print(prodata$COL.BEST.RET)
+
   
   # if there is any missing value in data replace it with NA
   prodata[prodata==""] <- NA

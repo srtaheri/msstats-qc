@@ -31,8 +31,8 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
   if(precursorSelection == "all peptides") {
     results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
       metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = normalization)
-      plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, method=plot.method, y.title1, type = 1)
-      plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, method=plot.method, y.title2, type = 2)
+      plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title1, type = 1)
+      plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title2, type = 2)
     })
     
     do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
@@ -194,7 +194,7 @@ CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
 XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursorSelection,]
   plot.data <- XmR.data.prepare(prodata, metricData, L, U, type)
-  print(plot.data)
+  #print(plot.data)
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
   #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
   

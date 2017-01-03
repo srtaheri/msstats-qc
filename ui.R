@@ -69,8 +69,29 @@ shinyUI(fluidPage(
                           wellPanel(
                             p("Please upload your data (Comma-separated (*.csv) 8 column QC file format)"),
                             p("To see an acceptable sample data, look at", strong("Help"),"tab"),
-                            fileInput("filein", "Upload file")
+                            fileInput("filein", "Upload file"),
                             
+                            p("Please select your preferred decision rule: "),
+                            p(strong("Decision Rule: "),"To go process is when"),
+                            fluidRow(
+                              column(6,
+                                     selectInput('decisionRule1', '% of peptides', seq(0:100),
+                                                 selected = 50)),
+                              column(6,
+                                     selectInput('decisionRule2', '% of metric', seq(0:100),
+                                                 selected = 50))
+                            ),
+                            p("are out of controll.")
+                        
+                            #   selectizeInput("decisionRule1", "",
+                            #                choices = seq(0:100), selected = 50, multiple = FALSE,
+                            #                options = NULL),
+                            # p("percent of peptides and"),
+                            # selectizeInput("decisionRule2", "",
+                            #                choices = seq(0:100), selected = 50, multiple = FALSE,
+                            #                options = NULL),
+                            # p("percent of metrics are not stable.")
+                                        
                           ),
                            
                            wellPanel(
