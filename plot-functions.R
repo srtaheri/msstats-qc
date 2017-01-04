@@ -252,8 +252,8 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
                                 guide='legend')
   gg <- gg + guides(colour = guide_legend(override.aes = list(linetype=c(1,1,1,1,0),shape=c(NA,NA,NA,NA,16))))
   gg <- gg + facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4))
-  gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
-  gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
+  #gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
+  #gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.4,1.4),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
   gg <- gg + labs(x = "QC No", y = "% of out of control \nprecursors")  
   gg <- gg + ggtitle("Overall Summary \nXmR")
@@ -293,8 +293,8 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
                                  guide='legend')
    gg <- gg + guides(colour = guide_legend(override.aes = list(linetype=c(1,1,1,1,0),shape=c(NA,NA,NA,NA,16))))
    gg <- gg + facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4))
-   gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
-   gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
+   #gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
+   #gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
    gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.4,1.4),
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
    gg <- gg + ggtitle("Overall Summary \nCUSUM")
@@ -456,11 +456,12 @@ metrics_heat.map <- function(prodata,metricData,precursorSelection, L, U, type) 
   #B <- CP.data.prepare(prodata, metricData, type)$Et
   #C <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.poz
   #D <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.neg
-  print("hello")
+  
   #data <- data.frame(A,C,D)
   ReportDate<-prodata[prodata$Precursor==precursorSelection,]
   ReportDate <- ReportDate$AcquiredTime
   XmRMean$ReportDate <- ReportDate
+  
   df<- tbl_df(XmRMean)
   
   df2<-gather(df,key=Metric,value = Value,-ReportDate)
@@ -469,8 +470,10 @@ metrics_heat.map <- function(prodata,metricData,precursorSelection, L, U, type) 
   mutate(Rescaled = scales::rescale(Value))
   df2$Metric<-as.factor(df2$Metric)
   df2$Metric=with(df2,factor(Metric, levels=rev(levels(Metric))))
-   
-   p <- ggplot(df2,aes(ReportDate,Metric,fill=factor(Value)))+
+  #ggplot(df2,aes(ReportDate,Metric,fill=factor(Value))) +
+   p <- ggplot(df2,aes(ReportDate,Metric)) +
+     scale_fill_gradient2(low="blue", high="red", mid="white", 
+                          midpoint=1000, limit=c(0,2000),name="Correlation\n(Pearson)") +
      geom_tile(colour="white",size=.1) +
      coord_equal() +
      scale_fill_viridis(discrete = TRUE,option = "C", direction = -1)+
