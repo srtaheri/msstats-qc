@@ -197,19 +197,33 @@ shinyServer(function(input,output,session) {
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata)
     )
-    #Text1 = textGrob("Mean",gp=gpar(col="gray40",fontsize = 11,face="bold"))
+    ##Text1 = textGrob("Mean",gp=gpar(col="gray40",fontsize = 11,face="bold"))
     #Text2 = textGrob("Dispersion",gp=gpar(col="gray40",fontsize = 11,face="bold"))
-    p1 <- XmR.Summary.plot(prodata, data.metrics = data$metrics, input$L, input$U)
-    p2 <- XmR.Radar.Plot(prodata, data.metrics = data$metrics,input$L,input$U)
-    p3 <- CUSUM.Summary.plot(prodata, data.metrics = data$metrics, input$L, input$U)
-    p4 <- CUSUM.Radar.Plot(prodata, data.metrics = data$metrics, input$L,input$U)
-    #p1 <- p1 + annotation_custom(grob = Text1, xmin = 0, xmax = 7, ymin = 0, ymax = 2.6)
-    #p1 <- p1 + annotation_custom(grob = Text2, xmin = 0, xmax = 15, ymin = 0, ymax = -2.6)
-    #p3 <- p3 + annotation_custom(grob = Text1, xmin = 0, xmax = 7, ymin = 0, ymax = 2.6)
-    #p3 <- p3 + annotation_custom(grob = Text2, xmin = 0, xmax = 15, ymin = 0, ymax = -2.6)
-    grid.arrange(p1,p2,p3,p4, ncol = 1)
+    #p1 <- XmR.Summary.plot(prodata, data.metrics = data$metrics, input$L, input$U)
+    #p2 <- XmR.Radar.Plot(prodata, data.metrics = data$metrics,input$L,input$U)
+    #p3 <- CUSUM.Summary.plot(prodata, data.metrics = data$metrics, input$L, input$U)
+    #p4 <- CUSUM.Radar.Plot(prodata, data.metrics = data$metrics, input$L,input$U)
+    ##p1 <- p1 + annotation_custom(grob = Text1, xmin = 0, xmax = 7, ymin = 0, ymax = 2.6)
+    ##p1 <- p1 + annotation_custom(grob = Text2, xmin = 0, xmax = 15, ymin = 0, ymax = -2.6)
+    ##p3 <- p3 + annotation_custom(grob = Text1, xmin = 0, xmax = 7, ymin = 0, ymax = 2.6)
+    ##p3 <- p3 + annotation_custom(grob = Text2, xmin = 0, xmax = 15, ymin = 0, ymax = -2.6)
+    #grid.arrange(p1,p2,p3,p4, ncol = 1)
 
   }, height = my_height )
+  
+  
+  output$plot_summary_txt <- renderText({
+    prodata <- data$df
+    peptideThreshold <- (as.numeric(input$peptideThreshold))/100
+    metricThreshold <- as.numeric(input$metricThreshold)
+    metricCounter1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+                                                         input$L, input$U, type = 1)
+    metricCounter2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+                                                         input$L, input$U, type = 2)
+    if(metricCounter1 > metricThreshold){ "For XmR, mean is not a to go process"}
+    if(metricCounter2 > metricThreshold){"For XmR, dispersion is not a to go process"}
+    if(metricCounter1 > metricThreshold && metricCounter2 > metricThreshold) {"For XmR, mean and dispersion are not to go processes"}
+  })
 
   #1500
   ############################# heat_map in Summary tab #############################################

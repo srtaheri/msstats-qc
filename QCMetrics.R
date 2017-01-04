@@ -402,3 +402,47 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
   return(dat)
 }
 #######################################################################################################
+XmR.Decision.DataFrame.prepare <- function(prodata, metric, L, U,type) {
+  
+  QCno    <- 1:nrow(prodata)
+  y <- rep(0,nrow(prodata))
+  counter <- rep(0,nrow(prodata))
+  
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  
+  for(j in 1:length(precursors)) {
+    metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
+    counter[1:length(metricData)] <- counter[1:length(metricData)]+1
+    plot.data <- XmR.data.prepare(prodata, metricData , L , U , type)
+    
+    sub1 <- plot.data[plot.data$t >= plot.data$UCL, ]
+    sub2 <- plot.data[plot.data$t <= plot.data$LCL, ]
+    sub <- rbind(sub1,sub2)
+    
+    y[sub$QCno] <- y[sub$QCno] + 1
+  }
+  max_QCno <- max(which(counter!=0))
+  pr.y = y[1:max_QCno]/counter[1:max_QCno]
+  
+  plot.data <- data.frame(QCno = rep(1:max_QCno,1),
+                          pr.y = pr.y,
+                          group = ifelse(rep(type==1,max_QCno), 
+                                         rep("Metric mean",max_QCno),
+                                         rep("Metric dispersion",max_QCno)
+                                        ),
+                          metric = rep(metric,max_QCno)
+                          )
+  
+  return(plot.data)
+}
+##################################################################################################
+XmR.number.Of.Out.Of.Range.Metrics <- function(prodata,data.metrics, peptideThreshold, L, U, type) {
+  
+  metricCounter = 0
+  for (metric in data.metrics) {
+    data <- XmR.Decision.DataFrame.prepare(prodata, metric, L, U,type)
+    if(nrow(data[data$pr.y > peptideThreshold,]) > 0)
+      metricCounter = metricCounter + 1
+  }
+    return(metricCounter)
+}

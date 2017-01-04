@@ -75,22 +75,13 @@ shinyUI(fluidPage(
                             p(strong("Decision Rule: "),"To go process is when"),
                             fluidRow(
                               column(6,
-                                     selectInput('decisionRule1', '% of peptides', seq(0:100),
+                                     selectInput('peptideThreshold', '% of peptides', seq(0:100),
                                                  selected = 50)),
                               column(6,
-                                     selectInput('decisionRule2', '% of metric', seq(0:100),
-                                                 selected = 50))
+                                     selectInput('metricThreshold', '# of metrics', seq(1:4),
+                                                 selected = 2))
                             ),
                             p("are out of controll.")
-                        
-                            #   selectizeInput("decisionRule1", "",
-                            #                choices = seq(0:100), selected = 50, multiple = FALSE,
-                            #                options = NULL),
-                            # p("percent of peptides and"),
-                            # selectizeInput("decisionRule2", "",
-                            #                choices = seq(0:100), selected = 50, multiple = FALSE,
-                            #                options = NULL),
-                            # p("percent of metrics are not stable.")
                                         
                           ),
                            
@@ -139,8 +130,21 @@ shinyUI(fluidPage(
                                     conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                      tags$div("It may take a while to load the plots, please wait...",
                                                               id="loadmessage")),
-                                    plotOutput("plot_summary")
-                                    #plotlyOutput("plot_summary")
+                                    fluidRow(
+                                      column(9,
+                                             plotOutput("plot_summary")
+                                             ),
+                                      column(3,
+                                             wellPanel(
+                                               textOutput("plot_summary_txt")
+                                             )
+                                             
+                                      )
+                                    )
+                                     
+                                    
+                                    
+                                    
            
                            ),
                          tabPanel("Boxplot",
