@@ -220,9 +220,9 @@ shinyServer(function(input,output,session) {
                                                          input$L, input$U, type = 1)
     metricCounter2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
                                                          input$L, input$U, type = 2)
-    if(metricCounter1 > metricThreshold){ "System is out-of-control"}
-    if(metricCounter2 > metricThreshold){"System is out-of-control"}
-    if(metricCounter1 > metricThreshold && metricCounter2 > metricThreshold) {"System is out-of-control"}
+    if(metricCounter1 > metricThreshold){ "System is out-of-control (A change in QC metric mean is possible)"}
+    if(metricCounter2 > metricThreshold){"System is out-of-control (A change in QC metric variation is possible)"}
+    if(metricCounter1 > metricThreshold && metricCounter2 > metricThreshold) {"System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
   })
 
   #1500
