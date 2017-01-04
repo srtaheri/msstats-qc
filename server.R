@@ -220,9 +220,9 @@ shinyServer(function(input,output,session) {
                                                          input$L, input$U, type = 1)
     metricCounter2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
                                                          input$L, input$U, type = 2)
-    if(metricCounter1 > metricThreshold){ "For XmR, mean is not a to go process"}
-    if(metricCounter2 > metricThreshold){"For XmR, dispersion is not a to go process"}
-    if(metricCounter1 > metricThreshold && metricCounter2 > metricThreshold) {"For XmR, mean and dispersion are not to go processes"}
+    if(metricCounter1 > metricThreshold){ "System is out-of-control"}
+    if(metricCounter2 > metricThreshold){"System is out-of-control"}
+    if(metricCounter1 > metricThreshold && metricCounter2 > metricThreshold) {"System is out-of-control"}
   })
 
   #1500
