@@ -194,7 +194,7 @@ CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
 XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursorSelection,]
   plot.data <- XmR.data.prepare(prodata, metricData, L, U, type)
-  #print(plot.data)
+  print(plot.data)
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
   #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
   
@@ -450,51 +450,58 @@ metrics_box.plot <- function(prodata, data.metrics) {
   return(p)
 }
 #####################################################################################################
-metrics_heat.map <- function(prodata,metricData,precursorSelection, L, U, type) {
+metrics_heat.map <- function(prodata,metric.heatmap.DataFrame,precursorSelection, L, U, type) {
   
-  XmRMean <- XmR.heatmap.DataFrame(prodata,precursorSelection, L, U, type = 1)
-  #B <- CP.data.prepare(prodata, metricData, type)$Et
-  #C <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.poz
-  #D <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.neg
-  
-  #data <- data.frame(A,C,D)
+  #CUSUM.poz <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.poz
+  #CUSUM.neg <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.neg
+
+  data <- metric.heatmap.DataFrame
   ReportDate<-prodata[prodata$Precursor==precursorSelection,]
   ReportDate <- ReportDate$AcquiredTime
-  XmRMean$ReportDate <- ReportDate
-  
-  df<- tbl_df(XmRMean)
+  data$ReportDate <- ReportDate
+
+  df<- tbl_df(data)
   
   df2<-gather(df,key=Metric,value = Value,-ReportDate)
    
   df2<- df2 %>% group_by(Metric)%>%
   mutate(Rescaled = scales::rescale(Value))
+  print(df2)
   df2$Metric<-as.factor(df2$Metric)
   df2$Metric=with(df2,factor(Metric, levels=rev(levels(Metric))))
-  #ggplot(df2,aes(ReportDate,Metric,fill=factor(Value))) +
-   p <- ggplot(df2,aes(ReportDate,Metric)) +
-     scale_fill_gradient2(low="blue", high="red", mid="white", 
-                          midpoint=1000, limit=c(0,2000),name="Correlation\n(Pearson)") +
-     geom_tile(colour="white",size=.1) +
-     coord_equal() +
-     scale_fill_viridis(discrete = TRUE,option = "C", direction = -1)+
-     guides(fill=guide_legend(title="# By Day"))+
-     #scale_x_date(date_breaks = "1 day",date_labels="%d-%b-%y")+
-     theme_minimal(base_size = 10, base_family = "Trebuchet MS")+
-     removeGrid()+rotateTextX()+
-     ggtitle("XmR heat map - Mean",subtitle = "# Events per metric per date and time")+
-     labs(x=NULL, y=NULL)+
-     theme(plot.title=element_text(hjust=0))+
-     theme(axis.ticks=element_blank())+
-     theme(axis.text=element_text(size=14))+
-     theme(legend.title=element_text(size=16))+
-     theme(legend.text=element_text(size=12))+
-     theme(legend.position="none")
+  
+  
+  #p <- ggplot(df2,aes(ReportDate,Metric,fill=factor(Rescaled)))
+  p <- ggplot(df2,aes(ReportDate,Metric,fill=Rescaled))
+  p <- p + scale_fill_gradient2(low="#F0E442", high="#000000", mid="#D55E00", 
+                                midpoint=0.5,
+                                #, limit=c(0.2,0.8)
+                                name="Correlation\n(Pearson)",guide = "legend"
+                                #, na.value = "red"
+                                )
+  p <- p + geom_tile(colour="white",size=.1)
+  p <- p + coord_equal()
+  p <- p + theme_minimal(base_size = 10, base_family = "Trebuchet MS")
+  p <- p + removeGrid()+rotateTextX()
+  if(type == 1) {
+    p <- p + ggtitle("XmR heat map - Mean",subtitle = "# Events per metric per date and time")
+  }
+  else {
+    p <- p + ggtitle("XmR heat map - Dispersion",subtitle = "# Events per metric per date and time")
+  }
+  
+  p <- p + labs(x=NULL, y=NULL)
+  p <- p + theme(plot.title=element_text(hjust=0))+
+           theme(axis.ticks=element_blank())+
+           theme(axis.text=element_text(size=14))+
+           theme(legend.title=element_text(size=16))+
+           theme(legend.text=element_text(size=12))+
+           theme(legend.position="none")
   # 
   # labels1df<-filter(df2,Value<=29)
   # labels2df<-filter(df2,Value>=30)
   # 
    #p<-p+geom_text(data=labels1df,aes(ReportDate,Metric,label=Value,fontface="bold"),size=2.5)
-   #p<-p+geom_text(data=labels2df,aes(ReportDate,Metric,label=Value,fontface="bold"),colour="white",size=2.5)
+   #p<-p+geom_text(data=df2,aes(ReportDate,Metric,label=Value,fontface="bold"),colour="white",size=2.5)
    p
-  # getMetricData gives us the column we want (RT, or PA, OR FWHM,...)
 }

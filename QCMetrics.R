@@ -230,6 +230,10 @@ CUSUM.Summary.DataFrame <- function(prodata, data.metrics, L, U) {
   return(dat)
 }
 ############################################################################################
+CUSUM.heatmap.DataFrame <- function() {
+  
+}
+############################################################################################
 #DESCRIPTION : for each metric returns a data frame of QCno, probability of out of control peptide for dispersion or mean plot
 XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
   QCno    <- 1:nrow(prodata)
@@ -285,21 +289,35 @@ XmR.heatmap.DataFrame <- function(prodata,precursorSelection, L, U, type) {
 
   metricDataRT <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.BEST.RET, normalization = F)
   RT <- XmR.data.prepare(prodata, metricDataRT, L, U, type)$t
-  
+  RT_UCL <- XmR.data.prepare(prodata, metricDataRT, L, U, type)$UCL
+  RT_LCL <- XmR.data.prepare(prodata, metricDataRT, L, U, type)$LCL
+
   metricDataPA <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.PEAK.ASS, normalization = F)
   PA <- XmR.data.prepare(prodata, metricDataPA, L, U, type)$t
+  PA_UCL <- XmR.data.prepare(prodata, metricDataPA, L, U, type)$UCL
+  PA_LCL <- XmR.data.prepare(prodata, metricDataPA, L, U, type)$LCL
   
   metricDataFWHM <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.FWHM, normalization = F)
   FWHM <- XmR.data.prepare(prodata, metricDataFWHM, L, U, type)$t
+  FWHM_UCL <- XmR.data.prepare(prodata, metricDataFWHM, L, U, type)$UCL
+  FWHM_LCL <- XmR.data.prepare(prodata, metricDataFWHM, L, U, type)$LCL
   
   metricDataTPA <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.TOTAL.AREA, normalization = F)
   TPA <- XmR.data.prepare(prodata, metricDataTPA, L, U, type)$t
+  TPA_UCL <- XmR.data.prepare(prodata, metricDataTPA, L, U, type)$UCL
+  TPA_LCL <- XmR.data.prepare(prodata, metricDataTPA, L, U, type)$LCL
   
-  datMean <- data.frame(RT = RT,
-                    PA = PA,
-                    FWHM = FWHM,
-                    TPA = TPA)
-  return(datMean)
+  dataFrame <- data.frame(RT = RT,
+                          #RT_UCL = RT_UCL, RT_LCL = RT_LCL,
+                        PA = PA, 
+                        #PA_UCL = PA_UCL, PA_LCL = PA_LCL,
+                        FWHM = FWHM, 
+                        #FWHM_UCL = FWHM_UCL, FWHM_LCL = FWHM_LCL,
+                        TPA = TPA
+                        #,TPA_UCL = TPA_UCL, TPA_LCL = TPA_LCL
+                        )
+  
+  return(dataFrame)
 }
 ############################################################################################
 Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type, XmR.type) {
@@ -435,7 +453,7 @@ XmR.Decision.DataFrame.prepare <- function(prodata, metric, L, U,type) {
   
   return(plot.data)
 }
-##################################################################################################
+#######################################################################################################
 XmR.number.Of.Out.Of.Range.Metrics <- function(prodata,data.metrics, peptideThreshold, L, U, type) {
   
   metricCounter = 0
@@ -445,4 +463,52 @@ XmR.number.Of.Out.Of.Range.Metrics <- function(prodata,data.metrics, peptideThre
       metricCounter = metricCounter + 1
   }
     return(metricCounter)
+}
+#######################################################################################################
+CUSUM.Decision.DataFrame.prepare <- function(prodata, metric, L, U, type) {
+  h <- 5
+  
+  QCno <- 1:nrow(prodata)
+  y <- rep(0,nrow(prodata))
+  counter <- rep(0,nrow(prodata))
+  
+  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  
+  for(j in 1:length(precursors)) {
+    metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T)
+    counter[1:length(metricData)] <- counter[1:length(metricData)]+1
+    plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
+    
+    sub1 <- plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]
+    sub2 <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
+    sub <- rbind(sub1,sub2)
+    
+    y[sub$QCno] <- y[sub$QCno] + 1
+  }
+  
+  max_QCno <- max(which(counter!=0))
+  
+  pr.y = y[1:max_QCno]/counter[1:max_QCno]
+
+  plot.data <- data.frame(QCno = rep(1:max_QCno,1),
+                          pr.y = pr.y,
+                          group = ifelse(rep(type==1,max_QCno), 
+                                         rep("Metric mean",max_QCno),
+                                         rep("Metric dispersion",max_QCno)
+                                         ),
+                          metric = rep(metric,max_QCno)
+  )
+  
+  return(plot.data)
+}
+####################################################################################################
+CUSUM.number.Of.Out.Of.Range.Metrics <- function(prodata, data.metrics, peptideThreshold, L, U, type) {
+  metricCounter = 0
+  for (metric in data.metrics) {
+    data <- CUSUM.Decision.DataFrame.prepare(prodata, metric, L, U,type)
+    #print(data$pr.y)
+    if(nrow(data[data$pr.y > peptideThreshold,]) > 0)
+      metricCounter = metricCounter + 1
+  }
+  return(metricCounter)
 }

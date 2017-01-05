@@ -189,7 +189,7 @@ shinyServer(function(input,output,session) {
   my_height <- reactive({
     my_height <- ceiling(length(data$metrics)/4)*1200
   })
-  
+  ################ plot the summary and radar plots ###############
   output$plot_summary <- renderPlot({
 
     prodata <- data$df
@@ -211,33 +211,42 @@ shinyServer(function(input,output,session) {
 
   }, height = my_height )
   
-  
-  output$plot_summary_txt <- renderText({
+  ################## decision message for XmR in summary tab #########
+  output$XmR_summary_decision_txt <- renderText({
     prodata <- data$df
     peptideThreshold <- (as.numeric(input$peptideThreshold))/100
     metricThreshold <- as.numeric(input$metricThreshold)
-    metricCounter1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+    
+    XmRCounter1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
                                                          input$L, input$U, type = 1)
-    metricCounter2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+    XmRCounter2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
                                                          input$L, input$U, type = 2)
-    if(metricCounter1 > metricThreshold){ "System is out-of-control (A change in QC metric mean is possible)"}
-    if(metricCounter2 > metricThreshold){"System is out-of-control (A change in QC metric variation is possible)"}
-    if(metricCounter1 > metricThreshold && metricCounter2 > metricThreshold) {"System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
+    
+    
+    if(XmRCounter1 > metricThreshold){ "System is out-of-control (A change in QC metric mean is possible)"}
+    if(XmRCounter2 > metricThreshold){"System is out-of-control (A change in QC metric variation is possible)"}
+    if(XmRCounter1 > metricThreshold && XmRCounter2 > metricThreshold) {"System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
+  })
+  ###################
+  output$CUSUM_summary_decision_txt <- renderText({
+    prodata <- data$df
+    peptideThreshold <- (as.numeric(input$peptideThreshold))/100
+    metricThreshold <- as.numeric(input$metricThreshold)
+    
+    CUSUMCounter1 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+                                                          input$L, input$U, type = 1)
+    CUSUMCounter2 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+                                                          input$L, input$U, type = 2)
+  
+    if(CUSUMCounter1 > metricThreshold){ "System is out-of-control (A change in QC metric mean is possible)"}
+    if(CUSUMCounter2 > metricThreshold){"System is out-of-control (A change in QC metric variation is possible)"}
+    if(CUSUMCounter1 > metricThreshold && CUSUMCounter2 > metricThreshold) {"System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
+    
   })
 
   #1500
   ############################# heat_map in Summary tab #############################################
 
-  # output$heat_map_metric_selection <- renderUI({
-  #   
-  #   checkboxGroupInput("heat_map_checkbox_select","choose your prefered metric to view plots",
-  #                      choices = c(data$metrics),
-  #                      selected = c(COL.PEAK.ASS,COL.BEST.RET,
-  #                                   COL.FWHM, COL.TOTAL.AREA)
-  #   )
-  #   
-  # })
-###################################################  
   output$heat_map <- renderPlot({
     prodata <- data$df
     validate(
@@ -248,9 +257,22 @@ shinyServer(function(input,output,session) {
       need(!is.null(prodata$AcquiredTime),"To view heatmap, the data set should include AcquiredTime column.")
     )
     if(is.null(prodata$AcquiredTime)) return(NULL)
-    metricData <- getMetricData(prodata, precursor = input$pepSelection, input$L, input$U, metric = COL.PEAK.ASS, normalization = FALSE)
-    metrics_heat.map(prodata,metricData ,precursorSelection = input$pepSelection, input$L, input$U, type = 1)
-  })
- 
+    XmR.heatmap.DataFrame.type1 <- XmR.heatmap.DataFrame(prodata,input$pepSelection, input$L, input$U, type = 1)
+    XmR.heatmap.DataFrame.type2 <- XmR.heatmap.DataFrame(prodata,input$pepSelection, input$L, input$U, type = 2)
+    
+    p1 <- metrics_heat.map(prodata ,XmR.heatmap.DataFrame.type1,input$pepSelection, input$L, input$U, type = 1)
+    p2 <- metrics_heat.map(prodata,XmR.heatmap.DataFrame.type2,input$pepSelection, input$L, input$U, type = 2)
+    grid.arrange(p1,p2, ncol = 1)
+    
+  }
+  #, height = 1000
+  )
+  #################### text below the heat map #################
+  # output$heat_map_txt <- renderText({
+  #   "In these heat maps, we scaled the values of metrics to (0,1). Values close
+  #   to zero are yellow and as the values get closer to 0.5 the color changes to
+  #   orange and it gets close to black as the values get closer to 1. The out of
+  #   range values are colored as red."
+  # })
   ############################################################################################################################
 })

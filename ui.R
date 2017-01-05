@@ -136,7 +136,14 @@ shinyUI(fluidPage(
                                              ),
                                       column(3,
                                              wellPanel(
-                                               textOutput("plot_summary_txt")
+                                               textOutput("XmR_summary_decision_txt"),
+                                               br(), br(),br(), br(),br(), br(),br(), br(),
+                                               br(), br(),br(), br(),br(), br(),br(), br(),
+                                               br(), br(),br(), br(),br(), br(),br(), br(),
+                                               textOutput("CUSUM_summary_decision_txt"),
+                                               br(), br(),br(), br(),br(), br(),br(), br(),
+                                               br(), br(),br(), br(),br(), br(),br(), br(),
+                                               br(), br(),br(), br(),br()
                                              )
                                              
                                       )
@@ -164,12 +171,12 @@ shinyUI(fluidPage(
                                   plotOutput("scatter_plot")
                                  ),
                          tabPanel("heat Map",
-                                  #uiOutput("heat_map_metric_selection"),
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                    tags$div("It may take a while to load the plots, please wait...",
                                                             id="loadmessage")),
                                   plotOutput("heat_map")
+                                  #,textOutput("heat_map_txt")
                                   
                          )
                          
