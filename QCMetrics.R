@@ -506,7 +506,7 @@ CUSUM.number.Of.Out.Of.Range.Metrics <- function(prodata, data.metrics, peptideT
   metricCounter = 0
   for (metric in data.metrics) {
     data <- CUSUM.Decision.DataFrame.prepare(prodata, metric, L, U,type)
-    #print(data$pr.y)
+    
     if(nrow(data[data$pr.y > peptideThreshold,]) > 0)
       metricCounter = metricCounter + 1
   }

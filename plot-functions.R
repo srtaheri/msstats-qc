@@ -194,7 +194,7 @@ CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
 XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursorSelection,]
   plot.data <- XmR.data.prepare(prodata, metricData, L, U, type)
-  print(plot.data)
+  
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
   #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
   
@@ -466,7 +466,7 @@ metrics_heat.map <- function(prodata,metric.heatmap.DataFrame,precursorSelection
    
   df2<- df2 %>% group_by(Metric)%>%
   mutate(Rescaled = scales::rescale(Value))
-  print(df2)
+  
   df2$Metric<-as.factor(df2$Metric)
   df2$Metric=with(df2,factor(Metric, levels=rev(levels(Metric))))
   
