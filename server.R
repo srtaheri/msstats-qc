@@ -18,12 +18,12 @@ shinyServer(function(input,output,session) {
   COL.FWHM <- "Full Width at Half Maximum"
   COL.TOTAL.AREA <- "Total Peak Area"
   COL.PEAK.ASS <- "Peak Assymetry"
-  
+
 
   #### Read data  ##################################################################################################
   data <- reactiveValues(df = NULL, metrics = NULL)
-  
-  
+
+
   observeEvent(input$filein, {
     file1 <- input$filein
     data$df <- input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
@@ -33,7 +33,7 @@ shinyServer(function(input,output,session) {
     )
     data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
   }, priority = 20)
-  
+
   observeEvent(input$sample_button, {
     data$df <- input_checking(read.csv("./Datasets/Sampledata_CPTAC_Study_9_1_Site54.csv"))
     validate(
@@ -42,7 +42,7 @@ shinyServer(function(input,output,session) {
     )
     data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
   }, priority = 20)
-  
+
   observeEvent(input$clear_button, {
     data$df <- NULL
     data$metrics <- NULL
@@ -83,9 +83,9 @@ shinyServer(function(input,output,session) {
 
   })
   #################################################################################################################
-  
+
   output$XmR_tabset <- renderUI({
-    
+
     Tabs <- lapply(input$XmR_checkbox_select,
                    function(x) {
                        tabPanel(x,
@@ -97,29 +97,30 @@ shinyServer(function(input,output,session) {
                                                              input$U, metric = x,
                                                              plot.method = "XmR", normalization = FALSE,
                                                              y.title1 = "Individual Value", y.title2 = "Moving Range"))
-                                
+
                                 )
                    })
     do.call(tabsetPanel, Tabs)
+    print(str(input$pepSelection))
   })
   ################################################################################################################
   ################################################################################################################
   output$CUSUM_select_metric <- renderUI({
-    
+
     checkboxGroupInput("CUSUM_checkbox_select","choose your prefered metric to view plots",
                        choices = c(data$metrics),
                        selected = c(COL.PEAK.ASS,COL.BEST.RET,
                                     COL.FWHM,
                                     COL.TOTAL.AREA)
     )
-    
+
   })
   #################################################################################################################
   output$CUSUM_tabset <- renderUI({
-    
+
     Tabs <- lapply(input$CUSUM_checkbox_select,
                    function(x) {
-               
+
                        tabPanel(x,
                                 tags$head(tags$style(type="text/css")),
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
@@ -128,24 +129,24 @@ shinyServer(function(input,output,session) {
                                 renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CUSUM", normalization = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation"))
                                 )
                    })
-    
+
     do.call(tabsetPanel, Tabs)
   })
   ################################################################################################################
   ################################################################################################################
   output$CP_select_metric <- renderUI({
-    
+
     checkboxGroupInput("CP_checkbox_select","choose your prefered metric to view plots",
                        choices = c(data$metrics),
                        selected = c(COL.PEAK.ASS,COL.BEST.RET,
                                     COL.TOTAL.AREA,
                                     COL.FWHM)
     )
-    
+
   })
   #################################################################################################################
   output$CP_tabset <- renderUI({
-    
+
     Tabs <- lapply(input$CP_checkbox_select,
                    function(x) {
                        tabPanel(x,
@@ -156,7 +157,7 @@ shinyServer(function(input,output,session) {
                                 renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CP", normalization = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation"))
                                 )
                    })
-    
+
     do.call(tabsetPanel, Tabs)
   })
   ########################################################## box plot in Summary tab ##########################################
@@ -173,7 +174,7 @@ shinyServer(function(input,output,session) {
 
      return(selectInput("scatter_metric_select", "Choose the metric",
                  choices = c(data$metrics), selected = COL.FWHM))
-    
+
   })
   output$scatter_plot <- renderPlot({
     prodata <- data$df
@@ -182,7 +183,7 @@ shinyServer(function(input,output,session) {
         need(is.data.frame(prodata), prodata)
       )
     metrics_scatter.plot(prodata,input$L, input$U, metric = input$scatter_metric_select, normalization = T)
-  }, height = 1500) 
+  }, height = 1500)
   outputOptions(output, "scatter_plot_metric_selection", priority = 10)
   outputOptions(output, "scatter_plot", priority = 1)
   ######################################################### plot_summary in Summary tab ########################################
@@ -210,19 +211,19 @@ shinyServer(function(input,output,session) {
     grid.arrange(p1,p2,p3,p4, ncol = 1)
 
   }, height = my_height )
-  
+
   ################## decision message for XmR in summary tab #########
   output$XmR_summary_decision_txt <- renderText({
     prodata <- data$df
     peptideThreshold <- (as.numeric(input$peptideThreshold))/100
     metricThreshold <- as.numeric(input$metricThreshold)
-    
+
     XmRCounter1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
                                                          input$L, input$U, type = 1)
     XmRCounter2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
                                                          input$L, input$U, type = 2)
-    
-    
+
+
     if(XmRCounter1 > metricThreshold){ "System is out-of-control (A change in QC metric mean is possible)"}
     if(XmRCounter2 > metricThreshold){"System is out-of-control (A change in QC metric variation is possible)"}
     if(XmRCounter1 > metricThreshold && XmRCounter2 > metricThreshold) {"System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
@@ -232,16 +233,16 @@ shinyServer(function(input,output,session) {
     prodata <- data$df
     peptideThreshold <- (as.numeric(input$peptideThreshold))/100
     metricThreshold <- as.numeric(input$metricThreshold)
-    
+
     CUSUMCounter1 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
                                                           input$L, input$U, type = 1)
     CUSUMCounter2 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
                                                           input$L, input$U, type = 2)
-  
+
     if(CUSUMCounter1 > metricThreshold){ "System is out-of-control (A change in QC metric mean is possible)"}
     if(CUSUMCounter2 > metricThreshold){"System is out-of-control (A change in QC metric variation is possible)"}
     if(CUSUMCounter1 > metricThreshold && CUSUMCounter2 > metricThreshold) {"System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
-    
+
   })
 
   #1500
@@ -259,11 +260,11 @@ shinyServer(function(input,output,session) {
     if(is.null(prodata$AcquiredTime)) return(NULL)
     XmR.heatmap.DataFrame.type1 <- XmR.heatmap.DataFrame(prodata,input$pepSelection, input$L, input$U, type = 1)
     XmR.heatmap.DataFrame.type2 <- XmR.heatmap.DataFrame(prodata,input$pepSelection, input$L, input$U, type = 2)
-    
+
     p1 <- metrics_heat.map(prodata ,XmR.heatmap.DataFrame.type1,input$pepSelection, input$L, input$U, type = 1)
     p2 <- metrics_heat.map(prodata,XmR.heatmap.DataFrame.type2,input$pepSelection, input$L, input$U, type = 2)
     grid.arrange(p1,p2, ncol = 1)
-    
+
   }
   #, height = 1000
   )
