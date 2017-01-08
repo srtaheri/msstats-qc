@@ -20,31 +20,31 @@ CUSUM.outrange.thld <- 5
 #        "plot.method" is one of XmR, CUSUM or CP methods
 #        "normalization" is either TRUE or FALSE
 #        "y.title1" and "y.title2" are titles of left and right plot which are Individual Value and Moving Range
-# DESCRIPTION : Draws together the "Individual Value" and "Moving Range plots" (left and right plot) for each metric and method. 
+# DESCRIPTION : Draws together the "Individual Value" and "Moving Range plots" (left and right plot) for each metric and method.
 render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.method, normalization, y.title1, y.title2){
   validate(
     need(!is.null(prodata), "Please upload your data")
   )
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   plots <- list()
-  
+
   if(precursorSelection == "all peptides") {
     results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
       metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = normalization)
       plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title1, type = 1)
       plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title2, type = 2)
     })
-    
-    do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>% 
+
+    do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>%
       layout(autosize = F, width = 1400, height = nlevels(prodata$Precursor)*200)
   }
-  
+
   else {
     metricData <- getMetricData(prodata, precursorSelection, L, U, metric = metric, normalization)
-    
+
     plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title1, type = 1)
     plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2)
-    
+
     subplot(plot1,plot2)
   }
 }
@@ -76,7 +76,7 @@ do.plot <- function(prodata, metricData, precursorSelection, L, U, plot.method, 
 #DESCRIPTION: draws one CUSUM plot based on type for each given metric
 CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, type) {
   plot.data <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)
-  
+
   #ymax=ifelse(max(plot.data$CUSUM)>=CUSUM.outrange.thld,(max(plot.data$CUSUM)),CUSUM.outrange.thld)
   #ymin=ifelse(min(plot.data$CUSUM)<=-CUSUM.outrange.thld,(min(plot.data$CUSUM)),-CUSUM.outrange.thld)
   x <- list(
@@ -86,7 +86,7 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, t
   y <- list(
     title = ytitle
   )
-  
+
   p <- plot_ly(plot.data
                , x = QCno
                , y = CUSUM.poz
@@ -141,7 +141,7 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, t
               marker=list(color="red" , size=5 , opacity=0.5),
               showlegend = FALSE,name=""
     )
-  
+
   return(p)
 }
 #########################################################################################################################
@@ -153,18 +153,18 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, t
 #DESCRIPTION: draws one CP plot based on type for each given metric
 CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursorSelection,]
-  ## Create variables 
+  ## Create variables
   plot.data <- CP.data.prepare(prodata, metricData, type)
   y.max=max(plot.data$Et) # y axis upper limit
   y.min=0 # y axis lower limit
-  
+
   x <- list(
     title = paste("QCno - ", precursorSelection)
   )
   y <- list(
     title = ytitle
   )
-  
+
   plot_ly(plot.data, x = QCno, y = Et
           ,type = "scatter"
           ,line = list(shape = "linear")
@@ -172,7 +172,7 @@ CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
           , text=precursor.data$Annotations
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
-    add_trace( x = c(tho.hat,tho.hat), y = c(0, (max(Et)+2)) 
+    add_trace( x = c(tho.hat,tho.hat), y = c(0, (max(Et)+2))
                ,marker=list(color="red", size=4, opacity=0.5)
                , mode = "lines"
                ,showlegend = FALSE,name=""
@@ -194,10 +194,10 @@ CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
 XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursorSelection,]
   plot.data <- XmR.data.prepare(prodata, metricData, L, U, type)
-  
+
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
   #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
-  
+
   x <- list(
     title = paste("QCno - ", precursorSelection)
   )
@@ -232,7 +232,7 @@ XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type
 }
 #################################################################################################################
 XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
-  
+  data.metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
   dat <- XmR.Summary.DataFrame(prodata,data.metrics, L, U)
   tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics)
   gg <- ggplot(dat)
@@ -252,10 +252,10 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
                                 guide='legend')
   gg <- gg + guides(colour = guide_legend(override.aes = list(linetype=c(1,1,1,1,0),shape=c(NA,NA,NA,NA,16))))
   gg <- gg + facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4))
-  #gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
-  #gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
+  gg <- gg + annotate("text", x = 15, y = 1.3, label = "Mean")
+  gg <- gg + annotate("text", x = 25, y = -1.3, label = "Dispersion")
   gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.4,1.4),breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
-  gg <- gg + labs(x = "QC No", y = "% of out of control \nprecursors")  
+  gg <- gg + labs(x = "QC No", y = "% of out of control \nprecursors")
   gg <- gg + ggtitle("Overall Summary \nXmR")
   theme_set(theme_gray(base_size = 15)) # this will change the size of all the texts in all ggplot functions
   gg <- gg + theme(plot.title = element_text(size=15, face="bold",margin = margin(10, 0, 10, 0)),
@@ -268,14 +268,14 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
                    plot.margin = unit(c(1,3,1,1), "lines")
   )
   gg
-  
+
 }
 ###############################################################################################
 CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
    h <- 5
    dat <- CUSUM.Summary.DataFrame(prodata, data.metrics, L, U)
    tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics)
-   
+
    gg <- ggplot(dat)
    gg <- gg + geom_hline(yintercept=0, alpha=0.5)
    gg <- gg + stat_smooth(method="loess", aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group))
@@ -293,12 +293,12 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
                                  guide='legend')
    gg <- gg + guides(colour = guide_legend(override.aes = list(linetype=c(1,1,1,1,0),shape=c(NA,NA,NA,NA,16))))
    gg <- gg + facet_wrap(~metric,nrow = ceiling(length(data.metrics)/4))
-   #gg <- gg + geom_label(aes(y = 1.3, x = 0.1,hjust = 0.1, label="Mean"))
-   #gg <- gg + geom_label(aes(y = -1.3, x = 0.1,hjust = 0.1, label="Dispersion"))
+   gg <- gg + annotate("text", x = 15, y = 1.3, label = "Mean")
+   gg <- gg + annotate("text", x = 25, y = -1.3, label = "Dispersion")
    gg <- gg + scale_y_continuous(expand=c(0,0), limits = c(-1.4,1.4),
                                  breaks = c(1,0.5,0,-0.5,-1) ,labels = c(1,0.5,0,"0.5","1"))
    gg <- gg + ggtitle("Overall Summary \nCUSUM")
-   
+
    gg <- gg + labs(x = "QC No", y = "% of out of control \nprecursors")
    gg <- gg + theme(plot.title = element_text(size=15, face="bold",margin = margin(10, 0, 10, 0)),
                     axis.text.x=element_text(size=12, vjust=0.5),
@@ -314,7 +314,7 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
    gt$layout$clip[gt$layout$name == "panel"] <- "off"
    grid.draw(gt)
    gg
-  
+
 }
 ####################################################################
 XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
@@ -357,13 +357,13 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
           panel.grid.major = element_line(colour = "firebrick3",linetype = "dotted"),
           plot.margin = unit(c(1,3,1,1), "lines")
   )
-  
+
 }
 
 #################################################################################################################
 CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
   dat <- CUSUM.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
-  
+
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby),
                   group = group, colour = group, fill = group)) +
     coord_polar() +
@@ -412,7 +412,7 @@ panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
   txt <- format(c(r, 0.123456789), digits = digits)[1]
   txt <- paste("r= ", txt, sep = "")
   text(0.5, 0.6, txt)
-  
+
   # p-value calculation
   p <- cor.test(x, y)$p.value
   txt2 <- format(c(p, 0.123456789), digits = digits)[1]
@@ -422,7 +422,7 @@ panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
 }
 #########################################################################################################################
 metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
-  
+
   multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   for (j in 1:nlevels(prodata$Precursor)) {
@@ -441,17 +441,17 @@ metrics_box.plot <- function(prodata, data.metrics) {
   for(i in 1:length(data.metrics)) {
     metric <- data.metrics[i]
     precursor.data <- substring(reorder(prodata$Precursor,prodata[,metric]), first = 1, last = 3)
-    plots[[i]] <- plot_ly(prodata, y = prodata[,metric], color = precursor.data, type = "box") %>% 
+    plots[[i]] <- plot_ly(prodata, y = prodata[,metric], color = precursor.data, type = "box") %>%
       layout(yaxis = list(title = metric),showlegend = FALSE)
   }
 
-  p <- do.call(subplot,c(plots,nrows=length(plots))) %>% 
+  p <- do.call(subplot,c(plots,nrows=length(plots))) %>%
     layout(autosize = F, width = 700, height = 1000)
   return(p)
 }
 #####################################################################################################
 metrics_heat.map <- function(prodata,metric.heatmap.DataFrame,precursorSelection, L, U, type) {
-  
+
   #CUSUM.poz <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.poz
   #CUSUM.neg <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.neg
 
@@ -461,19 +461,19 @@ metrics_heat.map <- function(prodata,metric.heatmap.DataFrame,precursorSelection
   data$ReportDate <- ReportDate
 
   df<- tbl_df(data)
-  
+
   df2<-gather(df,key=Metric,value = Value,-ReportDate)
-   
+
   df2<- df2 %>% group_by(Metric)%>%
   mutate(Rescaled = scales::rescale(Value))
-  
+
   df2$Metric<-as.factor(df2$Metric)
   df2$Metric=with(df2,factor(Metric, levels=rev(levels(Metric))))
-  
-  
+
+
   #p <- ggplot(df2,aes(ReportDate,Metric,fill=factor(Rescaled)))
   p <- ggplot(df2,aes(ReportDate,Metric,fill=Rescaled))
-  p <- p + scale_fill_gradient2(low="#F0E442", high="#000000", mid="#D55E00", 
+  p <- p + scale_fill_gradient2(low="#F0E442", high="#000000", mid="#D55E00",
                                 midpoint=0.5,
                                 #, limit=c(0.2,0.8)
                                 name="Correlation\n(Pearson)",guide = "legend"
@@ -489,7 +489,7 @@ metrics_heat.map <- function(prodata,metric.heatmap.DataFrame,precursorSelection
   else {
     p <- p + ggtitle("XmR heat map - Dispersion",subtitle = "# Events per metric per date and time")
   }
-  
+
   p <- p + labs(x=NULL, y=NULL)
   p <- p + theme(plot.title=element_text(hjust=0))+
            theme(axis.ticks=element_blank())+
@@ -497,10 +497,10 @@ metrics_heat.map <- function(prodata,metric.heatmap.DataFrame,precursorSelection
            theme(legend.title=element_text(size=16))+
            theme(legend.text=element_text(size=12))+
            theme(legend.position="none")
-  # 
+  #
   # labels1df<-filter(df2,Value<=29)
   # labels2df<-filter(df2,Value>=30)
-  # 
+  #
    #p<-p+geom_text(data=labels1df,aes(ReportDate,Metric,label=Value,fontface="bold"),size=2.5)
    #p<-p+geom_text(data=df2,aes(ReportDate,Metric,label=Value,fontface="bold"),colour="white",size=2.5)
    p
