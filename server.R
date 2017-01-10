@@ -71,6 +71,13 @@ shinyServer(function(input,output,session) {
      )
      data$df[,input$show_prodata_columns, drop = FALSE] # drop = F, is for not considering the last column as arrow and consider it as data frame
    }, options = list(pageLength = 25))
+  ###### Tab for selecting decision rule and upper and lower bound decisions ###############################################
+  output$decis_txt <- renderUI({
+    if(input$decision_rule == 4){
+print("print something")
+    }
+
+  })
   ################################################################# plots ###################################################
   ###########################################################################################################################
   output$XmR_select_metric <- renderUI({
