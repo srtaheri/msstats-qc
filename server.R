@@ -74,7 +74,16 @@ shinyServer(function(input,output,session) {
   ###### Tab for selecting decision rule and upper and lower bound decisions ###############################################
   output$decis_txt <- renderUI({
     if(input$decision_rule == 4){
-print("print something")
+      fluidRow(
+        column(6,
+               selectInput('peptideThreshold', '% of peptides', seq(0:100),
+                           selected = 50)),
+        column(6,
+               selectInput('metricThreshold', '# of metrics', seq(1:4),
+                           selected = 2))
+      )
+
+
     }
 
   })
