@@ -59,34 +59,55 @@ shinyServer(function(input,output,session) {
                             ,"all peptides"))
   })
   #### selecting columns to view in Data Import section ##############################################################
-  output$prodata_column_select <- renderUI({
-    prodata <- data$df
-    checkboxGroupInput("show_prodata_columns", "columns of your data", choices = colnames(prodata), selected = colnames(prodata))
-  })
+  # output$prodata_column_select <- renderUI({
+  #   prodata <- data$df
+  #   checkboxGroupInput("show_prodata_columns", "columns of your data", choices = colnames(prodata), selected = colnames(prodata))
+  # })
   ######Show table of data #####################################################################################################
    output$prodata_table <- renderDataTable({
      validate(
        need(!is.null(data$df), "Please upload your data"),
        need(is.data.frame(data$df), data$df)
      )
-     data$df[,input$show_prodata_columns, drop = FALSE] # drop = F, is for not considering the last column as arrow and consider it as data frame
+     #data$df[,input$show_prodata_columns, drop = FALSE] # drop = F, is for not considering the last column as arrow and consider it as data frame
+     data$df
    }, options = list(pageLength = 25))
   ###### Tab for selecting decision rule and upper and lower bound decisions ###############################################
-  output$decis_txt <- renderUI({
-    if(input$decision_rule == 4){
-      fluidRow(
-        column(6,
-               selectInput('peptideThreshold', '% of peptides', seq(0:100),
-                           selected = 50)),
-        column(6,
-               selectInput('metricThreshold', '# of metrics', seq(1:4),
-                           selected = 2))
-      )
-
-
-    }
-
+  output$decision_rule <- renderUI({
+    fluidRow(
+      column(2,
+             br(),
+             "Good to go is when less than\n",
+             br(),
+             "Warning area is when, less than"
+             ),
+      column(2,
+             numericInput('peptideThresholdGood', '', value = 50, min = 0,
+                          max = 100, step = 1),
+             numericInput('peptideThresholdWarn', '', value = 70, min = 1,
+                          max = 100, step = 1)
+             ),
+      column(2,
+             br(),
+             "percent of peptides and\n",
+             br(),br(),
+             "and more than ?? percentage of peptides and"
+             ),
+      column(2,
+             numericInput('metricThresholdGood', '', value = 1, min = 1,
+                          max = 4, step = 1),
+             numericInput('metricThresholdWarn', '', value = 2, min = 1,
+                          max = 4)
+             ),
+      column(3,
+             br(),
+             "of the metrics are out of control.\n",
+             br(),br(),
+             "of the metrics are out of control"
+             )
+    )
   })
+
   ################################################################# plots ###################################################
   ###########################################################################################################################
   output$XmR_select_metric <- renderUI({
@@ -117,7 +138,7 @@ shinyServer(function(input,output,session) {
                                 )
                    })
     do.call(tabsetPanel, Tabs)
-    print(str(input$pepSelection))
+
   })
   ################################################################################################################
   ################################################################################################################
@@ -186,27 +207,27 @@ shinyServer(function(input,output,session) {
     metrics_box.plot(prodata, data.metrics = data$metrics)
   })
   ########################################################## scatterplot matrix in Summary tab #################################
-  output$scatter_plot_metric_selection <- renderUI({
-
-     return(selectInput("scatter_metric_select", "Choose the metric",
-                 choices = c(data$metrics), selected = COL.FWHM))
-
-  })
-  output$scatter_plot <- renderPlot({
-    prodata <- data$df
-      validate(
-        need(!is.null(prodata), "Please upload your data"),
-        need(is.data.frame(prodata), prodata)
-      )
-    metrics_scatter.plot(prodata,input$L, input$U, metric = input$scatter_metric_select, normalization = T)
-  }, height = 1500)
-  outputOptions(output, "scatter_plot_metric_selection", priority = 10)
-  outputOptions(output, "scatter_plot", priority = 1)
+  # output$scatter_plot_metric_selection <- renderUI({
+  #
+  #    return(selectInput("scatter_metric_select", "Choose the metric",
+  #                choices = c(data$metrics), selected = COL.FWHM))
+  #
+  # })
+  # output$scatter_plot <- renderPlot({
+  #   prodata <- data$df
+  #     validate(
+  #       need(!is.null(prodata), "Please upload your data"),
+  #       need(is.data.frame(prodata), prodata)
+  #     )
+  #   metrics_scatter.plot(prodata,input$L, input$U, metric = input$scatter_metric_select, normalization = T)
+  # }, height = 1500)
+  # outputOptions(output, "scatter_plot_metric_selection", priority = 10)
+  # outputOptions(output, "scatter_plot", priority = 1)
   ######################################################### plot_summary in Summary tab ########################################
   my_height <- reactive({
     my_height <- ceiling(length(data$metrics)/4)*1200
   })
-  ################ plot the summary and radar plots ###############
+  ################ plot the summary and radar plots ############################################################################
   output$plot_summary <- renderPlot({
 
     prodata <- data$df
@@ -231,35 +252,50 @@ shinyServer(function(input,output,session) {
   ################## decision message for XmR in summary tab #########
   output$XmR_summary_decision_txt <- renderText({
     prodata <- data$df
-    peptideThreshold <- (as.numeric(input$peptideThreshold))/100
-    metricThreshold <- as.numeric(input$metricThreshold)
+    peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100
+    metricThresholdGood <- as.numeric(input$metricThresholdGood)
+    peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100
+    metricThresholdWarn <- as.numeric(input$metricThresholdWarn)
 
-    XmRCounter1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+   ####????? dorost konam
+    XmRCounterGood1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdGood,
                                                          input$L, input$U, type = 1)
-    XmRCounter2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+    XmRCounterGood2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdGood,
                                                          input$L, input$U, type = 2)
-
-
-    if(XmRCounter1 > metricThreshold){ "System is out-of-control (A change in QC metric mean is possible)"}
-    if(XmRCounter2 > metricThreshold){"System is out-of-control (A change in QC metric variation is possible)"}
-    if(XmRCounter1 > metricThreshold && XmRCounter2 > metricThreshold) {"System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
-  })
-  ###################
-  output$CUSUM_summary_decision_txt <- renderText({
-    prodata <- data$df
-    peptideThreshold <- (as.numeric(input$peptideThreshold))/100
-    metricThreshold <- as.numeric(input$metricThreshold)
-
-    CUSUMCounter1 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+    XmRCounterWarn1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdWarn,
                                                           input$L, input$U, type = 1)
-    CUSUMCounter2 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+    XmRCounterWarn2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdWarn,
                                                           input$L, input$U, type = 2)
 
-    if(CUSUMCounter1 > metricThreshold){ "System is out-of-control (A change in QC metric mean is possible)"}
-    if(CUSUMCounter2 > metricThreshold){"System is out-of-control (A change in QC metric variation is possible)"}
-    if(CUSUMCounter1 > metricThreshold && CUSUMCounter2 > metricThreshold) {"System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
-
+    if(XmRCounterGood1 <= metricThresholdGood && XmRCounterGood2 <= metricThresholdGood) {"System is in-control"}
+    if(XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn &&
+       XmRCounterGood2 <= metricThresholdGood){ "Warning! System is out-of-control (A change in QC metric mean is possible)"}
+    if(XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn &&
+       XmRCounterGood1 <= metricThresholdGood){"Warning! System is out-of-control (A change in QC metric variation is possible)"}
+    if(XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn &&
+       XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn) {"Warning! System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
+    if(XmRCounterGood1 > metricThresholdWarn &&
+       XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn) {"Bad! Mean is bad and variation is in warning area"}
+    if(XmRCounterGood2 > metricThresholdWarn &&
+       XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn) {"Bad! variation is bad and mean is in warning area"}
+    if(XmRCounterGood1 > metricThresholdWarn && XmRCounterGood2 > metricThresholdWarn) {"Bad! both mean and variation are in bad area"}
   })
+  ###################
+  # output$CUSUM_summary_decision_txt <- renderText({
+  #   prodata <- data$df
+  #   peptideThreshold <- (as.numeric(input$peptideThreshold))/100
+  #   metricThreshold <- as.numeric(input$metricThreshold)
+  #
+  #   CUSUMCounter1 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+  #                                                         input$L, input$U, type = 1)
+  #   CUSUMCounter2 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
+  #                                                         input$L, input$U, type = 2)
+  #
+  #   if(CUSUMCounter1 > metricThreshold){ "System is out-of-control (A change in QC metric mean is possible)"}
+  #   if(CUSUMCounter2 > metricThreshold){"System is out-of-control (A change in QC metric variation is possible)"}
+  #   if(CUSUMCounter1 > metricThreshold && CUSUMCounter2 > metricThreshold) {"System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
+  #
+  # })
 
   #1500
   ############################# heat_map in Summary tab #############################################
@@ -279,17 +315,11 @@ shinyServer(function(input,output,session) {
 
     p1 <- metrics_heat.map(prodata ,XmR.heatmap.DataFrame.type1,input$pepSelection, input$L, input$U, type = 1)
     p2 <- metrics_heat.map(prodata,XmR.heatmap.DataFrame.type2,input$pepSelection, input$L, input$U, type = 2)
+    #XmR.Decision.DataFrame.prepare(prodata, metric = "Retention Time", input$L, input$U,type = 1)
     grid.arrange(p1,p2, ncol = 1)
 
   }
-  #, height = 1000
   )
-  #################### text below the heat map #################
-  # output$heat_map_txt <- renderText({
-  #   "In these heat maps, we scaled the values of metrics to (0,1). Values close
-  #   to zero are yellow and as the values get closer to 0.5 the color changes to
-  #   orange and it gets close to black as the values get closer to 1. The out of
-  #   range values are colored as red."
-  # })
+
   ############################################################################################################################
 })

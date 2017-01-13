@@ -69,20 +69,7 @@ shinyUI(fluidPage(
                           wellPanel(
                             p("Please upload your data (Comma-separated (*.csv) 8 column QC file format)"),
                             p("To see an acceptable sample data, look at", strong("Help"),"tab"),
-                            fileInput("filein", "Upload file"),
-
-                            p("Please select your preferred decision rule: "),
-                            p(strong("Decision Rule: "),"To go process is when"),
-                            fluidRow(
-                              column(6,
-                                     selectInput('peptideThreshold', '% of peptides', seq(0:100),
-                                                 selected = 50)),
-                              column(6,
-                                     selectInput('metricThreshold', '# of metrics', seq(1:4),
-                                                 selected = 2))
-                            ),
-                            p("are out of controll.")
-
+                            fileInput("filein", "Upload file")
                           ),
 
                            wellPanel(
@@ -106,10 +93,10 @@ shinyUI(fluidPage(
                             uiOutput("pepSelect")
                           ),
                            #br(),
-                           wellPanel(
-                             helpText("please select the columns of your data that you need to see."),
-                             uiOutput("prodata_column_select")
-                           ),
+                           # wellPanel(
+                           #   helpText("please select the columns of your data that you need to see."),
+                           #   uiOutput("prodata_column_select")
+                           # ),
 
                            tags$style("body{background-color:linen; color:black}")
 
@@ -124,12 +111,8 @@ shinyUI(fluidPage(
                        ),
 
              tabPanel("Selection", theme = "bootstrap.css",
-                      tags$img(src='logo.png', height=220, width=220, style = "float: right"),
-                      radioButtons("decision_rule", "Please select your decision rule",
-                                   choices = c("first choice" = 1,"second choice" = 2,"third choice" = 3,"I want to select my own rule" = 4),
-                                   selected = 1, inline = FALSE,
-                                   width = NULL),
-                      uiOutput("decis_txt")
+                      p("Please select your preferred decision rule: "),
+                      uiOutput("decision_rule")
                       ),
 
               tabPanel("Metric Summary",
@@ -171,21 +154,21 @@ shinyUI(fluidPage(
                                   plotlyOutput("box_plot", height = 2000)
 
                          ),
-                         tabPanel("Scatterplot",
-                                  uiOutput("scatter_plot_metric_selection"),
-                                  tags$head(tags$style(type="text/css")),
-                                  conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                   tags$div("It may take a while to load the plots, please wait...",
-                                                            id="loadmessage")),
-                                  plotOutput("scatter_plot")
-                                 ),
+                         # tabPanel("Scatterplot",
+                         #          uiOutput("scatter_plot_metric_selection"),
+                         #          tags$head(tags$style(type="text/css")),
+                         #          conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                         #                           tags$div("It may take a while to load the plots, please wait...",
+                         #                                    id="loadmessage")),
+                         #          plotOutput("scatter_plot")
+                         #         ),
                          tabPanel("heat Map",
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                    tags$div("It may take a while to load the plots, please wait...",
                                                             id="loadmessage")),
                                   plotOutput("heat_map")
-                                  #,textOutput("heat_map_txt")
+
 
                          )
 

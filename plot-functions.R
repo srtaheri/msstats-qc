@@ -232,7 +232,6 @@ XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type
 }
 #################################################################################################################
 XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
-  data.metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
   dat <- XmR.Summary.DataFrame(prodata,data.metrics, L, U)
   tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics)
   gg <- ggplot(dat)
@@ -479,6 +478,9 @@ metrics_heat.map <- function(prodata,metric.heatmap.DataFrame,precursorSelection
                                 name="Correlation\n(Pearson)",guide = "legend"
                                 #, na.value = "red"
                                 )
+  # p <- p + scale_color_manual(values=c("blue","red","black"),
+  #                             breaks=c("bin1","bin2","bin3"),
+  #                             labels=c("0-0.049","0.05-0.099","0.10-0.149"))
   p <- p + geom_tile(colour="white",size=.1)
   p <- p + coord_equal()
   p <- p + theme_minimal(base_size = 10, base_family = "Trebuchet MS")
