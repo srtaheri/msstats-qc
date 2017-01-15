@@ -449,61 +449,40 @@ metrics_box.plot <- function(prodata, data.metrics) {
   return(p)
 }
 #####################################################################################################
-metrics_heat.map <- function(prodata,metric.heatmap.DataFrame,precursorSelection, L, U, type) {
-
-  #CUSUM.poz <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.poz
-  #CUSUM.neg <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)$CUSUM.neg
+metrics_heat.map <- function(metric.heatmap.DataFrame,precursorSelection, L, U, type) {
 
   data <- metric.heatmap.DataFrame
-  ReportDate<-prodata[prodata$Precursor==precursorSelection,]
-  ReportDate <- ReportDate$AcquiredTime
-  data$ReportDate <- ReportDate
 
-  df<- tbl_df(data)
+  p <- ggplot(data,aes(time,metric, group = bin, fill = bin))
+  # p <- p + scale_fill_gradient2(low="#F0E442", high="#000000", mid="#D55E00",
+  #                               midpoint=0.5,
+  #                               #, limit=c(0.2,0.8)
+  #                               name="Correlation\n(Pearson)",guide = "legend"
+  #                               #, na.value = "red"
+  #                               )
 
-  df2<-gather(df,key=Metric,value = Value,-ReportDate)
-
-  df2<- df2 %>% group_by(Metric)%>%
-  mutate(Rescaled = scales::rescale(Value))
-
-  df2$Metric<-as.factor(df2$Metric)
-  df2$Metric=with(df2,factor(Metric, levels=rev(levels(Metric))))
-
-
-  #p <- ggplot(df2,aes(ReportDate,Metric,fill=factor(Rescaled)))
-  p <- ggplot(df2,aes(ReportDate,Metric,fill=Rescaled))
-  p <- p + scale_fill_gradient2(low="#F0E442", high="#000000", mid="#D55E00",
-                                midpoint=0.5,
-                                #, limit=c(0.2,0.8)
-                                name="Correlation\n(Pearson)",guide = "legend"
-                                #, na.value = "red"
-                                )
-  # p <- p + scale_color_manual(values=c("blue","red","black"),
-  #                             breaks=c("bin1","bin2","bin3"),
-  #                             labels=c("0-0.049","0.05-0.099","0.10-0.149"))
+  # p <- p + scale_color_manual(values=c("Good" = "green","Bad" = "red","Warning" = "orange"),
+  #                             breaks=c("Good","Bad","Warning"),
+  #                             guide='legend')
   p <- p + geom_tile(colour="white",size=.1)
   p <- p + coord_equal()
   p <- p + theme_minimal(base_size = 10, base_family = "Trebuchet MS")
-  p <- p + removeGrid()+rotateTextX()
+  p <- p + removeGrid()
+  p <- p + rotateTextX()
   if(type == 1) {
-    p <- p + ggtitle("XmR heat map - Mean",subtitle = "# Events per metric per date and time")
-  }
-  else {
-    p <- p + ggtitle("XmR heat map - Dispersion",subtitle = "# Events per metric per date and time")
-  }
+     p <- p + ggtitle("XmR heat map - Mean",subtitle = "# Events per metric per date and time")
+   }
+   else {
+     p <- p + ggtitle("XmR heat map - Dispersion",subtitle = "# Events per metric per date and time")
+   }
 
   p <- p + labs(x=NULL, y=NULL)
-  p <- p + theme(plot.title=element_text(hjust=0))+
-           theme(axis.ticks=element_blank())+
-           theme(axis.text=element_text(size=14))+
-           theme(legend.title=element_text(size=16))+
-           theme(legend.text=element_text(size=12))+
-           theme(legend.position="none")
-  #
-  # labels1df<-filter(df2,Value<=29)
-  # labels2df<-filter(df2,Value>=30)
-  #
-   #p<-p+geom_text(data=labels1df,aes(ReportDate,Metric,label=Value,fontface="bold"),size=2.5)
-   #p<-p+geom_text(data=df2,aes(ReportDate,Metric,label=Value,fontface="bold"),colour="white",size=2.5)
+  #p <- p + theme(plot.title=element_text(hjust=0))
+  #p <- p + theme(axis.ticks=element_blank())
+  p <- p +  theme(axis.text=element_text(size=12))
+  #p <- p +  theme(legend.title=element_text(size=16))
+  #p <- p +  theme(legend.text=element_text(size=12))
+
+
    p
 }

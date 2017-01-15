@@ -74,37 +74,69 @@ shinyServer(function(input,output,session) {
    }, options = list(pageLength = 25))
   ###### Tab for selecting decision rule and upper and lower bound decisions ###############################################
   output$decision_rule <- renderUI({
-    fluidRow(
-      column(2,
-             br(),
-             "Good to go is when less than\n",
-             br(),
-             "Warning area is when, less than"
-             ),
-      column(2,
-             numericInput('peptideThresholdGood', '', value = 50, min = 0,
-                          max = 100, step = 1),
-             numericInput('peptideThresholdWarn', '', value = 70, min = 1,
-                          max = 100, step = 1)
-             ),
-      column(2,
-             br(),
-             "percent of peptides and\n",
-             br(),br(),
-             "and more than ?? percentage of peptides and"
-             ),
-      column(2,
-             numericInput('metricThresholdGood', '', value = 1, min = 1,
-                          max = 4, step = 1),
-             numericInput('metricThresholdWarn', '', value = 2, min = 1,
-                          max = 4)
-             ),
-      column(3,
-             br(),
-             "of the metrics are out of control.\n",
-             br(),br(),
-             "of the metrics are out of control"
-             )
+    validate(
+      need(!is.null(data$df), "Please upload your data first"),
+      need(is.data.frame(data$df), data$df)
+    )
+
+    #p("Please select your preferred decision rule: ")
+
+    fluidPage(
+      wellPanel(
+      fluidRow(
+
+        column(2,
+               br(),
+               "Good to go is when less than\n",
+               br(),
+               "Warning area is when, less than"
+        ),
+        column(2,
+               numericInput('peptideThresholdGood', '', value = 50, min = 0,
+                            max = 100, step = 1),
+               numericInput('peptideThresholdWarn', '', value = 70, min = 1,
+                            max = 100, step = 1)
+               ),
+        column(2,
+               br(),
+               "percent of peptides and\n",
+               br(),br(),
+               "and more than", "percentage of peptides and"
+        ),
+        column(2,
+               numericInput('metricThresholdGood', '', value = 1, min = 1,
+                            max = as.numeric(data$metrics), step = 1),
+               numericInput('metricThresholdWarn', '', value = 2, min = 1,
+                            max = as.numeric(data$metrics))
+        ),
+        column(3,
+               br(),
+               "of the selected metrics are out of control.\n",
+               br(),br(),
+               "of the selected metrics are out of control"
+        )
+
+      )),
+      fluidRow(
+        column(12,
+               wellPanel(
+                 checkboxGroupInput("user_selected_metrics","Please select the metrics",
+                                    choices = c(data$metrics),
+                                    selected = c(COL.PEAK.ASS,COL.BEST.RET,
+                                                 COL.FWHM, COL.TOTAL.AREA),
+                                    inline = TRUE)
+               )
+
+
+               )
+      ),
+      fluidRow(
+        column(12,
+               checkboxGroupInput("user_selected_type","Please select the type",
+                                  choices = c("mean","dispersion"), selected = c("mean","dispersion"))
+               )
+      )
+
     )
   })
 
@@ -250,36 +282,36 @@ shinyServer(function(input,output,session) {
   }, height = my_height )
 
   ################## decision message for XmR in summary tab #########
-  output$XmR_summary_decision_txt <- renderText({
-    prodata <- data$df
-    peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100
-    metricThresholdGood <- as.numeric(input$metricThresholdGood)
-    peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100
-    metricThresholdWarn <- as.numeric(input$metricThresholdWarn)
+  # output$XmR_summary_decision_txt <- renderText({
+  #   prodata <- data$df
+  #   peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100
+  #   metricThresholdGood <- as.numeric(input$metricThresholdGood)
+  #   peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100
+  #   metricThresholdWarn <- as.numeric(input$metricThresholdWarn)
 
    ####????? dorost konam
-    XmRCounterGood1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdGood,
-                                                         input$L, input$U, type = 1)
-    XmRCounterGood2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdGood,
-                                                         input$L, input$U, type = 2)
-    XmRCounterWarn1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdWarn,
-                                                          input$L, input$U, type = 1)
-    XmRCounterWarn2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdWarn,
-                                                          input$L, input$U, type = 2)
+    # XmRCounterGood1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdGood,
+    #                                                      input$L, input$U, type = 1)
+    # XmRCounterGood2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdGood,
+    #                                                      input$L, input$U, type = 2)
+    # XmRCounterWarn1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdWarn,
+    #                                                       input$L, input$U, type = 1)
+    # XmRCounterWarn2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdWarn,
+    #                                                       input$L, input$U, type = 2)
 
-    if(XmRCounterGood1 <= metricThresholdGood && XmRCounterGood2 <= metricThresholdGood) {"System is in-control"}
-    if(XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn &&
-       XmRCounterGood2 <= metricThresholdGood){ "Warning! System is out-of-control (A change in QC metric mean is possible)"}
-    if(XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn &&
-       XmRCounterGood1 <= metricThresholdGood){"Warning! System is out-of-control (A change in QC metric variation is possible)"}
-    if(XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn &&
-       XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn) {"Warning! System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
-    if(XmRCounterGood1 > metricThresholdWarn &&
-       XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn) {"Bad! Mean is bad and variation is in warning area"}
-    if(XmRCounterGood2 > metricThresholdWarn &&
-       XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn) {"Bad! variation is bad and mean is in warning area"}
-    if(XmRCounterGood1 > metricThresholdWarn && XmRCounterGood2 > metricThresholdWarn) {"Bad! both mean and variation are in bad area"}
-  })
+    # if(XmRCounterGood1 <= metricThresholdGood && XmRCounterGood2 <= metricThresholdGood) {"System is in-control"}
+    # if(XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn &&
+    #    XmRCounterGood2 <= metricThresholdGood){ "Warning! System is out-of-control (A change in QC metric mean is possible)"}
+    # if(XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn &&
+    #    XmRCounterGood1 <= metricThresholdGood){"Warning! System is out-of-control (A change in QC metric variation is possible)"}
+    # if(XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn &&
+    #    XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn) {"Warning! System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
+    # if(XmRCounterGood1 > metricThresholdWarn &&
+    #    XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn) {"Bad! Mean is bad and variation is in warning area"}
+    # if(XmRCounterGood2 > metricThresholdWarn &&
+    #    XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn) {"Bad! variation is bad and mean is in warning area"}
+    # if(XmRCounterGood1 > metricThresholdWarn && XmRCounterGood2 > metricThresholdWarn) {"Bad! both mean and variation are in bad area"}
+  #})
   ###################
   # output$CUSUM_summary_decision_txt <- renderText({
   #   prodata <- data$df
@@ -309,14 +341,17 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata$AcquiredTime),"To view heatmap, the data set should include AcquiredTime column.")
     )
+    peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100
+    peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
-    XmR.heatmap.DataFrame.type1 <- XmR.heatmap.DataFrame(prodata,input$pepSelection, input$L, input$U, type = 1)
-    XmR.heatmap.DataFrame.type2 <- XmR.heatmap.DataFrame(prodata,input$pepSelection, input$L, input$U, type = 2)
+    XmR.heatmap.DataFrame.type1 <- XmR.heatmap.DataFrame(prodata,input$pepSelection,input$user_selected_metrics, peptideThresholdGood, peptideThresholdWarn, input$L, input$U, type = 1)
+    #XmR.heatmap.DataFrame.type2 <- XmR.heatmap.DataFrame(prodata,input$pepSelection, input$L, input$U, type = 2)
 
-    p1 <- metrics_heat.map(prodata ,XmR.heatmap.DataFrame.type1,input$pepSelection, input$L, input$U, type = 1)
-    p2 <- metrics_heat.map(prodata,XmR.heatmap.DataFrame.type2,input$pepSelection, input$L, input$U, type = 2)
+    p1 <- metrics_heat.map(XmR.heatmap.DataFrame.type1,input$pepSelection, input$L, input$U, type = 1)
+    #p2 <- metrics_heat.map(prodata,XmR.heatmap.DataFrame.type2,input$pepSelection, input$L, input$U, type = 2)
     #XmR.Decision.DataFrame.prepare(prodata, metric = "Retention Time", input$L, input$U,type = 1)
-    grid.arrange(p1,p2, ncol = 1)
+    #grid.arrange(p1,p2, ncol = 1)
+    p1
 
   }
   )

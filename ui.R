@@ -111,7 +111,7 @@ shinyUI(fluidPage(
                        ),
 
              tabPanel("Selection", theme = "bootstrap.css",
-                      p("Please select your preferred decision rule: "),
+                      #p("Please select your preferred decision rule: "),
                       uiOutput("decision_rule")
                       ),
 
