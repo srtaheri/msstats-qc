@@ -106,7 +106,53 @@ shinyUI(fluidPage(
                        ),
 ######################################################################################################
              tabPanel("Selection", theme = "bootstrap.css",
-                      uiOutput("selection_tab")
+                      fluidPage(
+                        wellPanel(
+                          fluidRow(
+                            p(strong("Good to Go:"))
+                          ), 
+                          fluidRow(
+                            column(2,
+                                 br()
+                            ),
+                            column(5,
+                                 p(strong("percent of out of control peptides: ")), 
+                                 numericInput('peptideThresholdGood', '', value = 50, min = 0, max = 100, step = 1)
+                            ),
+                            column(5,
+                                 p(strong("percent of out of control metrics: ")),
+                                 uiOutput("metricThresholdGood")
+                            )
+                          )
+                        ),
+                        wellPanel(
+                          fluidRow(
+                            p(strong("Warning Area:"))
+                          ), 
+                          fluidRow(
+                            column(2,
+                                   br()
+                            ),
+                            column(5,
+                                   p(strong("percent of out of control peptides: ")),
+                                   uiOutput("peptideThresholdWarn")
+                            ),
+                            column(5,
+                                   p(strong("percent of out of control metrics: ")),
+                                   uiOutput("metricThresholdWarn")
+                            )
+                          )
+                        ),
+                        wellPanel(
+                          fluidRow(
+                            column(12,
+                                   uiOutput("metricSelection")
+                            )
+                          )
+                        )
+                      )
+                      
+                      #uiOutput("selection_tab")
                       # p(strong("Please select your preferred decision rule: ")),
                       # "To Go process, is when equal or less than",textOutput("ToGoPeptides"), "percent of peptides and equal or
                       #  less than", textOutput("ToGoMetrics"),"metric/metrics out of all the selected metrics are out of controll.",

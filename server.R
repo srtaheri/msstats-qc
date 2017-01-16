@@ -72,7 +72,36 @@ shinyServer(function(input,output,session) {
      #data$df[,input$show_prodata_columns, drop = FALSE] # drop = F, is for not considering the last column as arrow and consider it as data frame
      data$df
    }, options = list(pageLength = 25))
+  
   ###### Tab for selecting decision rule and metrics ###############################################
+  output$metricThresholdGood <- renderUI({
+    numOfMetrics <- length(input$user_selected_metrics)
+    numericInput('threshold_metric_good', '', value = 1, min = 1, max = numOfMetrics, step = 1)
+  })
+  
+  output$peptideThresholdWarn <- renderUI({
+    threshold_peptide_good <- input$peptideThresholdGood
+    numericInput('threshold_peptide_warn', '', value = threshold_peptide_good+1, min = threshold_peptide_good+1, max = 100, step = 1)
+  })
+  
+  output$metricThresholdWarn <- renderUI({
+    validate(
+      need(!is.null(input$threshold_metric_good),"loading...")
+    )
+    numOfMetrics <- length(input$user_selected_metrics)
+    threshold_metric_good <- input$threshold_metric_good
+    numericInput('threshold_metric_warn', '', value = threshold_metric_good, min = threshold_metric_good, max = numOfMetrics, step = 1)
+  })
+  
+  output$metricSelection <- renderUI({
+    checkboxGroupInput("user_selected_metrics","Please select the metrics",
+                       choices = c(data$metrics),
+                       selected = c(COL.PEAK.ASS,COL.BEST.RET,
+                                    COL.FWHM, COL.TOTAL.AREA),
+                       inline = TRUE)
+  })
+  
+  ############################# DEPRECATED
   output$selection_tab <- renderUI({
     validate(
       need(!is.null(data$df), "Please upload your data first"),
@@ -132,7 +161,7 @@ shinyServer(function(input,output,session) {
 
     )
   })
-
+  ###########################################################################
 
   # output$ToGoPeptidesSelect <- renderUI({
   #   numericInput('peptideThresholdGood', '% of peptides', value = 50, min = 0,
