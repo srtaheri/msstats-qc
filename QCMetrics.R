@@ -286,40 +286,14 @@ XmR.Summary.DataFrame <- function(prodata, data.metrics, L, U) {
   return(dat)
 }
 ############################################################################################
-# XmR.heatmap.DataFrame_deprecated <- function(prodata,precursorSelection, L, U, type) {
-#
-#   metricDataRT <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.BEST.RET, normalization = F)
-#   RT <- XmR.data.prepare(prodata, metricDataRT, L, U, type)$t
-#
-#
-#   metricDataPA <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.PEAK.ASS, normalization = F)
-#   PA <- XmR.data.prepare(prodata, metricDataPA, L, U, type)$t
-#
-#
-#   metricDataFWHM <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.FWHM, normalization = F)
-#   FWHM <- XmR.data.prepare(prodata, metricDataFWHM, L, U, type)$t
-#
-#
-#   metricDataTPA <- getMetricData(prodata, precursorSelection, L = L, U = U, metric = COL.TOTAL.AREA, normalization = F)
-#   TPA <- XmR.data.prepare(prodata, metricDataTPA, L, U, type)$t
-#
-#   dataFrame <- data.frame(RT = RT,
-#                         PA = PA,
-#                         FWHM = FWHM,
-#                         TPA = TPA
-#                         )
-#
-#   return(dataFrame)
-# }
-
-XmR.heatmap.DataFrame <- function(prodata,precursorSelection, data.metrics,peptideThresholdGood,peptideThresholdWarn, L, U, type) {
+heatmap.DataFrame <- function(prodata,precursorSelection, data.metrics,method,peptideThresholdGood,peptideThresholdWarn, L, U, type) {
   time <- c()
   val <- c()
   met <- c()
   bin <- c()
 
   for (metric in data.metrics) {
-    df <- XmR.Decision.DataFrame.prepare(prodata, metric, peptideThresholdGood,peptideThresholdWarn, L, U,type)
+    df <- Decision.DataFrame.prepare(prodata, metric, method, peptideThresholdGood,peptideThresholdWarn, L, U,type)
     time_df <- as.character(df$AcquiredTime)
     val_df <- df$pr.y
     met_df <- rep(metric,length(val_df))
@@ -438,7 +412,8 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
   return(dat)
 }
 #######################################################################################################
-XmR.Decision.DataFrame.prepare <- function(prodata, metric, peptideThresholdGood, peptideThresholdWarn, L, U,type) {
+Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThresholdGood, peptideThresholdWarn, L, U,type) {
+  h <- 5
   AcquiredTime <- prodata$AcquiredTime
   QCno    <- 1:nrow(prodata)
   y <- rep(0,nrow(prodata))
@@ -449,10 +424,16 @@ XmR.Decision.DataFrame.prepare <- function(prodata, metric, peptideThresholdGood
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
     counter[1:length(metricData)] <- counter[1:length(metricData)]+1
-    plot.data <- XmR.data.prepare(prodata, metricData , L , U , type)
+    if(method == "CUSUM") {
+      plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
+      sub1 <- plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]
+      sub2 <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
+    }else if(method == "XmR") {
+      plot.data <- XmR.data.prepare(prodata, metricData , L , U , type)
+      sub1 <- plot.data[plot.data$t >= plot.data$UCL, ]
+      sub2 <- plot.data[plot.data$t <= plot.data$LCL, ]
+    }
 
-    sub1 <- plot.data[plot.data$t >= plot.data$UCL, ]
-    sub2 <- plot.data[plot.data$t <= plot.data$LCL, ]
     sub <- rbind(sub1,sub2)
 
     y[sub$QCno] <- y[sub$QCno] + 1
@@ -485,61 +466,19 @@ XmR.Decision.DataFrame.prepare <- function(prodata, metric, peptideThresholdGood
   return(plot.data)
 }
 #######################################################################################################
-# XmR.number.Of.Out.Of.Range.Metrics <- function(prodata,data.metrics, peptideThreshold, L, U, type) {
-#
-#   metricCounter = 0
-#   for (metric in data.metrics) {
-#     data <- XmR.Decision.DataFrame.prepare(prodata, metric,peptideThresholdGood, peptideThresholdWarn, L, U,type)
-#     if(nrow(data[data$pr.y > peptideThreshold,]) > 0)
-#       metricCounter = metricCounter + 1
-#   }
-#     return(metricCounter)
-# }
-#######################################################################################################
-CUSUM.Decision.DataFrame.prepare <- function(prodata, metric, L, U, type) {
-  h <- 5
+ number.Of.Out.Of.Range.Metrics <- function(prodata,data.metrics,method, peptideThresholdGood, peptideThresholdWarn, L, U, type) {
 
-  QCno <- 1:nrow(prodata)
-  y <- rep(0,nrow(prodata))
-  counter <- rep(0,nrow(prodata))
-
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-
-  for(j in 1:length(precursors)) {
-    metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T)
-    counter[1:length(metricData)] <- counter[1:length(metricData)]+1
-    plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
-
-    sub1 <- plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]
-    sub2 <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
-    sub <- rbind(sub1,sub2)
-
-    y[sub$QCno] <- y[sub$QCno] + 1
+  metricCounterAboveGood = 0
+  metricCounterAboveWarn = 0
+  for (metric in data.metrics) {
+    data <- Decision.DataFrame.prepare(prodata, metric,method,peptideThresholdGood, peptideThresholdWarn, L, U,type)
+    if(nrow(data[data$pr.y > peptideThresholdGood,]) > 0) {
+      metricCounterAboveGood = metricCounterAboveGood + 1
+    }
+    if(nrow(data[data$pr.y > peptideThresholdWarn,]) > 0) {
+      metricCounterAboveWarn = metricCounterAboveWarn + 1
+    }
   }
-
-  max_QCno <- max(which(counter!=0))
-
-  pr.y = y[1:max_QCno]/counter[1:max_QCno]
-
-  plot.data <- data.frame(QCno = rep(1:max_QCno,1),
-                          pr.y = pr.y,
-                          group = ifelse(rep(type==1,max_QCno),
-                                         rep("Metric mean",max_QCno),
-                                         rep("Metric dispersion",max_QCno)
-                                         ),
-                          metric = rep(metric,max_QCno)
-  )
-
-  return(plot.data)
+    return(c(metricCounterAboveGood,metricCounterAboveWarn))
 }
 ####################################################################################################
-CUSUM.number.Of.Out.Of.Range.Metrics <- function(prodata, data.metrics, peptideThreshold, L, U, type) {
-  metricCounter = 0
-  for (metric in data.metrics) {
-    data <- CUSUM.Decision.DataFrame.prepare(prodata, metric, L, U,type)
-
-    if(nrow(data[data$pr.y > peptideThreshold,]) > 0)
-      metricCounter = metricCounter + 1
-  }
-  return(metricCounter)
-}

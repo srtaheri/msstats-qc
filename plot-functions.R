@@ -449,9 +449,9 @@ metrics_box.plot <- function(prodata, data.metrics) {
   return(p)
 }
 #####################################################################################################
-metrics_heat.map <- function(metric.heatmap.DataFrame,precursorSelection, L, U, type) {
+metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,peptideThresholdGood,peptideThresholdWarn, L, U, type) {
 
-  data <- metric.heatmap.DataFrame
+  data <- heatmap.DataFrame(prodata,precursorSelection, data.metrics,method,peptideThresholdGood,peptideThresholdWarn, L, U, type)
 
   p <- ggplot(data,aes(time,metric, group = bin, fill = bin))
   # p <- p + scale_fill_gradient2(low="#F0E442", high="#000000", mid="#D55E00",

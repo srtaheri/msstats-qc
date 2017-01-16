@@ -282,61 +282,56 @@ shinyServer(function(input,output,session) {
   }, height = my_height )
 
   ################## decision message for XmR in summary tab #########
-  # output$XmR_summary_decision_txt <- renderText({
-  #   prodata <- data$df
-  #   peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100
-  #   metricThresholdGood <- as.numeric(input$metricThresholdGood)
-  #   peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100
-  #   metricThresholdWarn <- as.numeric(input$metricThresholdWarn)
+   output$summary_decision_txt <- renderText({
+     prodata <- data$df
+     peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100 #For Eralp : the default is set to 50 (look at the selection tab)
+     metricThresholdGood <- as.numeric(input$metricThresholdGood) # For Eralp : the default is 1 (look at the selection tab)
+     peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100 #For Eralp : the default is set to 70 (look at the selection tab)
+     metricThresholdWarn <- as.numeric(input$metricThresholdWarn) # For Eralp : the default is 2 (look at the selection tab)
 
-   ####????? dorost konam
-    # XmRCounterGood1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdGood,
-    #                                                      input$L, input$U, type = 1)
-    # XmRCounterGood2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdGood,
-    #                                                      input$L, input$U, type = 2)
-    # XmRCounterWarn1 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdWarn,
-    #                                                       input$L, input$U, type = 1)
-    # XmRCounterWarn2 <- XmR.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThresholdWarn,
-    #                                                       input$L, input$U, type = 2)
+     # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 1) for which there exists a peptide
+     #that its percentage of out of range is above the peptideThresholdGood.[1]
+     XmRCounterAboveGood1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdGood,peptideThresholdWarn,
+                                                          input$L, input$U, type = 1)[1]
+     # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 1) for which there exists a peptide
+     #that its percentage of out of range is above the peptideThresholdWarn.[2]
+     XmRCounterAboveWarn1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdGood,peptideThresholdWarn,
+                                                                input$L, input$U, type = 1)[2]
+     # For Eralp : This gives the number of out of range metrics for XmR "dispersion"(type = 2) for which there exists a peptide
+     #that its percentage of out of range is above the peptideThresholdGood.[1]
+     XmRCounterAboveGood2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdGood,peptideThresholdWarn,
+                                                                input$L, input$U, type = 2)[1]
+     # For Eralp : This gives the number of out of range metrics for XmR "dispersion"(type = 2) for which there exists a peptide
+     #that its percentage of out of range is above the peptideThresholdWarn.[2]
+     XmRCounterAboveWarn2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdGood,peptideThresholdWarn,
+                                                                input$L, input$U, type = 2)[2]
 
-    # if(XmRCounterGood1 <= metricThresholdGood && XmRCounterGood2 <= metricThresholdGood) {"System is in-control"}
-    # if(XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn &&
-    #    XmRCounterGood2 <= metricThresholdGood){ "Warning! System is out-of-control (A change in QC metric mean is possible)"}
-    # if(XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn &&
-    #    XmRCounterGood1 <= metricThresholdGood){"Warning! System is out-of-control (A change in QC metric variation is possible)"}
-    # if(XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn &&
-    #    XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn) {"Warning! System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
-    # if(XmRCounterGood1 > metricThresholdWarn &&
-    #    XmRCounterGood2 > metricThresholdGood && XmRCounterGood2 <= metricThresholdWarn) {"Bad! Mean is bad and variation is in warning area"}
-    # if(XmRCounterGood2 > metricThresholdWarn &&
-    #    XmRCounterGood1 > metricThresholdGood && XmRCounterGood1 <= metricThresholdWarn) {"Bad! variation is bad and mean is in warning area"}
-    # if(XmRCounterGood1 > metricThresholdWarn && XmRCounterGood2 > metricThresholdWarn) {"Bad! both mean and variation are in bad area"}
-  #})
-  ###################
-  # output$CUSUM_summary_decision_txt <- renderText({
-  #   prodata <- data$df
-  #   peptideThreshold <- (as.numeric(input$peptideThreshold))/100
-  #   metricThreshold <- as.numeric(input$metricThreshold)
-  #
-  #   CUSUMCounter1 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
-  #                                                         input$L, input$U, type = 1)
+  #   CUSUMCounter1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "CUSUM", peptideThresholdGood,peptideThresholdWarn,
+   #  input$L, input$U, type = 1)[1]
   #   CUSUMCounter2 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
   #                                                         input$L, input$U, type = 2)
-  #
-  #   if(CUSUMCounter1 > metricThreshold){ "System is out-of-control (A change in QC metric mean is possible)"}
-  #   if(CUSUMCounter2 > metricThreshold){"System is out-of-control (A change in QC metric variation is possible)"}
-  #   if(CUSUMCounter1 > metricThreshold && CUSUMCounter2 > metricThreshold) {"System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
-  #
-  # })
 
-  #1500
+      if(XmRCounterAboveGood1 <= metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdGood) {"System is in-control"}
+     # if(XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn &&
+     #    XmRCounterAboveGood2 <= metricThresholdGood){ "Warning! System is out-of-control (A change in QC metric mean is possible)"}
+    # if(XmRCounterAboveGood2 > metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdWarn &&
+    #    XmRCounterAboveGood1 <= metricThresholdGood){"Warning! System is out-of-control (A change in QC metric variation is possible)"}
+    # if(XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn &&
+    #    XmRCounterAboveGood2 > metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdWarn) {"Warning! System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
+    # if(XmRCounterAboveGood1 > metricThresholdWarn &&
+    #    XmRCounterAboveGood2 > metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdWarn) {"Bad! Mean is bad and variation is in warning area"}
+    # if(XmRCounterAboveGood2 > metricThresholdWarn &&
+    #    XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn) {"Bad! variation is bad and mean is in warning area"}
+    # if(XmRCounterAboveGood1 > metricThresholdWarn && XmRCounterAboveGood2 > metricThresholdWarn) {"Bad! both mean and variation are in bad area"}
+  })
   ############################# heat_map in Summary tab #############################################
 
   output$heat_map <- renderPlot({
     prodata <- data$df
     validate(
       need(!is.null(prodata), "Please upload your data"),
-      need(is.data.frame(prodata), prodata)
+      need(is.data.frame(prodata), prodata),
+      need(!is.null(input$user_selected_metrics),"Please first select the metrics and decision thresholds in the selection tab")
     )
     validate(
       need(!is.null(prodata$AcquiredTime),"To view heatmap, the data set should include AcquiredTime column.")
@@ -344,14 +339,29 @@ shinyServer(function(input,output,session) {
     peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100
     peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
-    XmR.heatmap.DataFrame.type1 <- XmR.heatmap.DataFrame(prodata,input$pepSelection,input$user_selected_metrics, peptideThresholdGood, peptideThresholdWarn, input$L, input$U, type = 1)
-    #XmR.heatmap.DataFrame.type2 <- XmR.heatmap.DataFrame(prodata,input$pepSelection, input$L, input$U, type = 2)
 
-    p1 <- metrics_heat.map(XmR.heatmap.DataFrame.type1,input$pepSelection, input$L, input$U, type = 1)
-    #p2 <- metrics_heat.map(prodata,XmR.heatmap.DataFrame.type2,input$pepSelection, input$L, input$U, type = 2)
-    #XmR.Decision.DataFrame.prepare(prodata, metric = "Retention Time", input$L, input$U,type = 1)
-    #grid.arrange(p1,p2, ncol = 1)
-    p1
+    p1 <- metrics_heat.map(prodata,input$pepSelection,
+                           data.metrics = input$user_selected_metrics, method = "XmR",
+                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1)
+    p2 <- metrics_heat.map(prodata,input$pepSelection,
+                           data.metrics = input$user_selected_metrics, method = "XmR",
+                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2)
+    p3 <- metrics_heat.map(prodata,input$pepSelection,
+                           data.metrics = input$user_selected_metrics, method = "CUSUM",
+                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1)
+    p4 <- metrics_heat.map(prodata,input$pepSelection,
+                           data.metrics = input$user_selected_metrics, method = "CUSUM",
+                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2)
+    if(input$heatmap_controlChart_select == "XmR") {
+      grid.arrange(p1,p2, ncol = 1)
+    }else if(input$heatmap_controlChart_select == "CUSUM") {
+      grid.arrange(p3,p4,ncol = 1)
+    }else {
+      grid.arrange(p1,p2,p3,p4)
+    }
+
+
+
 
   }
   )

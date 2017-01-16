@@ -128,14 +128,7 @@ shinyUI(fluidPage(
                                              ),
                                       column(3,
                                              wellPanel(
-                                               textOutput("XmR_summary_decision_txt"),
-                                               br(), br(),br(), br(),br(), br(),br(), br(),
-                                               br(), br(),br(), br(),br(), br(),br(), br(),
-                                               br(), br(),br(), br(),br(), br(),br(), br(),
-                                               textOutput("CUSUM_summary_decision_txt"),
-                                               br(), br(),br(), br(),br(), br(),br(), br(),
-                                               br(), br(),br(), br(),br(), br(),br(), br(),
-                                               br(), br(),br(), br(),br()
+                                               textOutput("summary_decision_txt")
                                              )
 
                                       )
@@ -167,7 +160,15 @@ shinyUI(fluidPage(
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                    tags$div("It may take a while to load the plots, please wait...",
                                                             id="loadmessage")),
-                                  plotOutput("heat_map")
+                                  sidebarLayout(
+                                    sidebarPanel(
+                                      checkboxGroupInput("heatmap_controlChart_select", "Please select your control chart",
+                                                         choices = c("CUSUM Chart" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR")
+                                    ),
+                                    mainPanel(plotOutput("heat_map")
+                                              )
+                                  )
+
 
 
                          )
