@@ -72,14 +72,12 @@ shinyServer(function(input,output,session) {
      #data$df[,input$show_prodata_columns, drop = FALSE] # drop = F, is for not considering the last column as arrow and consider it as data frame
      data$df
    }, options = list(pageLength = 25))
-  ###### Tab for selecting decision rule and upper and lower bound decisions ###############################################
-  output$decision_rule <- renderUI({
+  ###### Tab for selecting decision rule and metrics ###############################################
+  output$selection_tab <- renderUI({
     validate(
       need(!is.null(data$df), "Please upload your data first"),
       need(is.data.frame(data$df), data$df)
     )
-
-    #p("Please select your preferred decision rule: ")
 
     fluidPage(
       wellPanel(
@@ -94,6 +92,7 @@ shinyServer(function(input,output,session) {
         column(2,
                numericInput('peptideThresholdGood', '', value = 50, min = 0,
                             max = 100, step = 1),
+
                numericInput('peptideThresholdWarn', '', value = 70, min = 1,
                             max = 100, step = 1)
                ),
@@ -101,13 +100,13 @@ shinyServer(function(input,output,session) {
                br(),
                "percent of peptides and\n",
                br(),br(),
-               "and more than", "percentage of peptides and"
+               "and more than ??? percentage of peptides and"
         ),
         column(2,
                numericInput('metricThresholdGood', '', value = 1, min = 1,
-                            max = as.numeric(data$metrics), step = 1),
+                            max = 4, step = 1),
                numericInput('metricThresholdWarn', '', value = 2, min = 1,
-                            max = as.numeric(data$metrics))
+                            max = 4, step = 1)
         ),
         column(3,
                br(),
@@ -129,33 +128,46 @@ shinyServer(function(input,output,session) {
 
 
                )
-      ),
-      fluidRow(
-        column(12,
-               checkboxGroupInput("user_selected_type","Please select the type",
-                                  choices = c("mean","dispersion"), selected = c("mean","dispersion"))
-               )
       )
 
     )
   })
 
+
+  # output$ToGoPeptidesSelect <- renderUI({
+  #   numericInput('peptideThresholdGood', '% of peptides', value = 50, min = 0,
+  #                max = 100, step = 1)
+  # })
+  # output$ToGoPeptides <- renderText({
+  #   input$peptideThresholdGood
+  # })
+  # output$ToGoMetricSelect <- renderUI({
+  #   numericInput('metricThresholdGood', '# ', value = 1, min = 1,
+  #                max = length(input$user_selected_metrics), step = 1)
+  # })
+  # output$ToGoMetrics <- renderText({
+  #   input$metricThresholdGood
+  # })
   ################################################################# plots ###################################################
   ###########################################################################################################################
-  output$XmR_select_metric <- renderUI({
-
-    checkboxGroupInput("XmR_checkbox_select","choose your prefered metric to view plots",
-                       choices = c(data$metrics),
-                       selected = c(COL.PEAK.ASS,COL.BEST.RET,
-                                    COL.FWHM, COL.TOTAL.AREA)
-                       )
-
-  })
+  # output$XmR_select_metric <- renderUI({
+  #
+  #   checkboxGroupInput("XmR_checkbox_select","choose your prefered metric to view plots",
+  #                      choices = c(data$metrics),
+  #                      selected = c(COL.PEAK.ASS,COL.BEST.RET,
+  #                                   COL.FWHM, COL.TOTAL.AREA)
+  #                      )
+  #
+  # })
   #################################################################################################################
 
   output$XmR_tabset <- renderUI({
-
-    Tabs <- lapply(input$XmR_checkbox_select,
+    validate(
+      need(!is.null(data$df), "Please upload your data first"),
+      need(is.data.frame(data$df), data$df),
+      need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
+    )
+    Tabs <- lapply(input$user_selected_metrics,
                    function(x) {
                        tabPanel(x,
                                 tags$head(tags$style(type="text/css")),
@@ -174,20 +186,24 @@ shinyServer(function(input,output,session) {
   })
   ################################################################################################################
   ################################################################################################################
-  output$CUSUM_select_metric <- renderUI({
-
-    checkboxGroupInput("CUSUM_checkbox_select","choose your prefered metric to view plots",
-                       choices = c(data$metrics),
-                       selected = c(COL.PEAK.ASS,COL.BEST.RET,
-                                    COL.FWHM,
-                                    COL.TOTAL.AREA)
-    )
-
-  })
+  # output$CUSUM_select_metric <- renderUI({
+  #
+  #   checkboxGroupInput("CUSUM_checkbox_select","choose your prefered metric to view plots",
+  #                      choices = c(data$metrics),
+  #                      selected = c(COL.PEAK.ASS,COL.BEST.RET,
+  #                                   COL.FWHM,
+  #                                   COL.TOTAL.AREA)
+  #   )
+  #
+  # })
   #################################################################################################################
   output$CUSUM_tabset <- renderUI({
-
-    Tabs <- lapply(input$CUSUM_checkbox_select,
+    validate(
+      need(!is.null(data$df), "Please upload your data first"),
+      need(is.data.frame(data$df), data$df),
+      need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
+    )
+    Tabs <- lapply(input$user_selected_metrics,
                    function(x) {
 
                        tabPanel(x,
@@ -203,20 +219,24 @@ shinyServer(function(input,output,session) {
   })
   ################################################################################################################
   ################################################################################################################
-  output$CP_select_metric <- renderUI({
-
-    checkboxGroupInput("CP_checkbox_select","choose your prefered metric to view plots",
-                       choices = c(data$metrics),
-                       selected = c(COL.PEAK.ASS,COL.BEST.RET,
-                                    COL.TOTAL.AREA,
-                                    COL.FWHM)
-    )
-
-  })
+  # output$CP_select_metric <- renderUI({
+  #
+  #   checkboxGroupInput("CP_checkbox_select","choose your prefered metric to view plots",
+  #                      choices = c(data$metrics),
+  #                      selected = c(COL.PEAK.ASS,COL.BEST.RET,
+  #                                   COL.TOTAL.AREA,
+  #                                   COL.FWHM)
+  #   )
+  #
+  # })
   #################################################################################################################
   output$CP_tabset <- renderUI({
-
-    Tabs <- lapply(input$CP_checkbox_select,
+    validate(
+      need(!is.null(data$df), "Please upload your data first"),
+      need(is.data.frame(data$df), data$df),
+      need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
+    )
+    Tabs <- lapply(input$user_selected_metrics,
                    function(x) {
                        tabPanel(x,
                                 tags$head(tags$style(type="text/css")),
@@ -234,7 +254,8 @@ shinyServer(function(input,output,session) {
     prodata <- data$df
     validate(
       need(!is.null(prodata), "Please upload your data"),
-      need(is.data.frame(prodata), prodata)
+      need(is.data.frame(prodata), prodata),
+      need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
     )
     metrics_box.plot(prodata, data.metrics = data$metrics)
   })
@@ -257,7 +278,7 @@ shinyServer(function(input,output,session) {
   # outputOptions(output, "scatter_plot", priority = 1)
   ######################################################### plot_summary in Summary tab ########################################
   my_height <- reactive({
-    my_height <- ceiling(length(data$metrics)/4)*1200
+    my_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*200
   })
   ################ plot the summary and radar plots ############################################################################
   output$plot_summary <- renderPlot({
@@ -265,25 +286,40 @@ shinyServer(function(input,output,session) {
     prodata <- data$df
     validate(
       need(!is.null(prodata), "Please upload your data"),
-      need(is.data.frame(prodata), prodata)
+      need(is.data.frame(prodata), prodata),
+      need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
     )
     ##Text1 = textGrob("Mean",gp=gpar(col="gray40",fontsize = 11,face="bold"))
     ##Text2 = textGrob("Dispersion",gp=gpar(col="gray40",fontsize = 11,face="bold"))
-    p1 <- XmR.Summary.plot(prodata, data.metrics = data$metrics, input$L, input$U)
-    p2 <- XmR.Radar.Plot(prodata, data.metrics = data$metrics,input$L,input$U)
-    p3 <- CUSUM.Summary.plot(prodata, data.metrics = data$metrics, input$L, input$U)
-    p4 <- CUSUM.Radar.Plot(prodata, data.metrics = data$metrics, input$L,input$U)
+    p1 <- XmR.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U)
+    p2 <- XmR.Radar.Plot(prodata, data.metrics = input$user_selected_metrics,input$L,input$U)
+    p3 <- CUSUM.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U)
+    p4 <- CUSUM.Radar.Plot(prodata, data.metrics = input$user_selected_metrics, input$L,input$U)
     ##p1 <- p1 + annotation_custom(grob = Text1, xmin = 0, xmax = 7, ymin = 0, ymax = 2.6)
     ##p1 <- p1 + annotation_custom(grob = Text2, xmin = 0, xmax = 15, ymin = 0, ymax = -2.6)
     ##p3 <- p3 + annotation_custom(grob = Text1, xmin = 0, xmax = 7, ymin = 0, ymax = 2.6)
     ##p3 <- p3 + annotation_custom(grob = Text2, xmin = 0, xmax = 15, ymin = 0, ymax = -2.6)
-    grid.arrange(p1,p2,p3,p4, ncol = 1)
+    if("XmR" %in% input$summary_controlChart_select && "CUSUM" %in% input$summary_controlChart_select) {
+      grid.arrange(p1,p2,p3,p4, ncol = 1)
+      print(length(input$summary_controlChart_select))
+    }
+    else if("XmR" %in% input$summary_controlChart_select) {
+      grid.arrange(p1,p2, ncol = 1)
+    }else if("CUSUM" %in% input$summary_controlChart_select) {
+      grid.arrange(p3,p4,ncol = 1)
+    }else {
+    }
 
   }, height = my_height )
 
   ################## decision message for XmR in summary tab #########
    output$summary_decision_txt <- renderText({
      prodata <- data$df
+     validate(
+       need(!is.null(prodata), "Please upload your data"),
+       need(is.data.frame(prodata), prodata),
+       need(!is.null(input$user_selected_metrics),"Please first select the metrics and decision thresholds in the selection tab")
+     )
      peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100 #For Eralp : the default is set to 50 (look at the selection tab)
      metricThresholdGood <- as.numeric(input$metricThresholdGood) # For Eralp : the default is 1 (look at the selection tab)
      peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100 #For Eralp : the default is set to 70 (look at the selection tab)
@@ -331,11 +367,10 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select the metrics and decision thresholds in the selection tab")
-    )
-    validate(
+      need(!is.null(input$user_selected_metrics),"Please first select the metrics and decision thresholds in the selection tab"),
       need(!is.null(prodata$AcquiredTime),"To view heatmap, the data set should include AcquiredTime column.")
     )
+
     peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100
     peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
@@ -352,19 +387,16 @@ shinyServer(function(input,output,session) {
     p4 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
                            peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2)
-    if(input$heatmap_controlChart_select == "XmR") {
+    if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
+      grid.arrange(p1,p2,p3,p4, ncol = 1)
+    }
+    else if("XmR" %in% input$heatmap_controlChart_select) {
       grid.arrange(p1,p2, ncol = 1)
-    }else if(input$heatmap_controlChart_select == "CUSUM") {
+    }else if("CUSUM" %in% input$heatmap_controlChart_select) {
       grid.arrange(p3,p4,ncol = 1)
     }else {
-      grid.arrange(p1,p2,p3,p4)
     }
-
-
-
-
-  }
-  )
+  }, height = my_height)
 
   ############################################################################################################################
 })

@@ -8,6 +8,7 @@ shinyUI(fluidPage(
                style="font-family:inherit;"),windowTitle = "MSstatsQC"),
   navbarPage(h4("System suitability monitoring tools for quantitative mass spectrometry based proteomic
                 experiments"),
+#################################################################################################################
               tabPanel("Home", theme = "bootstrap.css",
                          tags$img(src='logo.png', height=220, width=220, style = "float: right"),
                          p("MSstatsQC is an open-source web-based software which provides longitudinal
@@ -61,7 +62,7 @@ shinyUI(fluidPage(
                          br()
 
               ),
-
+########################################################################################################
               tabPanel("Data Import",
                        sidebarLayout(
 
@@ -92,12 +93,6 @@ shinyUI(fluidPage(
                             p("Please select a precursor or select all"),
                             uiOutput("pepSelect")
                           ),
-                           #br(),
-                           # wellPanel(
-                           #   helpText("please select the columns of your data that you need to see."),
-                           #   uiOutput("prodata_column_select")
-                           # ),
-
                            tags$style("body{background-color:linen; color:black}")
 
 
@@ -109,12 +104,16 @@ shinyUI(fluidPage(
                         ),
                            position = "left")
                        ),
-
+######################################################################################################
              tabPanel("Selection", theme = "bootstrap.css",
-                      #p("Please select your preferred decision rule: "),
-                      uiOutput("decision_rule")
+                      uiOutput("selection_tab")
+                      # p(strong("Please select your preferred decision rule: ")),
+                      # "To Go process, is when equal or less than",textOutput("ToGoPeptides"), "percent of peptides and equal or
+                      #  less than", textOutput("ToGoMetrics"),"metric/metrics out of all the selected metrics are out of controll.",
+                      #  uiOutput("ToGoPeptidesSelect"),
+                      #  uiOutput("ToGoMetricSelect")
                       ),
-
+#####################################################################################################
               tabPanel("Metric Summary",
                        tabsetPanel(
                            tabPanel("Plot Summary",
@@ -122,39 +121,36 @@ shinyUI(fluidPage(
                                     conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                      tags$div("It may take a while to load the plots, please wait...",
                                                               id="loadmessage")),
-                                    fluidRow(
-                                      column(9,
-                                             plotOutput("plot_summary")
-                                             ),
-                                      column(3,
-                                             wellPanel(
-                                               textOutput("summary_decision_txt")
-                                             )
-
+                                    sidebarLayout(
+                                      sidebarPanel(
+                                        checkboxGroupInput("summary_controlChart_select", "Please select your control chart",
+                                                           choices = c("CUSUM Chart" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR"),
+                                        textOutput("summary_decision_txt")
+                                      ),
+                                      mainPanel(
+                                        plotOutput("plot_summary")
                                       )
                                     )
-
-
-
-
-
-                           ),
+                                    # fluidRow(
+                                    #   column(9,
+                                    #          plotOutput("plot_summary")
+                                    #          ),
+                                    #   column(3,
+                                    #          wellPanel(
+                                    #            textOutput("summary_decision_txt")
+                                    #          )
+                                    #
+                                    #   )
+                                    # )
+                                    ),
                          tabPanel("Boxplot",
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                    tags$div("It may take a while to load the plots, please wait...",
                                                             id="loadmessage")),
                                   plotlyOutput("box_plot", height = 2000)
+                                  ),
 
-                         ),
-                         # tabPanel("Scatterplot",
-                         #          uiOutput("scatter_plot_metric_selection"),
-                         #          tags$head(tags$style(type="text/css")),
-                         #          conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                         #                           tags$div("It may take a while to load the plots, please wait...",
-                         #                                    id="loadmessage")),
-                         #          plotOutput("scatter_plot")
-                         #         ),
                          tabPanel("heat Map",
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
@@ -168,145 +164,24 @@ shinyUI(fluidPage(
                                     mainPanel(plotOutput("heat_map")
                                               )
                                   )
-
-
-
-                         )
+                                  )
 
                        )
                        ),
-
+###################################################################################################
               navbarMenu("Control Charts",
                          tabPanel("XmR",
-
-                                    sidebarLayout(
-                                      sidebarPanel(
-                                        uiOutput("XmR_select_metric")
-                                      ), # end sidebarPanel
-                                      mainPanel(
-                                        uiOutput("XmR_tabset")
-                                      ) # end mainPanel
-                                    ) # end sidebarLayout
-
-
-
-
-                                    #,
-                                    # tabPanel("Mass Accuracy"
-                                    #          , textOutput("MA_XmR_txt")
-                                    #          ,plotlyOutput("MA_XmR")
-                                    #          ,tags$head(tags$style(type="text/css"))
-                                    #          , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                    #                           tags$div("It may take a while to load the plots, please wait...
-                                    #                                    ",id="loadmessage"))
-                                    #                           )
-                                             ), # End "XMR" tabPanel and it's tabsetPanel
+                                  uiOutput("XmR_tabset")
+                                  ),
 
                          tabPanel("CUSUM",
-                                  sidebarLayout(
-                                    sidebarPanel(
-                                      uiOutput("CUSUM_select_metric")
-                                    ), # end sidebarPanel
-                                    mainPanel(
-                                      uiOutput("CUSUM_tabset")
-                                    ) # end mainPanel
-                                  ) # end sidebarLayout
-                                    #,
-                                    # tabPanel("Mass Accuracy"
-                                    #          , textOutput("MA_CUSUM_txt")
-                                    #          ,plotlyOutput("MA_CUSUM")
-                                    #          , tags$head(tags$style(type="text/css"))
-                                    #          , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                    #                           tags$div("It may take a while to load the plots, please wait...
-                                    #                                    ",id="loadmessage"))
-                                    #                           )
-                                             )
-                         #, # End tabpanle "CUSUM" and tabsetPanel of it
-                         #tabPanel("EWMA", textOutput("EWMA_txt")),
-                         #tabPanel("Short run SPC", textOutput("Short_run_SPC_txt")),
-
-                        # tabPanel("Multivariate Control Charts"
-                        #          , textOutput("Multivariate_Control_Charts_txt"),
-                        #          tabsetPanel(
-                        #            tabPanel("Retention Time",
-                        #                     plotlyOutput("RT_Multi")
-                        #                     , tags$head(tags$style(type="text/css"))
-                        #                     , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                        #                                      tags$div("It may take a while to load the plots, please wait...
-                        #                                               ",id="loadmessage"))
-                        #                                      ),
-                        #            tabPanel("Total Peak Area",
-                        #                     plotlyOutput("TA_Multi")
-                        #                     , tags$head(tags$style(type="text/css"))
-                        #                     , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                        #                                      tags$div("It may take a while to load the plots, please wait...
-                        #                                               ",id="loadmessage"))
-                        #                                      ),
-                        #            tabPanel("Full Width at Half Maximum (FWHM)",
-                        #                     plotlyOutput("Max_Multi")
-                        #                     , tags$head(tags$style(type="text/css"))
-                        #                     , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                        #                                      tags$div("It may take a while to load the plots, please wait...
-                        #                                               ",id="loadmessage"))
-                        #                                      ),
-                        #            tabPanel("Peak Assymetry",
-                        #                     plotlyOutput("PA_Multi")
-                        #                     , tags$head(tags$style(type="text/css"))
-                        #                     , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                        #                                      tags$div("It may take a while to load the plots, please wait...
-                        #                                               ",id="loadmessage"))
-                        #                                      )
-                                   #,
-                                   # tabPanel("Mass Accuracy",
-                                   #          plotlyOutput("MA_Multi")
-                                   #          , tags$head(tags$style(type="text/css"))
-                                   #          , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                   #                           tags$div("It may take a while to load the plots, please wait...
-                                   #                                    ",id="loadmessage"))
-                                   #                           )
-                                    #        ))
-), # End "Multi" tabPanel and it's tabsetPanel
-
-              tabPanel("Change Point Analysis",
-                       sidebarLayout(
-                         sidebarPanel(
-                           uiOutput("CP_select_metric")
-                         ), # end sidebarPanel
-                         mainPanel(
-                           uiOutput("CP_tabset")
-                         ) # end mainPanel
-                       ) # end sidebarLayout
-                         #,
-                         # tabPanel("Mass Accuracy"
-                         #          , textOutput("CP_MA_txt")
-                         #          , plotlyOutput("MA_CP")
-                         #          , tags$head(tags$style(type="text/css"))
-                         #          , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                         #                           tags$div("It may take a while to load the plots, please wait...
-                         #                                    ",id="loadmessage"))
-                         #                           )
-                         #          )), # end "Change Point Analysis" tabPanel and it's tabsetPanel
-
-              # tabPanel("Capability Analysis",
-              #          tabsetPanel(
-              #            tabPanel("Retention Time"
-              #                     , textOutput("CA_RT_txt")
-              #                     , plotlyOutput("RT_CA")
-              #                     , tags$head(tags$style(type="text/css"))
-              #                     , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-              #                                      tags$div("It may take a while to load the plots, please wait...
-              #                                               ",id="loadmessage"))
-              #                                      ),
-                         # tabPanel("Mass Accuracy"
-                         #          , textOutput("CA_MA_txt")
-                         #          , plotlyOutput("MA_CA")
-                         #          , tags$head(tags$style(type="text/css"))
-                         #          , conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                         #                           tags$div("It may take a while to load the plots, please wait...
-                         #                                    ",id="loadmessage"))
-                         #                           )
-                                  ), # end "Capability Analysis" tabPanel and it's tabsetPanel
-              #tabPanel("Overall QC Performance", textOutput("OverallQC_txt")),
+                                  uiOutput("CUSUM_tabset")
+                                  ),
+                         tabPanel("Change Point Analysis",
+                                  uiOutput("CP_tabset")
+                                  )
+              ),
+###################################################################################################
               tabPanel("Help",
                        tabsetPanel(
                          tabPanel("Metrics"
@@ -367,7 +242,7 @@ shinyUI(fluidPage(
                                     to save time by narrowing the search window. We introduce
                                     two change point models: step shift change model for mean and step shift change model for variance.",
                                    a("visit for more info",href="http://www.eng.fsu.edu/~pigna/pdf/"))
-                         ),
+                                  ),
 
                          tabPanel("Documentation",
                                   h5(strong("MSstatsQC webpage")),
@@ -377,9 +252,9 @@ shinyUI(fluidPage(
                                   h5(strong("MSstatsQC Github")),
                                   p("Latest documantation is also available via our Github page"
                                     , a("visit for more info",href="https://github.com/srtaheri/msstats-qc"))
-
-                         )
+                                  )
 
                                   ))
+#####################################################################################################
                        )
   ))
