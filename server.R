@@ -259,23 +259,7 @@ shinyServer(function(input,output,session) {
     )
     metrics_box.plot(prodata, data.metrics = data$metrics)
   })
-  ########################################################## scatterplot matrix in Summary tab #################################
-  # output$scatter_plot_metric_selection <- renderUI({
-  #
-  #    return(selectInput("scatter_metric_select", "Choose the metric",
-  #                choices = c(data$metrics), selected = COL.FWHM))
-  #
-  # })
-  # output$scatter_plot <- renderPlot({
-  #   prodata <- data$df
-  #     validate(
-  #       need(!is.null(prodata), "Please upload your data"),
-  #       need(is.data.frame(prodata), prodata)
-  #     )
-  #   metrics_scatter.plot(prodata,input$L, input$U, metric = input$scatter_metric_select, normalization = T)
-  # }, height = 1500)
-  # outputOptions(output, "scatter_plot_metric_selection", priority = 10)
-  # outputOptions(output, "scatter_plot", priority = 1)
+
   ######################################################### plot_summary in Summary tab ########################################
   my_height <- reactive({
     my_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*200
@@ -289,16 +273,12 @@ shinyServer(function(input,output,session) {
       need(is.data.frame(prodata), prodata),
       need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
     )
-    ##Text1 = textGrob("Mean",gp=gpar(col="gray40",fontsize = 11,face="bold"))
-    ##Text2 = textGrob("Dispersion",gp=gpar(col="gray40",fontsize = 11,face="bold"))
+
     p1 <- XmR.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U)
     p2 <- XmR.Radar.Plot(prodata, data.metrics = input$user_selected_metrics,input$L,input$U)
     p3 <- CUSUM.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U)
     p4 <- CUSUM.Radar.Plot(prodata, data.metrics = input$user_selected_metrics, input$L,input$U)
-    ##p1 <- p1 + annotation_custom(grob = Text1, xmin = 0, xmax = 7, ymin = 0, ymax = 2.6)
-    ##p1 <- p1 + annotation_custom(grob = Text2, xmin = 0, xmax = 15, ymin = 0, ymax = -2.6)
-    ##p3 <- p3 + annotation_custom(grob = Text1, xmin = 0, xmax = 7, ymin = 0, ymax = 2.6)
-    ##p3 <- p3 + annotation_custom(grob = Text2, xmin = 0, xmax = 15, ymin = 0, ymax = -2.6)
+
     if("XmR" %in% input$summary_controlChart_select && "CUSUM" %in% input$summary_controlChart_select) {
       grid.arrange(p1,p2,p3,p4, ncol = 1)
       print(length(input$summary_controlChart_select))
@@ -377,16 +357,20 @@ shinyServer(function(input,output,session) {
 
     p1 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
-                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1)
+                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1,
+                           title = "XmR heat map - Mean")
     p2 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
-                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2)
+                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2,
+                           title = "XmR heat map - Dispersion")
     p3 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
-                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1)
+                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1,
+                           title = "CUSUM heat map - Mean")
     p4 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
-                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2)
+                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2,
+                           title = "CUSUM heat map - Dispersion")
     if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
       grid.arrange(p1,p2,p3,p4, ncol = 1)
     }

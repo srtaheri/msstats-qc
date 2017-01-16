@@ -449,7 +449,7 @@ metrics_box.plot <- function(prodata, data.metrics) {
   return(p)
 }
 #####################################################################################################
-metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,peptideThresholdGood,peptideThresholdWarn, L, U, type) {
+metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,peptideThresholdGood,peptideThresholdWarn, L, U, type, title) {
 
   data <- heatmap.DataFrame(prodata,precursorSelection, data.metrics,method,peptideThresholdGood,peptideThresholdWarn, L, U, type)
 
@@ -466,15 +466,11 @@ metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,pep
   #                             guide='legend')
   p <- p + geom_tile(colour="white",size=.1)
   p <- p + coord_equal()
-  p <- p + theme_minimal(base_size = 10, base_family = "Trebuchet MS")
+  #p <- p + theme_minimal(base_size = 10, base_family = "Trebuchet MS")
   p <- p + removeGrid()
   p <- p + rotateTextX()
-  if(type == 1) {
-     p <- p + ggtitle("XmR heat map - Mean",subtitle = "# Events per metric per date and time")
-   }
-   else {
-     p <- p + ggtitle("XmR heat map - Dispersion",subtitle = "# Events per metric per date and time")
-   }
+
+  p <- p + ggtitle(title,subtitle = "# metric per date and time")
 
   p <- p + labs(x=NULL, y=NULL)
   #p <- p + theme(plot.title=element_text(hjust=0))
