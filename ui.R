@@ -117,10 +117,10 @@ shinyUI(fluidPage(
                             ),
                             column(5,
                                  p(strong("percent of out of control peptides: ")), 
-                                 numericInput('peptideThresholdGood', '', value = 50, min = 0, max = 100, step = 1)
+                                 numericInput('threshold_peptide_good', '', value = 50, min = 0, max = 100, step = 1)
                             ),
                             column(5,
-                                 p(strong("percent of out of control metrics: ")),
+                                 p(strong("number of out of control metrics: ")),
                                  uiOutput("metricThresholdGood")
                             )
                           )
@@ -138,7 +138,7 @@ shinyUI(fluidPage(
                                    uiOutput("peptideThresholdWarn")
                             ),
                             column(5,
-                                   p(strong("percent of out of control metrics: ")),
+                                   p(strong("number of out of control metrics: ")),
                                    uiOutput("metricThresholdWarn")
                             )
                           )

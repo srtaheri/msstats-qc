@@ -80,7 +80,7 @@ shinyServer(function(input,output,session) {
   })
   
   output$peptideThresholdWarn <- renderUI({
-    threshold_peptide_good <- input$peptideThresholdGood
+    threshold_peptide_good <- input$threshold_peptide_good
     numericInput('threshold_peptide_warn', '', value = threshold_peptide_good+1, min = threshold_peptide_good+1, max = 100, step = 1)
   })
   
@@ -329,10 +329,10 @@ shinyServer(function(input,output,session) {
        need(is.data.frame(prodata), prodata),
        need(!is.null(input$user_selected_metrics),"Please first select the metrics and decision thresholds in the selection tab")
      )
-     peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100 #For Eralp : the default is set to 50 (look at the selection tab)
-     metricThresholdGood <- as.numeric(input$metricThresholdGood) # For Eralp : the default is 1 (look at the selection tab)
-     peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100 #For Eralp : the default is set to 70 (look at the selection tab)
-     metricThresholdWarn <- as.numeric(input$metricThresholdWarn) # For Eralp : the default is 2 (look at the selection tab)
+     peptideThresholdGood <- (as.numeric(input$threshold_peptide_good))/100 #For Eralp : the default is set to 50 (look at the selection tab)
+     metricThresholdGood <- as.numeric(input$threshold_metric_good) # For Eralp : the default is 1 (look at the selection tab)
+     peptideThresholdWarn <- (as.numeric(input$threshold_peptide_warn))/100 #For Eralp : the default is set to 70 (look at the selection tab)
+     metricThresholdWarn <- as.numeric(input$threshold_metric_warn) # For Eralp : the default is 2 (look at the selection tab)
 
      # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 1) for which there exists a peptide
      #that its percentage of out of range is above the peptideThresholdGood.[1]
@@ -380,10 +380,10 @@ shinyServer(function(input,output,session) {
       need(!is.null(prodata$AcquiredTime),"To view heatmap, the data set should include AcquiredTime column.")
     )
 
-    peptideThresholdGood <- (as.numeric(input$peptideThresholdGood))/100
-    peptideThresholdWarn <- (as.numeric(input$peptideThresholdWarn))/100
+    peptideThresholdGood <- (as.numeric(input$threshold_peptide_good))/100
+    peptideThresholdWarn <- (as.numeric(input$threshold_peptide_warn))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
-
+    
     p1 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1,
