@@ -236,7 +236,7 @@ shinyServer(function(input,output,session) {
   })
   heatmap_width <- reactive({
     prodata <- data$df
-    heatmap_width <- nrow(prodata[prodata$Precursor == prodata$Precursor[1],])*30
+    heatmap_width <- nrow(prodata[prodata$Precursor == prodata$Precursor[1],])*20
     heatmap_width
   })
   ################ plot the summary and radar plots ############################################################################
