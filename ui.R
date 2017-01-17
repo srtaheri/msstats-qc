@@ -107,16 +107,27 @@ shinyUI(fluidPage(
 ######################################################################################################
              tabPanel("Selection", theme = "bootstrap.css",
                       fluidPage(
+
                         wellPanel(
                           fluidRow(
-                            p(strong("Good to Go:"))
-                          ), 
+                            column(12,
+                                   uiOutput("metricSelection")
+                            )
+                          )
+                        ),
+                        p(strong("Please select the your decision rule:")),
+                        wellPanel(
+                          fluidRow(
+                            p(strong("I) Good to Go:"),"A process is Good to Go when:"),
+                            p("1. Equal or Less than the selected percentage of peptides are out of controll, and"),
+                            p("2. Equal or less than the selected number of metrics (out of all the metrics selected above), are out of controll.")
+                          ),
                           fluidRow(
                             column(2,
                                  br()
                             ),
                             column(5,
-                                 p(strong("percent of out of control peptides: ")), 
+                                 p(strong("Percentage of out of control peptides: ")),
                                  numericInput('threshold_peptide_good', '', value = 50, min = 0, max = 100, step = 1)
                             ),
                             column(5,
@@ -125,16 +136,19 @@ shinyUI(fluidPage(
                             )
                           )
                         ),
+
                         wellPanel(
                           fluidRow(
-                            p(strong("Warning Area:"))
-                          ), 
+                            p(strong("II) Warning to Go:"),"A process is Warning to Go when:"),
+                            p("1. More than the selected percentage of peptides in part I and Equal or Less than the selected percentage of peptides here are out of controll, and"),
+                            p("2. Equal or less than the selected number of metrics (out of all the metrics selected above), are out of controll.")
+                          ),
                           fluidRow(
                             column(2,
                                    br()
                             ),
                             column(5,
-                                   p(strong("percent of out of control peptides: ")),
+                                   p(strong("Percent of out of control peptides: ")),
                                    uiOutput("peptideThresholdWarn")
                             ),
                             column(5,
@@ -142,26 +156,28 @@ shinyUI(fluidPage(
                                    uiOutput("metricThresholdWarn")
                             )
                           )
-                        ),
-                        wellPanel(
-                          fluidRow(
-                            column(12,
-                                   uiOutput("metricSelection")
-                            )
-                          )
                         )
                       )
-                      
-                      #uiOutput("selection_tab")
-                      # p(strong("Please select your preferred decision rule: ")),
-                      # "To Go process, is when equal or less than",textOutput("ToGoPeptides"), "percent of peptides and equal or
-                      #  less than", textOutput("ToGoMetrics"),"metric/metrics out of all the selected metrics are out of controll.",
-                      #  uiOutput("ToGoPeptidesSelect"),
-                      #  uiOutput("ToGoMetricSelect")
                       ),
 #####################################################################################################
               tabPanel("Metric Summary",
                        tabsetPanel(
+
+                         tabPanel("heat Map",
+                                  tags$head(tags$style(type="text/css")),
+                                  conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                   tags$div("It may take a while to load the plots, please wait...",
+                                                            id="loadmessage")),
+                                  sidebarLayout(
+                                    sidebarPanel(
+                                      checkboxGroupInput("heatmap_controlChart_select", "Please select your control chart",
+                                                         choices = c("CUSUM Chart" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR")
+                                    ),
+                                    mainPanel(plotOutput("heat_map")
+                                    )
+                                  )
+                         ),
+
                            tabPanel("Plot Summary",
                                     tags$head(tags$style(type="text/css")),
                                     conditionalPanel(condition="$('html').hasClass('shiny-busy')",
@@ -189,27 +205,13 @@ shinyUI(fluidPage(
                                     #   )
                                     # )
                                     ),
+
                          tabPanel("Boxplot",
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                    tags$div("It may take a while to load the plots, please wait...",
                                                             id="loadmessage")),
                                   plotlyOutput("box_plot", height = 2000)
-                                  ),
-
-                         tabPanel("heat Map",
-                                  tags$head(tags$style(type="text/css")),
-                                  conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                   tags$div("It may take a while to load the plots, please wait...",
-                                                            id="loadmessage")),
-                                  sidebarLayout(
-                                    sidebarPanel(
-                                      checkboxGroupInput("heatmap_controlChart_select", "Please select your control chart",
-                                                         choices = c("CUSUM Chart" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR")
-                                    ),
-                                    mainPanel(plotOutput("heat_map")
-                                              )
-                                  )
                                   )
 
                        )

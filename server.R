@@ -72,18 +72,18 @@ shinyServer(function(input,output,session) {
      #data$df[,input$show_prodata_columns, drop = FALSE] # drop = F, is for not considering the last column as arrow and consider it as data frame
      data$df
    }, options = list(pageLength = 25))
-  
+
   ###### Tab for selecting decision rule and metrics ###############################################
   output$metricThresholdGood <- renderUI({
     numOfMetrics <- length(input$user_selected_metrics)
     numericInput('threshold_metric_good', '', value = 1, min = 1, max = numOfMetrics, step = 1)
   })
-  
+
   output$peptideThresholdWarn <- renderUI({
     threshold_peptide_good <- input$threshold_peptide_good
     numericInput('threshold_peptide_warn', '', value = threshold_peptide_good+1, min = threshold_peptide_good+1, max = 100, step = 1)
   })
-  
+
   output$metricThresholdWarn <- renderUI({
     validate(
       need(!is.null(input$threshold_metric_good),"loading...")
@@ -92,7 +92,7 @@ shinyServer(function(input,output,session) {
     threshold_metric_good <- input$threshold_metric_good
     numericInput('threshold_metric_warn', '', value = threshold_metric_good, min = threshold_metric_good, max = numOfMetrics, step = 1)
   })
-  
+
   output$metricSelection <- renderUI({
     checkboxGroupInput("user_selected_metrics","Please select the metrics",
                        choices = c(data$metrics),
@@ -100,67 +100,8 @@ shinyServer(function(input,output,session) {
                                     COL.FWHM, COL.TOTAL.AREA),
                        inline = TRUE)
   })
-  
-  ############################# DEPRECATED
-  output$selection_tab <- renderUI({
-    validate(
-      need(!is.null(data$df), "Please upload your data first"),
-      need(is.data.frame(data$df), data$df)
-    )
-
-    fluidPage(
-      wellPanel(
-      fluidRow(
-
-        column(2,
-               br(),
-               "Good to go is when less than\n",
-               br(),
-               "Warning area is when, less than"
-        ),
-        column(2,
-               numericInput('peptideThresholdGood', '', value = 50, min = 0,
-                            max = 100, step = 1),
-
-               numericInput('peptideThresholdWarn', '', value = 70, min = 1,
-                            max = 100, step = 1)
-               ),
-        column(2,
-               br(),
-               "percent of peptides and\n",
-               br(),br(),
-               "and more than ??? percentage of peptides and"
-        ),
-        column(2,
-               numericInput('metricThresholdGood', '', value = 1, min = 1,
-                            max = 4, step = 1),
-               numericInput('metricThresholdWarn', '', value = 2, min = 1,
-                            max = 4, step = 1)
-        ),
-        column(3,
-               br(),
-               "of the selected metrics are out of control.\n",
-               br(),br(),
-               "of the selected metrics are out of control"
-        )
-
-      )),
-      fluidRow(
-        column(12,
-               wellPanel(
-                 checkboxGroupInput("user_selected_metrics","Please select the metrics",
-                                    choices = c(data$metrics),
-                                    selected = c(COL.PEAK.ASS,COL.BEST.RET,
-                                                 COL.FWHM, COL.TOTAL.AREA),
-                                    inline = TRUE)
-               )
 
 
-               )
-      )
-
-    )
-  })
   ###########################################################################
 
   # output$ToGoPeptidesSelect <- renderUI({
@@ -293,6 +234,11 @@ shinyServer(function(input,output,session) {
   my_height <- reactive({
     my_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*200
   })
+  heatmap_width <- reactive({
+    prodata <- data$df
+    heatmap_width <- nrow(prodata[prodata$Precursor == prodata$Precursor[1],])*30
+    heatmap_width
+  })
   ################ plot the summary and radar plots ############################################################################
   output$plot_summary <- renderPlot({
 
@@ -383,7 +329,7 @@ shinyServer(function(input,output,session) {
     peptideThresholdGood <- (as.numeric(input$threshold_peptide_good))/100
     peptideThresholdWarn <- (as.numeric(input$threshold_peptide_warn))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
-    
+
     p1 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1,
@@ -409,7 +355,7 @@ shinyServer(function(input,output,session) {
       grid.arrange(p3,p4,ncol = 1)
     }else {
     }
-  }, height = my_height)
+  }, height = my_height, width = heatmap_width)
 
   ############################################################################################################################
 })

@@ -10,7 +10,7 @@ COL.PEAK.ASS <- "Peak Assymetry"
 #         "normalization" is either TRUE or FALSE
 #Description of function : it gets the metric column only for the precursor chosen and either return the column as it is or normalize it and then return it
 getMetricData <- function(prodata, precursorSelection, L, U, metric, normalization) {
-  precursor.data<-prodata[prodata$Precursor==precursorSelection,] #"Precursor" is one of the columns in data that shows the name of peptides
+  precursor.data<-prodata[prodata$Precursor==precursorSelection,] #"Precursor" is one of the columns in data that shows the name of peptides. This gets only the part of data related to the selected peptide
   metricData <- 0
 
   if(is.null(metric)){
