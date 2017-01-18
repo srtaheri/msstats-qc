@@ -54,7 +54,7 @@ shinyServer(function(input,output,session) {
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata)
     )
-    selectInput("pepSelection","Choose precursor type"
+    selectInput("pepSelection","Choose peptide"
                             ,choices = c(levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
                             ,"all peptides"))
   })
@@ -94,7 +94,7 @@ shinyServer(function(input,output,session) {
   })
 
   output$metricSelection <- renderUI({
-    checkboxGroupInput("user_selected_metrics","Please select the metrics",
+    checkboxGroupInput("user_selected_metrics","",
                        choices = c(data$metrics),
                        selected = c(COL.PEAK.ASS,COL.BEST.RET,
                                     COL.FWHM, COL.TOTAL.AREA),
@@ -135,7 +135,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(data$df), "Please upload your data first"),
       need(is.data.frame(data$df), data$df),
-      need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
+      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
     Tabs <- lapply(input$user_selected_metrics,
                    function(x) {
@@ -171,7 +171,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(data$df), "Please upload your data first"),
       need(is.data.frame(data$df), data$df),
-      need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
+      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
     Tabs <- lapply(input$user_selected_metrics,
                    function(x) {
@@ -204,7 +204,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(data$df), "Please upload your data first"),
       need(is.data.frame(data$df), data$df),
-      need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
+      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
     Tabs <- lapply(input$user_selected_metrics,
                    function(x) {
@@ -225,7 +225,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
+      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
     metrics_box.plot(prodata, data.metrics = data$metrics)
   })
@@ -246,7 +246,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select your decision rule and metrics from the selection tab")
+      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
 
     p1 <- XmR.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U)
@@ -273,7 +273,7 @@ shinyServer(function(input,output,session) {
      validate(
        need(!is.null(prodata), "Please upload your data"),
        need(is.data.frame(prodata), prodata),
-       need(!is.null(input$user_selected_metrics),"Please first select the metrics and create decision rules in the selection tab")
+       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
      )
      peptideThresholdGood <- (as.numeric(input$threshold_peptide_good))/100 #For Eralp : the default is set to 50 (look at the selection tab)
      metricThresholdGood <- as.numeric(input$threshold_metric_good) # For Eralp : the default is 1 (look at the selection tab)
@@ -302,9 +302,9 @@ shinyServer(function(input,output,session) {
   #   CUSUMCounter2 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
   #                                                         input$L, input$U, type = 2)
 
-      if(XmRCounterAboveGood1 <= metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdGood) {"System is in-control"}
-     # if(XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn &&
-     #    XmRCounterAboveGood2 <= metricThresholdGood){ "Warning! System is out-of-control (A change in QC metric mean is possible)"}
+      if(XmRCounterAboveGood1 <= metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdGood) {"GREEN FLAG: System performance is ACCEPTABLE"}
+#       if(XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn &&
+#         XmRCounterAboveGood2 <= metricThresholdGood){ "Warning! SSystem performance is UNACCEPTABLE (A change in QC metric mean is possible)"}
     # if(XmRCounterAboveGood2 > metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdWarn &&
     #    XmRCounterAboveGood1 <= metricThresholdGood){"Warning! System is out-of-control (A change in QC metric variation is possible)"}
     # if(XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn &&
@@ -313,7 +313,7 @@ shinyServer(function(input,output,session) {
     #    XmRCounterAboveGood2 > metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdWarn) {"Bad! Mean is bad and variation is in warning area"}
     # if(XmRCounterAboveGood2 > metricThresholdWarn &&
     #    XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn) {"Bad! variation is bad and mean is in warning area"}
-    # if(XmRCounterAboveGood1 > metricThresholdWarn && XmRCounterAboveGood2 > metricThresholdWarn) {"Bad! both mean and variation are in bad area"}
+      if(XmRCounterAboveGood1 > metricThresholdWarn && XmRCounterAboveGood2 > metricThresholdWarn) {"RED FLAG: System performance is UNACCEPTABLE"}
   })
   ############################# heat_map in Summary tab #############################################
 
@@ -322,8 +322,8 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select the metrics and decision thresholds in the selection tab"),
-      need(!is.null(prodata$AcquiredTime),"To view heatmap, the data set should include AcquiredTime column.")
+      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule"),
+      need(!is.null(prodata$AcquiredTime),"To view heatmaps, the dataset should include Acquired Time column.")
     )
 
     peptideThresholdGood <- (as.numeric(input$threshold_peptide_good))/100

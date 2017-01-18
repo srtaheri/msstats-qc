@@ -98,14 +98,14 @@ shinyUI(fluidPage(
                            ),
 
                           wellPanel(
-                            p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
+                            p("If you want to clean existing results, please click this button"),
                             actionButton("clear_button", "Clear the data and plots"),
                             bsTooltip("clear_button","click this button to clear your data and all the tables and plots from the system.", placement = "bottom", trigger = "hover",
                                       options = NULL)
                           ),
 
                           wellPanel(
-                            p("Please select a guide set"),
+                            p("Please select a guide set to estimate control limits"),
                             numericInput("L","Lower bound of guide set",value = 1, min = 1, step = 1),
                             numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
                             p("Please select a precursor or select all"),
@@ -125,10 +125,10 @@ shinyUI(fluidPage(
 ######################################################################################################
              tabPanel("Create Decision Rules", theme = "bootstrap.css",
                       fluidPage(
-
+                        p(strong("Please select QC metrics:")),
                         wellPanel(
                           fluidRow(
-                            column(12,
+                            column(10,
                                    uiOutput("metricSelection")
                             )
                           )
@@ -136,7 +136,7 @@ shinyUI(fluidPage(
                         p(strong("Please create your decision rule:")),
                         wellPanel(
                           fluidRow(
-                            p(strong("RED FLAG"), style="color:black; background-color: red;",align = "center",style="font-size:120%;"),
+                            p(strong("RED FLAG"), style="color:black; background-color: red;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is UNACCEPTABLE when:"),align = "center"),
                             p("1. Greater than the selected % of peptides are", strong("out of control"),",and"),
                             p("2. Greater than the selected # of QC metrics are", strong("out of control"),".")
@@ -158,11 +158,11 @@ shinyUI(fluidPage(
 
                         wellPanel(
                           fluidRow(
-                            p(strong("YELLOW FLAG"), style="color:black; background-color: yellow;",align = "center",style="font-size:120%;"),
+                            p(strong("YELLOW FLAG"), style="color:black; background-color: yellow;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is POOR when:"),align = "center"),
                             p("1. Greater than the selected % of peptides are", strong("out of control"),",and"),
                             p("2. Greater than the selected # of QC metrics are", strong("out of control"),"."),
-                            p("The limits should be less than or equal to the the RED FLAG limits")
+                            p("Warning:The limits should be less than or equal to the the RED FLAG limits")
                           ),
                           fluidRow(
                             column(2,
@@ -180,7 +180,7 @@ shinyUI(fluidPage(
                         ),
                         wellPanel(
                           fluidRow(
-                            p(strong("GREEN FLAG"), style="color:black; background-color: green;",align = "center",style="font-size:120%;"),
+                            p(strong("GREEN FLAG"), style="color:black; background-color: green;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is ACCEPTABLE when:"),align = "center"),
                             p("RED FLAG and/or YELLOW FLAG limits are not exceeded.")
                           )
@@ -224,7 +224,7 @@ shinyUI(fluidPage(
                                       sidebarPanel(
                                         checkboxGroupInput("summary_controlChart_select", "Please select your control chart",
                                                            choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR"),
-                                        textOutput("summary_decision_txt")
+                                        htmlOutput("summary_decision_txt")
                                       ),
                                       mainPanel(
                                         plotOutput("plot_summary")
@@ -246,14 +246,14 @@ shinyUI(fluidPage(
                        ),
 ###################################################################################################
               navbarMenu("Control Charts",
-                         tabPanel("XmR",
+                         tabPanel("X and mR Control Charts",
                                   uiOutput("XmR_tabset")
                                   ),
 
-                         tabPanel("CUSUM",
+                         tabPanel("CUSUMm and Cusumv Control Charts",
                                   uiOutput("CUSUM_tabset")
                                   ),
-                         tabPanel("Change Point Analysis",
+                         tabPanel("Change Point Analysis for Mean and Variability",
                                   uiOutput("CP_tabset")
                                   )
               ),
