@@ -453,13 +453,13 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
                           )
   for (i in 1:max_QCno) {
     if(plot.data$pr.y[i] <= peptideThresholdGood){
-      plot.data$bin[i] <- "Good"
+      plot.data$bin[i] <- "Unacceptable"
     }
     else if(plot.data$pr.y[i] <= peptideThresholdWarn){
-      plot.data$bin[i] <- "Warning"
+      plot.data$bin[i] <- "Poor"
     }
     else {
-      plot.data$bin[i] <- "Bad"
+      plot.data$bin[i] <- "Acceptable"
     }
   }
 

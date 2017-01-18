@@ -4,7 +4,7 @@ library(plotly)
 library(markdown)
 shinyUI(fluidPage(
   shinyjs::useShinyjs(),
-  titlePanel(title=p(strong("MSstatsQC"),align = "center",style="color:#444444;",style="font-size:150%;",
+  titlePanel(title=p(strong("MSstatsQC"),align = "center",style="color:#444444;",style="font-size:170%;",
                style="font-family:inherit;"),windowTitle = "MSstatsQC"),
   navbarPage(h4("System suitability monitoring tools for quantitative mass spectrometry based proteomic
                 experiments"),
@@ -85,19 +85,20 @@ shinyUI(fluidPage(
 
                         sidebarPanel(
                           wellPanel(
-                            p("Please upload your data (Comma-separated (*.csv) 8 column QC file format)"),
-                            p("To see an acceptable sample data, look at", strong("Help"),"tab"),
+                            p("Please upload your data (Comma-separated (*.csv) QC file format)"),
+                            p("To see acceptable sample data, look at", strong("Help"),"tab"),
                             fileInput("filein", "Upload file")
                           ),
 
                            wellPanel(
-                             #p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
+                             p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
                              actionButton("sample_button", "Run with sample data"),
                              bsTooltip("sample_button","If you want to run MSstatsQC with sample data file, please click this button", placement = "bottom", trigger = "hover",
                                        options = NULL)
                            ),
 
                           wellPanel(
+                            p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
                             actionButton("clear_button", "Clear the data and plots"),
                             bsTooltip("clear_button","click this button to clear your data and all the tables and plots from the system.", placement = "bottom", trigger = "hover",
                                       options = NULL)
@@ -135,7 +136,7 @@ shinyUI(fluidPage(
                         p(strong("Please create your decision rule:")),
                         wellPanel(
                           fluidRow(
-                            p(strong("I) RED FLAG:"), style="color:black; background-color: red;",align = "center"),
+                            p(strong("RED FLAG"), style="color:black; background-color: red;",align = "center",style="font-size:120%;"),
                             p(strong("System performance is UNACCEPTABLE when:"),align = "center"),
                             p("1. Greater than the selected % of peptides are", strong("out of control"),",and"),
                             p("2. Greater than the selected # of QC metrics are", strong("out of control"),".")
@@ -157,7 +158,7 @@ shinyUI(fluidPage(
 
                         wellPanel(
                           fluidRow(
-                            p(strong("II) YELLOW FLAG:"), style="color:black; background-color: yellow;",align = "center"),
+                            p(strong("YELLOW FLAG"), style="color:black; background-color: yellow;",align = "center",style="font-size:120%;"),
                             p(strong("System performance is POOR when:"),align = "center"),
                             p("1. Greater than the selected % of peptides are", strong("out of control"),",and"),
                             p("2. Greater than the selected # of QC metrics are", strong("out of control"),"."),
@@ -179,7 +180,7 @@ shinyUI(fluidPage(
                         ),
                         wellPanel(
                           fluidRow(
-                            p(strong("III) GREEN FLAG:"), style="color:black; background-color: green;",align = "center"),
+                            p(strong("GREEN FLAG"), style="color:black; background-color: green;",align = "center",style="font-size:120%;"),
                             p(strong("System performance is ACCEPTABLE when:"),align = "center"),
                             p("RED FLAG and/or YELLOW FLAG limits are not exceeded.")
                           )
@@ -191,7 +192,15 @@ shinyUI(fluidPage(
               tabPanel("Metric Summary",
                        tabsetPanel(
 
-                         tabPanel("heat Map",
+                         tabPanel("Descriptives: Boxplots for QC Metrics",
+                                  tags$head(tags$style(type="text/css")),
+                                  conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                                   tags$div("It may take a while to load the plots, please wait...",
+                                                            id="loadmessage")),
+                                  plotlyOutput("box_plot", height = 2000)
+                         ),
+                         
+                         tabPanel("Overall Performance: Heatmaps",
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                    tags$div("It may take a while to load the plots, please wait...",
@@ -199,14 +208,14 @@ shinyUI(fluidPage(
                                   sidebarLayout(
                                     sidebarPanel(
                                       checkboxGroupInput("heatmap_controlChart_select", "Please select your control chart",
-                                                         choices = c("CUSUM Chart" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR")
+                                                         choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR")
                                     ),
                                     mainPanel(plotOutput("heat_map")
                                     )
                                   )
                          ),
 
-                           tabPanel("Plot Summary",
+                           tabPanel("Detailed Performance: Plot summaries",
                                     tags$head(tags$style(type="text/css")),
                                     conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                      tags$div("It may take a while to load the plots, please wait...",
@@ -214,7 +223,7 @@ shinyUI(fluidPage(
                                     sidebarLayout(
                                       sidebarPanel(
                                         checkboxGroupInput("summary_controlChart_select", "Please select your control chart",
-                                                           choices = c("CUSUM Chart" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR"),
+                                                           choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR"),
                                         textOutput("summary_decision_txt")
                                       ),
                                       mainPanel(
@@ -232,16 +241,7 @@ shinyUI(fluidPage(
                                     #
                                     #   )
                                     # )
-                                    ),
-
-                         tabPanel("Boxplot",
-                                  tags$head(tags$style(type="text/css")),
-                                  conditionalPanel(condition="$('html').hasClass('shiny-busy')",
-                                                   tags$div("It may take a while to load the plots, please wait...",
-                                                            id="loadmessage")),
-                                  plotlyOutput("box_plot", height = 2000)
-                                  )
-
+                                    )
                        )
                        ),
 ###################################################################################################
