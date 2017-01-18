@@ -11,11 +11,24 @@ shinyUI(fluidPage(
 #################################################################################################################
               tabPanel("Home", theme = "bootstrap.css",
                          tags$img(src='logo.png', height=220, width=220, style = "float: right"),
-                         p("MSstatsQC is an open-source web-based software which provides longitudinal
-                           system suitability monitoring tools (control charts) for SRM based proteomic experiments."),
+                         tags$img(src='home.png', height=200, width=500, style = "float: left"),                         
+                       br(),
+                       br(),
+                       br(),
+                       br(),  
+                       br(),
+                       br(),
+                       br(),
+                       br(), 
+                       br(),
+                       br(),
+                       br(),
+                        p("MSstatsQC is an open-source web-based software which provides longitudinal
+                           system suitability monitoring tools (control charts) for proteomic experiments."),
                         h5(strong("Metrics you can monitor")),
                         p("MSstatsQC uses control charts to monitor the instrument performance by tracking system
-                           suitability metrics including total peak area, retention time and full width at half maximum (FWHM) and peak assymetry."),
+                           suitability metrics including total peak area, retention time and full width at half maximum (FWHM) and peak assymetry. 
+                           Additional metrics can also be analyzed by including them to the input file."),
                        h5(strong("Statistical functionalities")),
                         p("This framework includes simultaneous monitoring tools for mean and dispersion of suitability metrics and presents
                            alternative methods of monitoring such as time weighted control charts to ensure that various types
@@ -23,23 +36,27 @@ shinyUI(fluidPage(
                            can be classified into two groups: individual-moving range (XmR) control charts and mean and dispersion
                            cumulative sum (CUSUM) control charts. To successfully identify the time of change, change point analysis
                            is also included in this framework. Experiment specific control limits are provided with the control
-                           charts to distinguish between random noise and systematic error."),
+                           charts to distinguish between random noise and systematic error. MSstatsQC can also help user on decision making. 
+                           Decision regions (red, yellow and green) can be designed with 'Create Decision Rules' tab and results are available in 'Metric Summary' tab."),
                        h5(strong("Using MSstatsQC")),
                        p("The steps for generating results are as follows:"),
-                         ("1. Import your QC data "),
+                       p("INCLUDE CHEATSHEET WORKFLOW!!!"),
+                         ("1) Import your SST/QC data "),
                          br(),
-                         ("2.	Determine the guide set to estimate metric mean and variance "),
+                         ("2)	Determine the guide set to estimate metric mean and variance "),
                          br(),
-                         ("3.	Select specific precursor(s) or select all"),
+                         ("3)	Select specific precursor(s) or select all"),
                          br(),
-                         ("4. Run and generate control charts"),
+                         ("4)	Design decision rules"),
                          br(),
-                         ("5.	Check with change point analysis for better reasoning"),
+                         ("5) Run and generate control charts"),
                          br(),
-                         ("6.	Navigate results and download them for your QC reports"),
+                         ("6)	Check with heatmaps, metric summary plots and change point analysis for better reasoning"),
+                         br(),
+                         ("7)	Navigate results and download them for your QC reports"),
                          br(),
                          br(),
-                         tags$img(src='home.png', height=200, width=500, style = "float: center"),
+                         
                          br(),
                          br(),
                          h5 ("Project Team: "),
@@ -105,7 +122,7 @@ shinyUI(fluidPage(
                            position = "left")
                        ),
 ######################################################################################################
-             tabPanel("Selection", theme = "bootstrap.css",
+             tabPanel("Create Decision Rules", theme = "bootstrap.css",
                       fluidPage(
 
                         wellPanel(
@@ -115,23 +132,24 @@ shinyUI(fluidPage(
                             )
                           )
                         ),
-                        p(strong("Please select the your decision rule:")),
+                        p(strong("Please create your decision rule:")),
                         wellPanel(
                           fluidRow(
-                            p(strong("I) Good to Go:"),"A process is Good to Go when:"),
-                            p("1. Equal or Less than the selected percentage of peptides are out of controll, and"),
-                            p("2. Equal or less than the selected number of metrics (out of all the metrics selected above), are out of controll.")
+                            p(strong("I) RED FLAG:"), style="color:black; background-color: red;",align = "center"),
+                            p(strong("System performance is UNACCEPTABLE when:"),align = "center"),
+                            p("1. Greater than the selected % of peptides are", strong("out of control"),",and"),
+                            p("2. Greater than the selected # of QC metrics are", strong("out of control"),".")
                           ),
                           fluidRow(
                             column(2,
                                  br()
                             ),
                             column(5,
-                                 p(strong("Percentage of out of control peptides: ")),
+                                 p(strong("% out of control peptides: ")),
                                  numericInput('threshold_peptide_good', '', value = 50, min = 0, max = 100, step = 1)
                             ),
                             column(5,
-                                 p(strong("number of out of control metrics: ")),
+                                 p(strong("# out of control QC metrics: ")),
                                  uiOutput("metricThresholdGood")
                             )
                           )
@@ -139,23 +157,33 @@ shinyUI(fluidPage(
 
                         wellPanel(
                           fluidRow(
-                            p(strong("II) Warning to Go:"),"A process is Warning to Go when:"),
-                            p("1. More than the selected percentage of peptides in part I and Equal or Less than the selected percentage of peptides here are out of controll, and"),
-                            p("2. Equal or less than the selected number of metrics (out of all the metrics selected above), are out of controll.")
+                            p(strong("II) YELLOW FLAG:"), style="color:black; background-color: yellow;",align = "center"),
+                            p(strong("System performance is POOR when:"),align = "center"),
+                            p("1. Greater than the selected % of peptides are", strong("out of control"),",and"),
+                            p("2. Greater than the selected # of QC metrics are", strong("out of control"),"."),
+                            p("The limits should be less than or equal to the the RED FLAG limits")
                           ),
                           fluidRow(
                             column(2,
                                    br()
                             ),
                             column(5,
-                                   p(strong("Percent of out of control peptides: ")),
+                                   p(strong("% of out of control peptides: ")),
                                    uiOutput("peptideThresholdWarn")
                             ),
                             column(5,
-                                   p(strong("number of out of control metrics: ")),
+                                   p(strong("# of out of control metrics: ")),
                                    uiOutput("metricThresholdWarn")
                             )
                           )
+                        ),
+                        wellPanel(
+                          fluidRow(
+                            p(strong("III) GREEN FLAG:"), style="color:black; background-color: green;",align = "center"),
+                            p(strong("System performance is ACCEPTABLE when:"),align = "center"),
+                            p("RED FLAG and/or YELLOW FLAG limits are not exceeded.")
+                          )
+
                         )
                       )
                       ),

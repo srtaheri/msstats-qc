@@ -273,7 +273,7 @@ shinyServer(function(input,output,session) {
      validate(
        need(!is.null(prodata), "Please upload your data"),
        need(is.data.frame(prodata), prodata),
-       need(!is.null(input$user_selected_metrics),"Please first select the metrics and decision thresholds in the selection tab")
+       need(!is.null(input$user_selected_metrics),"Please first select the metrics and create decision rules in the selection tab")
      )
      peptideThresholdGood <- (as.numeric(input$threshold_peptide_good))/100 #For Eralp : the default is set to 50 (look at the selection tab)
      metricThresholdGood <- as.numeric(input$threshold_metric_good) # For Eralp : the default is 1 (look at the selection tab)
