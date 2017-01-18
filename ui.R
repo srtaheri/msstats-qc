@@ -138,8 +138,8 @@ shinyUI(fluidPage(
                           fluidRow(
                             p(strong("RED FLAG"), style="color:black; background-color: red;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is UNACCEPTABLE when:"),align = "center"),
-                            p("1. Greater than the selected % of peptides are", strong("out of control"),",and"),
-                            p("2. Greater than the selected # of QC metrics are", strong("out of control"),".")
+                            p("1. Greater than the selected % of peptides are", strong("out of control"),"and"),
+                            p("2. Greater than the selected # of QC metrics are", strong("out of control."))
                           ),
                           fluidRow(
                             column(2,
@@ -160,8 +160,8 @@ shinyUI(fluidPage(
                           fluidRow(
                             p(strong("YELLOW FLAG"), style="color:black; background-color: yellow;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is POOR when:"),align = "center"),
-                            p("1. Greater than the selected % of peptides are", strong("out of control"),",and"),
-                            p("2. Greater than the selected # of QC metrics are", strong("out of control"),"."),
+                            p("1. Greater than the selected % of peptides are", strong("out of control"),"and"),
+                            p("2. Greater than the selected # of QC metrics are", strong("out of control.")),
                             p("Warning:The limits should be less than or equal to the the RED FLAG limits")
                           ),
                           fluidRow(
@@ -182,7 +182,7 @@ shinyUI(fluidPage(
                           fluidRow(
                             p(strong("GREEN FLAG"), style="color:black; background-color: green;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is ACCEPTABLE when:"),align = "center"),
-                            p("RED FLAG and/or YELLOW FLAG limits are not exceeded.")
+                            p("RED FLAG and YELLOW FLAG limits are not exceeded.")
                           )
 
                         )
