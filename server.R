@@ -333,19 +333,19 @@ shinyServer(function(input,output,session) {
     p1 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1,
-                           title = "XmR heat map - Mean")
+                           title = "Heatmap (Changes in mean of QC metric-X)")
     p2 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2,
-                           title = "XmR heat map - Dispersion")
+                           title = "Heatmap (Changes in variability of QC metric-mR)")
     p3 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
                            peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1,
-                           title = "CUSUM heat map - Mean")
+                           title = "Heatmap (Changes in mean of QC metric-CUSUMm)")
     p4 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
                            peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2,
-                           title = "CUSUM heat map - Dispersion")
+                           title = "Heatmap (Changes in variability of QC metric-CUSUMv)")
     if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
       grid.arrange(p1,p2,p3,p4, ncol = 1)
     }
