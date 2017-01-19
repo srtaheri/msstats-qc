@@ -231,10 +231,6 @@ CUSUM.Summary.DataFrame <- function(prodata, data.metrics, L, U) {
   return(dat)
 }
 ############################################################################################
-CUSUM.heatmap.DataFrame <- function() {
-
-}
-############################################################################################
 #DESCRIPTION : for each metric returns a data frame of QCno, probability of out of control peptide for dispersion or mean plot
 XmR.Summary.prepare <- function(prodata, metric, L, U,type) {
   QCno    <- 1:nrow(prodata)
@@ -286,14 +282,16 @@ XmR.Summary.DataFrame <- function(prodata, data.metrics, L, U) {
   return(dat)
 }
 ############################################################################################
-heatmap.DataFrame <- function(prodata,precursorSelection, data.metrics,method,peptideThresholdGood,peptideThresholdWarn, L, U, type) {
+heatmap.DataFrame <- function(prodata,precursorSelection, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type) {
+  #peptideThresholdGood = peptideThresholdRed
+  #peptideThresholdWarn = peptideThresholdYellow
   time <- c()
   val <- c()
   met <- c()
   bin <- c()
 
   for (metric in data.metrics) {
-    df <- Decision.DataFrame.prepare(prodata, metric, method, peptideThresholdGood,peptideThresholdWarn, L, U,type)
+    df <- Decision.DataFrame.prepare(prodata, metric, method, peptideThresholdRed,peptideThresholdYellow, L, U,type)
     time_df <- as.character(df$AcquiredTime)
     val_df <- df$pr.y
     met_df <- rep(metric,length(val_df))
@@ -412,7 +410,9 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
   return(dat)
 }
 #######################################################################################################
-Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThresholdGood, peptideThresholdWarn, L, U,type) {
+Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThresholdRed, peptideThresholdYellow, L, U,type) {
+  #peptideThresholdGood = peptideThresholdRed
+  #peptideThresholdWarn = peptideThresholdYellow
   h <- 5
   AcquiredTime <- prodata$AcquiredTime
   QCno    <- 1:nrow(prodata)
@@ -452,10 +452,10 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
                           ,bin = rep(0,max_QCno)
                           )
   for (i in 1:max_QCno) {
-    if(plot.data$pr.y[i] <= peptideThresholdGood){
+    if(plot.data$pr.y[i] >= peptideThresholdRed){
       plot.data$bin[i] <- "Unacceptable"
     }
-    else if(plot.data$pr.y[i] <= peptideThresholdWarn){
+    else if(plot.data$pr.y[i] >= peptideThresholdYellow){
       plot.data$bin[i] <- "Poor"
     }
     else {

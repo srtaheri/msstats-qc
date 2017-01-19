@@ -11,17 +11,17 @@ shinyUI(fluidPage(
   navbarPage(h4("System suitability monitoring tools for quantitative mass spectrometry based proteomic
                 experiments"),
 #################################################################################################################
-              tabPanel("Home", 
+              tabPanel("Home",
                          tags$img(src='logo.png', height=220, width=220, style = "float: right"),
-                         tags$img(src='home.png', height=200, width=500, style = "float: left"),                         
+                         tags$img(src='home.png', height=200, width=500, style = "float: left"),
                        br(),
                        br(),
                        br(),
-                       br(),  
                        br(),
                        br(),
                        br(),
-                       br(), 
+                       br(),
+                       br(),
                        br(),
                        br(),
                        br(),
@@ -29,7 +29,7 @@ shinyUI(fluidPage(
                            system suitability monitoring tools (control charts) for proteomic experiments."),
                         h5(strong("Metrics you can monitor")),
                         p("MSstatsQC uses control charts to monitor the instrument performance by tracking system
-                           suitability metrics including total peak area, retention time and full width at half maximum (FWHM) and peak assymetry. 
+                           suitability metrics including total peak area, retention time and full width at half maximum (FWHM) and peak assymetry.
                            Additional metrics can also be analyzed by including them to the input file."),
                        h5(strong("Statistical functionalities")),
                         p("This framework includes simultaneous monitoring tools for mean and dispersion of suitability metrics and presents
@@ -38,7 +38,7 @@ shinyUI(fluidPage(
                            can be classified into two groups: individual-moving range (XmR) control charts and mean and dispersion
                            cumulative sum (CUSUM) control charts. To successfully identify the time of change, change point analysis
                            is also included in this framework. Experiment specific control limits are provided with the control
-                           charts to distinguish between random noise and systematic error. MSstatsQC can also help user on decision making. 
+                           charts to distinguish between random noise and systematic error. MSstatsQC can also help user on decision making.
                            Decision regions (red, yellow and green) can be designed with 'Create Decision Rules' tab and results are available in 'Metric Summary' tab."),
                        h5(strong("Using MSstatsQC")),
                        p("The steps for generating results are as follows:"),
@@ -58,7 +58,7 @@ shinyUI(fluidPage(
                          ("7)	Navigate results and download them for your QC reports"),
                          br(),
                          br(),
-                         
+
                          br(),
                          br(),
                          h5 ("Project Team: "),
@@ -149,11 +149,11 @@ shinyUI(fluidPage(
                             ),
                             column(5,
                                  p(strong("% out of control peptides: ")),
-                                 numericInput('threshold_peptide_good', '', value = 50, min = 0, max = 100, step = 1)
+                                 numericInput('threshold_peptide_red', '', value = 70, min = 0, max = 100, step = 1)
                             ),
                             column(5,
                                  p(strong("# out of control QC metrics: ")),
-                                 uiOutput("metricThresholdGood")
+                                 uiOutput("metricThresholdRed")
                             )
                           )
                         ),
@@ -172,11 +172,11 @@ shinyUI(fluidPage(
                             ),
                             column(5,
                                    p(strong("% of out of control peptides: ")),
-                                   uiOutput("peptideThresholdWarn")
+                                   uiOutput("peptideThresholdYellow")
                             ),
                             column(5,
                                    p(strong("# of out of control metrics: ")),
-                                   uiOutput("metricThresholdWarn")
+                                   uiOutput("metricThresholdYellow")
                             )
                           )
                         ),
@@ -201,7 +201,7 @@ shinyUI(fluidPage(
                                                             id="loadmessage")),
                                   plotlyOutput("box_plot", height = 2000)
                          ),
-                         
+
                          tabPanel("Overall Performance: Heatmaps",
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
@@ -248,11 +248,11 @@ shinyUI(fluidPage(
                        ),
 ###################################################################################################
               navbarMenu("Control Charts",
-                         tabPanel("X and mR Control Charts",
+                         tabPanel("XmR Control Charts",
                                   uiOutput("XmR_tabset")
                                   ),
 
-                         tabPanel("CUSUMm and Cusumv Control Charts",
+                         tabPanel("CUSUMm and CUSUMv Control Charts",
                                   uiOutput("CUSUM_tabset")
                                   ),
                          tabPanel("Change Point Analysis for Mean and Variability",

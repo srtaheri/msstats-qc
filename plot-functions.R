@@ -449,9 +449,10 @@ metrics_box.plot <- function(prodata, data.metrics) {
   return(p)
 }
 #####################################################################################################
-metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,peptideThresholdGood,peptideThresholdWarn, L, U, type, title) {
-  color_palette <- colorRampPalette(c("red", "yellow", "green"))(3)
-  data <- heatmap.DataFrame(prodata,precursorSelection, data.metrics,method,peptideThresholdGood,peptideThresholdWarn, L, U, type)
+metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,peptideThresholdRed,peptideThresholdYellow, L, U, type, title) {
+
+  color_palette <- colorRampPalette(c("green", "yellow", "red"))(3)
+  data <- heatmap.DataFrame(prodata,precursorSelection, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type)
 
   p <- ggplot(data,aes(time,metric, group = bin, fill = bin))
   # p <- p + scale_fill_gradient2(low="#F0E442", high="#000000", mid="#D55E00",
@@ -475,10 +476,10 @@ metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,pep
   p <- p + labs(x=NULL, y=NULL)
   #p <- p + theme(plot.title=element_text(hjust=0))
   #p <- p + theme(axis.ticks=element_blank())
-  
+
   #p <- p +  theme(legend.title=element_text(size=16))
   #p <- p +  theme(legend.text=element_text(size=12))
-  p<-p + scale_fill_manual(values = color_palette, name = "") 
+  p<-p + scale_fill_manual(values = color_palette, name = "")
   p <- p +  theme(axis.text=element_text(size=12))
 
    p

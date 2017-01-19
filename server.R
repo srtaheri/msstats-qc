@@ -74,23 +74,23 @@ shinyServer(function(input,output,session) {
    }, options = list(pageLength = 25))
 
   ###### Tab for selecting decision rule and metrics ###############################################
-  output$metricThresholdGood <- renderUI({
+  output$metricThresholdRed <- renderUI({
     numOfMetrics <- length(input$user_selected_metrics)
-    numericInput('threshold_metric_good', '', value = 1, min = 1, max = numOfMetrics, step = 1)
+    numericInput('threshold_metric_red', '', value = 2, min = 0, max = numOfMetrics, step = 1)
   })
 
-  output$peptideThresholdWarn <- renderUI({
-    threshold_peptide_good <- input$threshold_peptide_good
-    numericInput('threshold_peptide_warn', '', value = threshold_peptide_good+1, min = threshold_peptide_good+1, max = 100, step = 1)
+  output$peptideThresholdYellow <- renderUI({
+    threshold_peptide_red <- input$threshold_peptide_red
+    numericInput('threshold_peptide_yellow', '', value = threshold_peptide_red - 1, min = 1, max = threshold_peptide_red, step = 1)
   })
 
-  output$metricThresholdWarn <- renderUI({
-    validate(
-      need(!is.null(input$threshold_metric_good),"loading...")
-    )
+  output$metricThresholdYellow <- renderUI({
+    # validate(
+    #   need(!is.null(input$threshold_metric_red),"loading...")
+    # )
     numOfMetrics <- length(input$user_selected_metrics)
-    threshold_metric_good <- input$threshold_metric_good
-    numericInput('threshold_metric_warn', '', value = threshold_metric_good, min = threshold_metric_good, max = numOfMetrics, step = 1)
+    threshold_metric_red <- input$threshold_metric_red
+    numericInput('threshold_metric_yellow', '', value = threshold_metric_red , min = 0, max = threshold_metric_red, step = 1)
   })
 
   output$metricSelection <- renderUI({
@@ -101,34 +101,7 @@ shinyServer(function(input,output,session) {
                        inline = TRUE)
   })
 
-
-  ###########################################################################
-
-  # output$ToGoPeptidesSelect <- renderUI({
-  #   numericInput('peptideThresholdGood', '% of peptides', value = 50, min = 0,
-  #                max = 100, step = 1)
-  # })
-  # output$ToGoPeptides <- renderText({
-  #   input$peptideThresholdGood
-  # })
-  # output$ToGoMetricSelect <- renderUI({
-  #   numericInput('metricThresholdGood', '# ', value = 1, min = 1,
-  #                max = length(input$user_selected_metrics), step = 1)
-  # })
-  # output$ToGoMetrics <- renderText({
-  #   input$metricThresholdGood
-  # })
   ################################################################# plots ###################################################
-  ###########################################################################################################################
-  # output$XmR_select_metric <- renderUI({
-  #
-  #   checkboxGroupInput("XmR_checkbox_select","choose your prefered metric to view plots",
-  #                      choices = c(data$metrics),
-  #                      selected = c(COL.PEAK.ASS,COL.BEST.RET,
-  #                                   COL.FWHM, COL.TOTAL.AREA)
-  #                      )
-  #
-  # })
   #################################################################################################################
 
   output$XmR_tabset <- renderUI({
@@ -155,17 +128,6 @@ shinyServer(function(input,output,session) {
 
   })
   ################################################################################################################
-  ################################################################################################################
-  # output$CUSUM_select_metric <- renderUI({
-  #
-  #   checkboxGroupInput("CUSUM_checkbox_select","choose your prefered metric to view plots",
-  #                      choices = c(data$metrics),
-  #                      selected = c(COL.PEAK.ASS,COL.BEST.RET,
-  #                                   COL.FWHM,
-  #                                   COL.TOTAL.AREA)
-  #   )
-  #
-  # })
   #################################################################################################################
   output$CUSUM_tabset <- renderUI({
     validate(
@@ -188,17 +150,6 @@ shinyServer(function(input,output,session) {
     do.call(tabsetPanel, Tabs)
   })
   ################################################################################################################
-  ################################################################################################################
-  # output$CP_select_metric <- renderUI({
-  #
-  #   checkboxGroupInput("CP_checkbox_select","choose your prefered metric to view plots",
-  #                      choices = c(data$metrics),
-  #                      selected = c(COL.PEAK.ASS,COL.BEST.RET,
-  #                                   COL.TOTAL.AREA,
-  #                                   COL.FWHM)
-  #   )
-  #
-  # })
   #################################################################################################################
   output$CP_tabset <- renderUI({
     validate(
@@ -219,7 +170,17 @@ shinyServer(function(input,output,session) {
 
     do.call(tabsetPanel, Tabs)
   })
-  ########################################################## box plot in Summary tab ##########################################
+  ######################################################### height and width in Summary tab ########################################
+  my_height <- reactive({
+    my_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*200
+  })
+
+  heatmap_width <- reactive({
+    prodata <- data$df
+    heatmap_width <- nrow(prodata[prodata$Precursor == prodata$Precursor[1],])*20
+    heatmap_width
+  })
+  ########################################################## box plot in Metric Summary tab ##########################################
   output$box_plot <- renderPlotly({
     prodata <- data$df
     validate(
@@ -230,16 +191,7 @@ shinyServer(function(input,output,session) {
     metrics_box.plot(prodata, data.metrics = data$metrics)
   })
 
-  ######################################################### plot_summary in Summary tab ########################################
-  my_height <- reactive({
-    my_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*200
-  })
-  heatmap_width <- reactive({
-    prodata <- data$df
-    heatmap_width <- nrow(prodata[prodata$Precursor == prodata$Precursor[1],])*20
-    heatmap_width
-  })
-  ################ plot the summary and radar plots ############################################################################
+  ###############   summary plots and radar plots ############################################################################
   output$plot_summary <- renderPlot({
 
     prodata <- data$df
@@ -326,25 +278,26 @@ shinyServer(function(input,output,session) {
       need(!is.null(prodata$AcquiredTime),"To view heatmaps, the dataset should include Acquired Time column.")
     )
 
-    peptideThresholdGood <- (as.numeric(input$threshold_peptide_good))/100
-    peptideThresholdWarn <- (as.numeric(input$threshold_peptide_warn))/100
+    peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100
+    peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
-
+    #peptideThresholdGood = peptideThresholdRed
+    #peptideThresholdWarn = peptideThresholdYellow
     p1 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
-                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1,
+                           peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
                            title = "Heatmap (Changes in mean of QC metric-X)")
     p2 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
-                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2,
+                           peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
                            title = "Heatmap (Changes in variability of QC metric-mR)")
     p3 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
-                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 1,
+                           peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
                            title = "Heatmap (Changes in mean of QC metric-CUSUMm)")
     p4 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
-                           peptideThresholdGood, peptideThresholdWarn,input$L, input$U, type = 2,
+                           peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
                            title = "Heatmap (Changes in variability of QC metric-CUSUMv)")
     if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
       grid.arrange(p1,p2,p3,p4, ncol = 1)
