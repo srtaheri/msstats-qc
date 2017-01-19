@@ -470,7 +470,7 @@ metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,pep
   p <- p + removeGrid()
   p <- p + rotateTextX()
 
-  p <- p + ggtitle(title,subtitle = "# metric per date and time")
+  p <- p + ggtitle(title,subtitle = "")
 
   p <- p + labs(x=NULL, y=NULL)
   #p <- p + theme(plot.title=element_text(hjust=0))

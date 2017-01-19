@@ -313,7 +313,7 @@ shinyServer(function(input,output,session) {
     #    XmRCounterAboveGood2 > metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdWarn) {"Bad! Mean is bad and variation is in warning area"}
     # if(XmRCounterAboveGood2 > metricThresholdWarn &&
     #    XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn) {"Bad! variation is bad and mean is in warning area"}
-      if(XmRCounterAboveGood1 > metricThresholdWarn && XmRCounterAboveGood2 > metricThresholdWarn) {"RED FLAG: System performance is UNACCEPTABLE"}
+      if(XmRCounterAboveGood1 > metricThresholdWarn && XmRCounterAboveGood2 > metricThresholdWarn) {paste("RED FLAG: System performance is UNACCEPTABLE","<fontcolor=\"#FF0000\"><b>", input$n, "</b></font>")}
   })
   ############################# heat_map in Summary tab #############################################
 

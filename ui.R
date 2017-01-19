@@ -2,14 +2,16 @@ library(shiny)
 library(shinyBS)
 library(plotly)
 library(markdown)
+library(shinythemes)
 shinyUI(fluidPage(
+  theme = shinytheme("yeti"),
   shinyjs::useShinyjs(),
   titlePanel(title=p(strong("MSstatsQC"),align = "center",style="color:#444444;",style="font-size:170%;",
                style="font-family:inherit;"),windowTitle = "MSstatsQC"),
   navbarPage(h4("System suitability monitoring tools for quantitative mass spectrometry based proteomic
                 experiments"),
 #################################################################################################################
-              tabPanel("Home", theme = "bootstrap.css",
+              tabPanel("Home", 
                          tags$img(src='logo.png', height=220, width=220, style = "float: right"),
                          tags$img(src='home.png', height=200, width=500, style = "float: left"),                         
                        br(),
