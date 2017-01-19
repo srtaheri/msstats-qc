@@ -466,19 +466,21 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
   return(plot.data)
 }
 #######################################################################################################
- number.Of.Out.Of.Range.Metrics <- function(prodata,data.metrics,method, peptideThresholdGood, peptideThresholdWarn, L, U, type) {
+ number.Of.Out.Of.Range.Metrics <- function(prodata,data.metrics,method, peptideThresholdRed, peptideThresholdYellow, L, U, type) {
 
-  metricCounterAboveGood = 0
-  metricCounterAboveWarn = 0
+  metricCounterAboveRed = 0
+  metricCounterAboveYellowBelowRed = 0
   for (metric in data.metrics) {
-    data <- Decision.DataFrame.prepare(prodata, metric,method,peptideThresholdGood, peptideThresholdWarn, L, U,type)
-    if(nrow(data[data$pr.y > peptideThresholdGood,]) > 0) {
-      metricCounterAboveGood = metricCounterAboveGood + 1
+    data <- Decision.DataFrame.prepare(prodata, metric,method,peptideThresholdRed, peptideThresholdYellow, L, U,type)
+    aboveYellow <- data[data$pr.y >= peptideThresholdYellow,]
+    aboveYellowBelowRed <- aboveYellow[aboveYellow$pr.y < peptideThresholdRed,]
+    if(nrow(data[data$pr.y >= peptideThresholdRed,]) > 0) {
+      metricCounterAboveRed = metricCounterAboveRed + 1
     }
-    if(nrow(data[data$pr.y > peptideThresholdWarn,]) > 0) {
-      metricCounterAboveWarn = metricCounterAboveWarn + 1
+    if(nrow(aboveYellowBelowRed) > 0) {
+      metricCounterAboveYellowBelowRed = metricCounterAboveYellowBelowRed + 1
     }
   }
-    return(c(metricCounterAboveGood,metricCounterAboveWarn))
+    return(c(metricCounterAboveRed,metricCounterAboveYellowBelowRed))
 }
 ####################################################################################################

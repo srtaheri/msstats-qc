@@ -227,45 +227,31 @@ shinyServer(function(input,output,session) {
        need(is.data.frame(prodata), prodata),
        need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
      )
-     peptideThresholdGood <- (as.numeric(input$threshold_peptide_good))/100 #For Eralp : the default is set to 50 (look at the selection tab)
-     metricThresholdGood <- as.numeric(input$threshold_metric_good) # For Eralp : the default is 1 (look at the selection tab)
-     peptideThresholdWarn <- (as.numeric(input$threshold_peptide_warn))/100 #For Eralp : the default is set to 70 (look at the selection tab)
-     metricThresholdWarn <- as.numeric(input$threshold_metric_warn) # For Eralp : the default is 2 (look at the selection tab)
+     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #For Eralp : this is the percentage of peptide user chooses for red flag
+     metricThresholdRed <- as.numeric(input$threshold_metric_red) # For Eralp : this is the number of metric user chooses for red flag
+     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #For Eralp : this is the percentage of peptide user chooses for yellow flag
+     metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) # For Eralp : this is the number of metric user chooses for yellow flag
 
      # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 1) for which there exists a peptide
-     #that its percentage of out of range is above the peptideThresholdGood.[1]
-     XmRCounterAboveGood1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdGood,peptideThresholdWarn,
+     #that its percentage of out of range is above the peptideThresholdRed.[1]
+     XmRCounterAboveRed1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
                                                           input$L, input$U, type = 1)[1]
      # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 1) for which there exists a peptide
-     #that its percentage of out of range is above the peptideThresholdWarn.[2]
-     XmRCounterAboveWarn1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdGood,peptideThresholdWarn,
+     #that its percentage of out of range is above the peptideThresholdYellow and below the peptideThresholdRed..[2]
+     XmRCounterAboveYellow1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
                                                                 input$L, input$U, type = 1)[2]
-     # For Eralp : This gives the number of out of range metrics for XmR "dispersion"(type = 2) for which there exists a peptide
-     #that its percentage of out of range is above the peptideThresholdGood.[1]
-     XmRCounterAboveGood2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdGood,peptideThresholdWarn,
+     # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 2) for which there exists a peptide
+     #that its percentage of out of range is above the peptideThresholdRed.[1]
+     XmRCounterAboveRed2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
                                                                 input$L, input$U, type = 2)[1]
-     # For Eralp : This gives the number of out of range metrics for XmR "dispersion"(type = 2) for which there exists a peptide
-     #that its percentage of out of range is above the peptideThresholdWarn.[2]
-     XmRCounterAboveWarn2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdGood,peptideThresholdWarn,
+     # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 2) for which there exists a peptide
+     #that its percentage of out of range is above the peptideThresholdYellow and below the peptideThresholdRed..[2]
+     XmRCounterAboveYellow2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
                                                                 input$L, input$U, type = 2)[2]
 
-  #   CUSUMCounter1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "CUSUM", peptideThresholdGood,peptideThresholdWarn,
-   #  input$L, input$U, type = 1)[1]
-  #   CUSUMCounter2 <- CUSUM.number.Of.Out.Of.Range.Metrics(prodata,data$metrics, peptideThreshold,
-  #                                                         input$L, input$U, type = 2)
 
-      if(XmRCounterAboveGood1 <= metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdGood) {"GREEN FLAG: System performance is ACCEPTABLE"}
-#       if(XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn &&
-#         XmRCounterAboveGood2 <= metricThresholdGood){ "Warning! SSystem performance is UNACCEPTABLE (A change in QC metric mean is possible)"}
-    # if(XmRCounterAboveGood2 > metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdWarn &&
-    #    XmRCounterAboveGood1 <= metricThresholdGood){"Warning! System is out-of-control (A change in QC metric variation is possible)"}
-    # if(XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn &&
-    #    XmRCounterAboveGood2 > metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdWarn) {"Warning! System is out-of-control (A simultaneous change in QC metric mean and variation is possible)"}
-    # if(XmRCounterAboveGood1 > metricThresholdWarn &&
-    #    XmRCounterAboveGood2 > metricThresholdGood && XmRCounterAboveGood2 <= metricThresholdWarn) {"Bad! Mean is bad and variation is in warning area"}
-    # if(XmRCounterAboveGood2 > metricThresholdWarn &&
-    #    XmRCounterAboveGood1 > metricThresholdGood && XmRCounterAboveGood1 <= metricThresholdWarn) {"Bad! variation is bad and mean is in warning area"}
-      if(XmRCounterAboveGood1 > metricThresholdWarn && XmRCounterAboveGood2 > metricThresholdWarn) {paste("RED FLAG: System performance is UNACCEPTABLE","<fontcolor=\"#FF0000\"><b>", input$n, "</b></font>")}
+      if(XmRCounterAboveYellow1 > metricThresholdYellow && XmRCounterAboveYellow2 > metricThresholdYellow) {"Yellow FLAG: System performance is POOR"}
+      if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) {paste("RED FLAG: System performance is UNACCEPTABLE","<fontcolor=\"#FF0000\"><b>", input$n, "</b></font>")}
   })
   ############################# heat_map in Summary tab #############################################
 
@@ -281,8 +267,7 @@ shinyServer(function(input,output,session) {
     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100
     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
-    #peptideThresholdGood = peptideThresholdRed
-    #peptideThresholdWarn = peptideThresholdYellow
+
     p1 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
