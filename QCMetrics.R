@@ -475,7 +475,9 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
     aboveYellow <- data[data$pr.y >= peptideThresholdYellow,]
     aboveYellowBelowRed <- aboveYellow[aboveYellow$pr.y < peptideThresholdRed,]
     if(nrow(data[data$pr.y >= peptideThresholdRed,]) > 0) {
+      print(metricCounterAboveRed)
       metricCounterAboveRed = metricCounterAboveRed + 1
+      print(metricCounterAboveRed)
     }
     if(nrow(aboveYellowBelowRed) > 0) {
       metricCounterAboveYellowBelowRed = metricCounterAboveYellowBelowRed + 1

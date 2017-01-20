@@ -248,10 +248,24 @@ shinyServer(function(input,output,session) {
      #that its percentage of out of range is above the peptideThresholdYellow and below the peptideThresholdRed..[2]
      XmRCounterAboveYellow2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
                                                                 input$L, input$U, type = 2)[2]
+     # print("XmRCounterAboveYellow1")
+     # print(XmRCounterAboveYellow1)
+     # print("XmRCounterAboveRed1")
+     # print(XmRCounterAboveRed1)
+     # print("XmRCounterAboveYellow2")
+     # print(XmRCounterAboveYellow2)
+     # print("XmRCounterAboveRed2")
+     # print(XmRCounterAboveRed2)
+     # print(metricThresholdYellow)
+     # print(metricThresholdRed)
 
-
-      if(XmRCounterAboveYellow1 > metricThresholdYellow && XmRCounterAboveYellow2 > metricThresholdYellow) {"Yellow FLAG: System performance is POOR"}
-      if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) {paste("RED FLAG: System performance is UNACCEPTABLE","<fontcolor=\"#FF0000\"><b>", input$n, "</b></font>")}
+      if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) return({paste("RED FLAG: System performance is UNACCEPTABLE","<fontcolor=\"#FF0000\"><b>", input$n, "</b></font>")})
+      if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 <= metricThresholdRed) return({paste("RED FLAG: System performance is UNACCEPTABLE","<fontcolor=\"#FF0000\"><b>", input$n, "</b></font>")})
+      if(XmRCounterAboveRed1 <= metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) return({paste("RED FLAG: System performance is UNACCEPTABLE","<fontcolor=\"#FF0000\"><b>", input$n, "</b></font>")})
+      if(XmRCounterAboveYellow1 > metricThresholdYellow && XmRCounterAboveYellow2 > metricThresholdYellow) return({"Yellow FLAG: System performance is POOR"})
+      if(XmRCounterAboveYellow1 <= metricThresholdYellow && XmRCounterAboveYellow2 > metricThresholdYellow) return({"Yellow FLAG: System performance is POOR"})
+      if(XmRCounterAboveYellow1 > metricThresholdYellow && XmRCounterAboveYellow2 <= metricThresholdYellow) return({"Yellow FLAG: System performance is POOR"})
+      return({"Green FLAG: System performance is acceptable"})
   })
   ############################# heat_map in Summary tab #############################################
 

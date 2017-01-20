@@ -82,59 +82,66 @@ shinyUI(fluidPage(
 
               ),
 ########################################################################################################
-              tabPanel("Data Import",
-                       sidebarLayout(
+              tabPanel("Data Import and Selection",
+                       tabsetPanel(
+                         tabPanel("Data Import",
+                                  sidebarLayout(
 
-                        sidebarPanel(
-                          wellPanel(
-                            p("Please upload your data (Comma-separated (*.csv) QC file format)"),
-                            p("To see acceptable sample data, look at", strong("Help"),"tab"),
-                            fileInput("filein", "Upload file")
-                          ),
+                                    sidebarPanel(
+                                      wellPanel(
+                                        p("Please upload your data (Comma-separated (*.csv) QC file format)"),
+                                        p("To see acceptable sample data, look at", strong("Help"),"tab"),
+                                        fileInput("filein", "Upload file")
+                                      ),
 
-                           wellPanel(
-                             p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
-                             actionButton("sample_button", "Run with sample data"),
-                             bsTooltip("sample_button","If you want to run MSstatsQC with sample data file, please click this button", placement = "bottom", trigger = "hover",
-                                       options = NULL)
-                           ),
+                                      wellPanel(
+                                        p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
+                                        actionButton("sample_button", "Run with sample data")
+                                        #bsTooltip("sample_button","If you want to run MSstatsQC with sample data file, please click this button", placement = "bottom", trigger = "hover",
+                                                  #options = NULL)
+                                      ),
 
-                          wellPanel(
-                            p("If you want to clean existing results, please click this button"),
-                            actionButton("clear_button", "Clear the data and plots"),
-                            bsTooltip("clear_button","click this button to clear your data and all the tables and plots from the system.", placement = "bottom", trigger = "hover",
-                                      options = NULL)
-                          ),
-
-                          wellPanel(
-                            p("Please select a guide set to estimate control limits"),
-                            numericInput("L","Lower bound of guide set",value = 1, min = 1, step = 1),
-                            numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
-                            p("Please select a precursor or select all"),
-                            uiOutput("pepSelect")
-                          ),
-                           tags$style("body{background-color:linen; color:black}")
+                                      wellPanel(
+                                        p("If you want to clean existing results, please click this button"),
+                                        actionButton("clear_button", "Clear the data and plots")
+                                        #bsTooltip("clear_button","click this button to clear your data and all the tables and plots from the system.", placement = "bottom", trigger = "hover",
+                                                  #options = NULL)
+                                      ),
 
 
-                           ),
-                        mainPanel(
+                                      tags$style("body{background-color:linen; color:black}")
 
-                          tabPanel("Data",
-                                   dataTableOutput('prodata_table'))
-                        ),
-                           position = "left")
+
+                                    ),
+                                    mainPanel(
+
+                                      tabPanel("Data",
+                                               dataTableOutput('prodata_table'))
+                                    ),
+                                    position = "left")
+                                  ),
+                         tabPanel("User selection",
+                                  p(strong("Please select QC metrics:")),
+                                  wellPanel(
+                                    fluidRow(
+                                      column(10,
+                                             uiOutput("metricSelection")
+                                      )
+                                    )
+                                  ),
+                                  wellPanel(
+                                    p("Please select a guide set to estimate control limits"),
+                                    numericInput("L","Lower bound of guide set",value = 1, min = 1, step = 1),
+                                    numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
+                                    p("Please select a precursor or select all"),
+                                    uiOutput("pepSelect")
+                                  )
+                                  )
+                       )
                        ),
 ######################################################################################################
              tabPanel("Create Decision Rules", theme = "bootstrap.css",
                       fluidPage(
-                        p(strong("Please select QC metrics:")),
-                        wellPanel(
-                          fluidRow(
-                            column(10,
-                                   uiOutput("metricSelection")
-                            )
-                          )
-                        ),
                         p(strong("Please create your decision rule:")),
                         wellPanel(
                           fluidRow(
