@@ -204,30 +204,32 @@ XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type
   y <- list(
     title = ytitle
   )
-  plot_ly(plot.data, x = QCno, y = t, type = "scatter",
+  plot_ly(plot.data, x = ~QCno, y = ~t, type = "scatter",
           name = "",  line = list(shape = "linear"),
-          marker=list(color="dodgerblue" , size=4 , opacity=0.5)
+          marker=~list(color="dodgerblue" , size=4 , opacity=0.0)
           ,showlegend = FALSE
           , text=precursor.data$Annotations
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
-    add_trace(y = UCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE,name="UCL") %>%
-    add_trace(y = LCL, marker=list(color="red" , size=4 , opacity=0.5), mode = "lines",showlegend = FALSE,name="LCL") %>%
-    add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
-              , mode = "markers"
-              , marker=list(color="red" , size=8 , opacity=0.5)
-              ,showlegend = FALSE,name=""
-    ) %>%
-    add_trace(x = plot.data[t >= UCL, ]$QCno, y = plot.data[t >= UCL, ]$t
-              , mode = "markers"
-              , marker=list(color="red" , size=8 , opacity=0.5)
-              ,showlegend = FALSE,name=""
-    ) %>%
-    add_trace(x = plot.data[t > LCL & t < UCL, ]$QCno, y = plot.data[t > LCL & t < UCL, ]$t
-              , mode = "markers"
-              , marker=list(color="blue" , size=8 , opacity=0.5)
-              ,showlegend = FALSE,name=""
-    )
+    add_trace(y = ~UCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="UCL") %>%
+    add_trace(y = ~LCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="LCL") 
+  #%>%
+#     add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
+#               , mode = "markers"
+#               , marker=list(color="red" , size=8 , opacity=0.5)
+#               ,showlegend = FALSE,name=""
+#     ) 
+#%>%
+#     add_trace(x = plot.data[t >= UCL, ]$QCno, y = plot.data[t >= UCL, ]$t
+#               , mode = "markers"
+#               , marker=list(color="red" , size=8 , opacity=0.5)
+#               ,showlegend = FALSE,name=""
+#     ) %>%
+#     add_trace(x = plot.data[t > LCL & t < UCL, ]$QCno, y = plot.data[t > LCL & t < UCL, ]$t
+#               , mode = "markers"
+#               , marker=list(color="blue" , size=8 , opacity=0.5)
+#               ,showlegend = FALSE,name=""
+#     )
 
 }
 #################################################################################################################
