@@ -21,7 +21,7 @@ CUSUM.outrange.thld <- 5
 #        "normalization" is either TRUE or FALSE
 #        "y.title1" and "y.title2" are titles of left and right plot which are Individual Value and Moving Range
 # DESCRIPTION : Draws together the "Individual Value" and "Moving Range plots" (left and right plot) for each metric and method.
-render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.method, normalization, y.title1, y.title2){
+render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.method, normalization, y.title1, y.title2,selectMean,selectSD){
   validate(
     need(!is.null(prodata), "Please upload your data")
   )
@@ -31,8 +31,8 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
   if(precursorSelection == "all peptides") {
     results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
       metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = normalization)
-      plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title1, type = 1)
-      plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title2, type = 2)
+      plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title1, type = 1,selectMean,selectSD)
+      plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title2, type = 2,selectMean,selectSD)
     })
 
     do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>%
@@ -42,8 +42,8 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
   else {
     metricData <- getMetricData(prodata, precursorSelection, L, U, metric = metric, normalization)
 
-    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title1, type = 1)
-    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2)
+    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title1, type = 1,selectMean,selectSD)
+    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2,selectMean,selectSD)
 
     subplot(plot1,plot2)
   }
@@ -57,13 +57,13 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
 #          "y.title" is the title of the plot which is either Individual Value or Moving Range
 #          "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
 #DESCRIPTION : draw one plot (which is either Individual Value or Moving Range based on the type user chooses) for each metric and method
-do.plot <- function(prodata, metricData, precursorSelection, L, U, plot.method,  y.title, type) {
+do.plot <- function(prodata, metricData, precursorSelection, L, U, plot.method,  y.title, type,selectMean,selectSD) {
   if(plot.method=="CUSUM") {
     CUSUM.plot(prodata, metricData, precursorSelection, L, U,  y.title, type)
   } else if(plot.method=="CP") {
     CP.plot(prodata, metricData, precursorSelection, y.title, type)
   } else if(plot.method=="XmR") {
-    XmR.plot(prodata, metricData, precursorSelection, L, U, y.title, type)
+    XmR.plot(prodata, metricData, precursorSelection, L, U, y.title, type,selectMean,selectSD)
   }
 }
 #################################################################################################
@@ -191,9 +191,9 @@ CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
 #          "ytitle" is the title of the plot which is either Individual Value or Moving Range
 #          "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
 #DESCRIPTION: draws one XmR plot based on type for each given metric
-XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type) {
+XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type,selectMean,selectSD) {
   precursor.data <- prodata[prodata$Precursor==precursorSelection,]
-  plot.data <- XmR.data.prepare(prodata, metricData, L, U, type)
+  plot.data <- XmR.data.prepare(prodata, metricData, L, U, type,selectMean,selectSD)
 
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
   #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
@@ -233,8 +233,8 @@ XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type
 
 }
 #################################################################################################################
-XmR.Summary.plot <- function(prodata,data.metrics, L, U) {
-  dat <- XmR.Summary.DataFrame(prodata,data.metrics, L, U)
+XmR.Summary.plot <- function(prodata,data.metrics, L, U,selectMean,selectSD) {
+  dat <- XmR.Summary.DataFrame(prodata,data.metrics, L, U,selectMean,selectSD)
   tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics)
   gg <- ggplot(dat)
   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
@@ -318,9 +318,9 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
 
 }
 ####################################################################
-XmR.Radar.Plot <- function(prodata, data.metrics, L,U) {
+XmR.Radar.Plot <- function(prodata, data.metrics, L,U,selectMean,selectSD) {
 
-  dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
+  dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U,selectMean,selectSD)
   #write.csv(file="dataRadar.csv",dat)
 
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby),
@@ -405,37 +405,37 @@ CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
 #################################################################################################################
 
 #### Panel.cor for drawing scatter plot matrix ############################################################################
-panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
-  usr <- par("usr"); on.exit(par(usr))
-  par(usr = c(0, 1, 0, 1))
-  # correlation coefficient
-  r <- cor(x, y)
-  txt <- format(c(r, 0.123456789), digits = digits)[1]
-  txt <- paste("r= ", txt, sep = "")
-  text(0.5, 0.6, txt)
-
-  # p-value calculation
-  p <- cor.test(x, y)$p.value
-  txt2 <- format(c(p, 0.123456789), digits = digits)[1]
-  txt2 <- paste("p= ", txt2, sep = "")
-  if(p<0.01) txt2 <- paste("p= ", "<0.01", sep = "")
-  text(0.5, 0.4, txt2)
-}
+# panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
+#   usr <- par("usr"); on.exit(par(usr))
+#   par(usr = c(0, 1, 0, 1))
+#   # correlation coefficient
+#   r <- cor(x, y)
+#   txt <- format(c(r, 0.123456789), digits = digits)[1]
+#   txt <- paste("r= ", txt, sep = "")
+#   text(0.5, 0.6, txt)
+#
+#   # p-value calculation
+#   p <- cor.test(x, y)$p.value
+#   txt2 <- format(c(p, 0.123456789), digits = digits)[1]
+#   txt2 <- paste("p= ", txt2, sep = "")
+#   if(p<0.01) txt2 <- paste("p= ", "<0.01", sep = "")
+#   text(0.5, 0.4, txt2)
+# }
 #########################################################################################################################
-metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
-
-  multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-  for (j in 1:nlevels(prodata$Precursor)) {
-    z <- getMetricData(prodata, precursors[j], L, U, metric, normalization)
-    if(is.null(z))
-      return(NULL)
-    multidata[1:length(z),j]<-z
-  }
-  colnames(multidata) <- substring(precursors, first = 1, last = 3)
-  multidata=data.frame(multidata)
-  pairs(multidata, upper.panel = panel.cor, col = "blue")
-}
+# metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
+#
+#   multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
+#   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+#   for (j in 1:nlevels(prodata$Precursor)) {
+#     z <- getMetricData(prodata, precursors[j], L, U, metric, normalization)
+#     if(is.null(z))
+#       return(NULL)
+#     multidata[1:length(z),j]<-z
+#   }
+#   colnames(multidata) <- substring(precursors, first = 1, last = 3)
+#   multidata=data.frame(multidata)
+#   pairs(multidata, upper.panel = panel.cor, col = "blue")
+# }
 #########################################################################################################################
 metrics_box.plot <- function(prodata, data.metrics) {
   plots <- list()
@@ -451,10 +451,10 @@ metrics_box.plot <- function(prodata, data.metrics) {
   return(p)
 }
 #####################################################################################################
-metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,peptideThresholdRed,peptideThresholdYellow, L, U, type, title) {
+metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,peptideThresholdRed,peptideThresholdYellow, L, U, type, title,selectMean,selectSD) {
 
   color_palette <- colorRampPalette(c("green", "yellow", "red"))(3)
-  data <- heatmap.DataFrame(prodata,precursorSelection, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type)
+  data <- heatmap.DataFrame(prodata,precursorSelection, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type,selectMean,selectSD)
 
   p <- ggplot(data,aes(time,metric, group = bin, fill = bin))
   # p <- p + scale_fill_gradient2(low="#F0E442", high="#000000", mid="#D55E00",

@@ -58,18 +58,12 @@ shinyServer(function(input,output,session) {
                             ,choices = c(levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
                             ,"all peptides"))
   })
-  #### selecting columns to view in Data Import section ##############################################################
-  # output$prodata_column_select <- renderUI({
-  #   prodata <- data$df
-  #   checkboxGroupInput("show_prodata_columns", "columns of your data", choices = colnames(prodata), selected = colnames(prodata))
-  # })
   ######Show table of data #####################################################################################################
    output$prodata_table <- renderDataTable({
      validate(
        need(!is.null(data$df), "Please upload your data"),
        need(is.data.frame(data$df), data$df)
      )
-     #data$df[,input$show_prodata_columns, drop = FALSE] # drop = F, is for not considering the last column as arrow and consider it as data frame
      data$df
    }, options = list(pageLength = 25))
 
@@ -103,7 +97,6 @@ shinyServer(function(input,output,session) {
 
   ################################################################# plots ###################################################
   #################################################################################################################
-
   output$XmR_tabset <- renderUI({
     validate(
       need(!is.null(data$df), "Please upload your data first"),
@@ -120,7 +113,8 @@ shinyServer(function(input,output,session) {
                                 renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L,
                                                              input$U, metric = x,
                                                              plot.method = "XmR", normalization = FALSE,
-                                                             y.title1 = "Individual Value", y.title2 = "Moving Range"))
+                                                             y.title1 = "Individual Value", y.title2 = "Moving Range",
+                                                             selectMean = input$selectMean,selectSD = input$selectSD))
 
                                 )
                    })
@@ -201,14 +195,13 @@ shinyServer(function(input,output,session) {
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
 
-    p1 <- XmR.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U)
-    p2 <- XmR.Radar.Plot(prodata, data.metrics = input$user_selected_metrics,input$L,input$U)
+    p1 <- XmR.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U, selectMean = input$selectMean,selectSD = input$selectSD)
+    p2 <- XmR.Radar.Plot(prodata, data.metrics = input$user_selected_metrics,input$L,input$U,selectMean = input$selectMean,selectSD = input$selectSD)
     p3 <- CUSUM.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U)
     p4 <- CUSUM.Radar.Plot(prodata, data.metrics = input$user_selected_metrics, input$L,input$U)
 
     if("XmR" %in% input$summary_controlChart_select && "CUSUM" %in% input$summary_controlChart_select) {
       grid.arrange(p1,p2,p3,p4, ncol = 1)
-      print(length(input$summary_controlChart_select))
     }
     else if("XmR" %in% input$summary_controlChart_select) {
       grid.arrange(p1,p2, ncol = 1)
@@ -232,22 +225,30 @@ shinyServer(function(input,output,session) {
      peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #For Eralp : this is the percentage of peptide user chooses for yellow flag
      metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) # For Eralp : this is the number of metric user chooses for yellow flag
 
+     if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
+       selectMean <- input$selectMean
+       selectSD <- input$selectSD
+     }
+     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+       selectMean <- NULL
+       selectSD <- NULL
+     }
      # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 1) for which there exists a peptide
      #that its percentage of out of range is above the peptideThresholdRed.[1]
      XmRCounterAboveRed1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
-                                                          input$L, input$U, type = 1)[1]
+                                                          input$L, input$U, type = 1,selectMean ,selectSD)[1]
      # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 1) for which there exists a peptide
      #that its percentage of out of range is above the peptideThresholdYellow and below the peptideThresholdRed..[2]
      XmRCounterAboveYellow1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
-                                                                input$L, input$U, type = 1)[2]
+                                                                input$L, input$U, type = 1,selectMean ,selectSD)[2]
      # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 2) for which there exists a peptide
      #that its percentage of out of range is above the peptideThresholdRed.[1]
      XmRCounterAboveRed2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
-                                                                input$L, input$U, type = 2)[1]
+                                                                input$L, input$U, type = 2,selectMean ,selectSD)[1]
      # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 2) for which there exists a peptide
      #that its percentage of out of range is above the peptideThresholdYellow and below the peptideThresholdRed..[2]
      XmRCounterAboveYellow2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
-                                                                input$L, input$U, type = 2)[2]
+                                                                input$L, input$U, type = 2,selectMean ,selectSD)[2]
      # print("XmRCounterAboveYellow1")
      # print(XmRCounterAboveYellow1)
      # print("XmRCounterAboveRed1")
@@ -281,23 +282,34 @@ shinyServer(function(input,output,session) {
     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100
     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
-
+    if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
+      selectMean <- input$selectMean
+      selectSD <- input$selectSD
+    }
+    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+      selectMean <- NULL
+      selectSD <- NULL
+    }
     p1 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
-                           title = "Heatmap (Changes in mean of QC metric-X)")
+                           title = "Heatmap (Changes in mean of QC metric-X)",
+                           selectMean, selectSD)
     p2 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
-                           title = "Heatmap (Changes in variability of QC metric-mR)")
+                           title = "Heatmap (Changes in variability of QC metric-mR)",
+                           selectMean, selectSD)
     p3 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
-                           title = "Heatmap (Changes in mean of QC metric-CUSUMm)")
+                           title = "Heatmap (Changes in mean of QC metric-CUSUMm)",
+                           selectMean, selectSD)
     p4 <- metrics_heat.map(prodata,input$pepSelection,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
-                           title = "Heatmap (Changes in variability of QC metric-CUSUMv)")
+                           title = "Heatmap (Changes in variability of QC metric-CUSUMv)",
+                           selectMean, selectSD)
     if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
       grid.arrange(p1,p2,p3,p4, ncol = 1)
     }

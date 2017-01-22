@@ -130,9 +130,24 @@ shinyUI(fluidPage(
                                     )
                                   ),
                                   wellPanel(
-                                    p("Please select a guide set to estimate control limits"),
-                                    numericInput("L","Lower bound of guide set",value = 1, min = 1, step = 1),
-                                    numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1),
+                                    radioButtons("selectGuideSetOrMeanSD",
+                                                 "If you want to select mean and standard deviation yourself please select them here. Otherwise please choose the guide set button.",
+                                                 choices = c("I want to select mean and standard deviation myself","I want to select the guide set")
+                                                 ),
+                                    conditionalPanel(
+                                      condition = "input.selectGuideSetOrMeanSD == 'I want to select mean and standard deviation myself'",
+                                      p("please select the mean and standard deviation"),
+                                      numericInput("selectMean","mean",value = 1),
+                                      numericInput("selectSD","standard deviation",value = 1)
+                                    ),
+                                    conditionalPanel(
+                                      condition = "input.selectGuideSetOrMeanSD == 'I want to select the guide set'",
+                                      p("Please select a guide set to estimate control limits"),
+                                      numericInput("L","Lower bound of guide set",value = 1, min = 1, step = 1),
+                                      numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1)
+                                    )
+                                  ),
+                                  wellPanel(
                                     p("Please select a precursor or select all"),
                                     uiOutput("pepSelect")
                                   )
