@@ -26,6 +26,7 @@ shinyServer(function(input,output,session) {
 
   observeEvent(input$filein, {
     file1 <- input$filein
+    print("Hei THere..")
     data$df <- input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
     validate(
       need(!is.null(data$df), "Please upload your data"),
@@ -40,6 +41,7 @@ shinyServer(function(input,output,session) {
       need(!is.null(data$df), "Please upload your data"),
       need(is.data.frame(data$df), data$df)
     )
+    
     data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
   }, priority = 20)
 
@@ -66,7 +68,30 @@ shinyServer(function(input,output,session) {
      )
      data$df
    }, options = list(pageLength = 25))
+###### selection tab in Data Improt and selection #####################################################
+  output$selectMeanSD <- renderUI({
+    fluidRow(
+      column(6,
+             numericInput("selectMean","mean",value = 1)
+      ),
+      column(6,
+             numericInput("selectSD","standard deviation",value = 1)
+      )
+    )
+  })
 
+  output$selectGuideSet <- renderUI({
+    fluidRow(
+      column(6,
+             numericInput("L","Lower bound of guide set",value = 1, min = 1, step = 1)
+      ),
+      column(6,
+             numericInput("U","Upper bound of guide set", value = 5, min = 2, step = 1)
+      )
+    )
+
+
+  })
   ###### Tab for selecting decision rule and metrics ###############################################
   output$metricThresholdRed <- renderUI({
     numOfMetrics <- length(input$user_selected_metrics)
@@ -103,6 +128,16 @@ shinyServer(function(input,output,session) {
       need(is.data.frame(data$df), data$df),
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
+    if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
+      selectMean <- input$selectMean
+      selectSD <- input$selectSD
+      print("I want to select myself")
+    }
+    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+      selectMean <- NULL
+      selectSD <- NULL
+      print("I want guide set")
+    }
     Tabs <- lapply(input$user_selected_metrics,
                    function(x) {
                        tabPanel(x,
@@ -224,7 +259,7 @@ shinyServer(function(input,output,session) {
      metricThresholdRed <- as.numeric(input$threshold_metric_red) # For Eralp : this is the number of metric user chooses for red flag
      peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #For Eralp : this is the percentage of peptide user chooses for yellow flag
      metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) # For Eralp : this is the number of metric user chooses for yellow flag
-
+     
      if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
        selectMean <- input$selectMean
        selectSD <- input$selectSD
@@ -233,40 +268,59 @@ shinyServer(function(input,output,session) {
        selectMean <- NULL
        selectSD <- NULL
      }
-     # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 1) for which there exists a peptide
-     #that its percentage of out of range is above the peptideThresholdRed.[1]
-     XmRCounterAboveRed1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
-                                                          input$L, input$U, type = 1,selectMean ,selectSD)[1]
-     # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 1) for which there exists a peptide
-     #that its percentage of out of range is above the peptideThresholdYellow and below the peptideThresholdRed..[2]
-     XmRCounterAboveYellow1 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
-                                                                input$L, input$U, type = 1,selectMean ,selectSD)[2]
-     # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 2) for which there exists a peptide
-     #that its percentage of out of range is above the peptideThresholdRed.[1]
-     XmRCounterAboveRed2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
-                                                                input$L, input$U, type = 2,selectMean ,selectSD)[1]
-     # For Eralp : This gives the number of out of range metrics for XmR "mean"(type = 2) for which there exists a peptide
-     #that its percentage of out of range is above the peptideThresholdYellow and below the peptideThresholdRed..[2]
-     XmRCounterAboveYellow2 <- number.Of.Out.Of.Range.Metrics(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
-                                                                input$L, input$U, type = 2,selectMean ,selectSD)[2]
-     # print("XmRCounterAboveYellow1")
-     # print(XmRCounterAboveYellow1)
-     # print("XmRCounterAboveRed1")
-     # print(XmRCounterAboveRed1)
-     # print("XmRCounterAboveYellow2")
-     # print(XmRCounterAboveYellow2)
-     # print("XmRCounterAboveRed2")
-     # print(XmRCounterAboveRed2)
-     # print(metricThresholdYellow)
-     # print(metricThresholdRed)
+     if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
+       paste(
+         decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                            input$L, input$U, type = 2,selectMean ,selectSD),
+         decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                          input$L, input$U, type = 2,selectMean ,selectSD)
+       )
+     }else if("CUSUM" %in% input$heatmap_controlChart_select) {
+       decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                          input$L, input$U, type = 2,selectMean ,selectSD)
+     }else if("XmR" %in% input$heatmap_controlChart_select) {
+       decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                        input$L, input$U, type = 2,selectMean ,selectSD)
+     }else {
+     }
+  })
+  ################## decision message for XmR in heatmap tab #########
+  output$heatmap_txt <- renderText({
+    prodata <- data$df
+    validate(
+      need(!is.null(prodata), "Please upload your data"),
+      need(is.data.frame(prodata), prodata),
+      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+    )
+    peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #For Eralp : this is the percentage of peptide user chooses for red flag
+    metricThresholdRed <- as.numeric(input$threshold_metric_red) # For Eralp : this is the number of metric user chooses for red flag
+    peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #For Eralp : this is the percentage of peptide user chooses for yellow flag
+    metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) # For Eralp : this is the number of metric user chooses for yellow flag
+    
+    if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
+      selectMean <- input$selectMean
+      selectSD <- input$selectSD
+    }
+    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+      selectMean <- NULL
+      selectSD <- NULL
+    }
+    if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
+      paste(
+        decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                         input$L, input$U, type = 2,selectMean ,selectSD),
+        decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                         input$L, input$U, type = 2,selectMean ,selectSD)
+      )
+    }else if("CUSUM" %in% input$heatmap_controlChart_select) {
+      decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                       input$L, input$U, type = 2,selectMean ,selectSD)
+    }else if("XmR" %in% input$heatmap_controlChart_select) {
+      decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                       input$L, input$U, type = 2,selectMean ,selectSD)
+    }else {
+    }
 
-      if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) return({paste("RED FLAG: System performance is UNACCEPTABLE","<fontcolor=\"#FF0000\"><b>", input$n, "</b></font>")})
-      if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 <= metricThresholdRed) return({paste("RED FLAG: System performance is UNACCEPTABLE","<fontcolor=\"#FF0000\"><b>", input$n, "</b></font>")})
-      if(XmRCounterAboveRed1 <= metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) return({paste("RED FLAG: System performance is UNACCEPTABLE","<fontcolor=\"#FF0000\"><b>", input$n, "</b></font>")})
-      if(XmRCounterAboveYellow1 > metricThresholdYellow && XmRCounterAboveYellow2 > metricThresholdYellow) return({"Yellow FLAG: System performance is POOR"})
-      if(XmRCounterAboveYellow1 <= metricThresholdYellow && XmRCounterAboveYellow2 > metricThresholdYellow) return({"Yellow FLAG: System performance is POOR"})
-      if(XmRCounterAboveYellow1 > metricThresholdYellow && XmRCounterAboveYellow2 <= metricThresholdYellow) return({"Yellow FLAG: System performance is POOR"})
-      return({"Green FLAG: System performance is acceptable"})
   })
   ############################# heat_map in Summary tab #############################################
 
@@ -290,22 +344,22 @@ shinyServer(function(input,output,session) {
       selectMean <- NULL
       selectSD <- NULL
     }
-    p1 <- metrics_heat.map(prodata,input$pepSelection,
+    p1 <- metrics_heat.map(prodata,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
                            title = "Heatmap (Changes in mean of QC metric-X)",
                            selectMean, selectSD)
-    p2 <- metrics_heat.map(prodata,input$pepSelection,
+    p2 <- metrics_heat.map(prodata,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
                            title = "Heatmap (Changes in variability of QC metric-mR)",
                            selectMean, selectSD)
-    p3 <- metrics_heat.map(prodata,input$pepSelection,
+    p3 <- metrics_heat.map(prodata,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
                            title = "Heatmap (Changes in mean of QC metric-CUSUMm)",
                            selectMean, selectSD)
-    p4 <- metrics_heat.map(prodata,input$pepSelection,
+    p4 <- metrics_heat.map(prodata,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
                            title = "Heatmap (Changes in variability of QC metric-CUSUMv)",

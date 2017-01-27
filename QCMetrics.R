@@ -290,7 +290,7 @@ XmR.Summary.DataFrame <- function(prodata, data.metrics, L, U,selectMean,selectS
   return(dat)
 }
 ############################################################################################
-heatmap.DataFrame <- function(prodata,precursorSelection, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type,selectMean,selectSD) {
+heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type,selectMean,selectSD) {
   #peptideThresholdGood = peptideThresholdRed
   #peptideThresholdWarn = peptideThresholdYellow
   time <- c()
@@ -421,6 +421,7 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
 Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThresholdRed, peptideThresholdYellow, L, U,type,selectMean,selectSD) {
   #peptideThresholdGood = peptideThresholdRed
   #peptideThresholdWarn = peptideThresholdYellow
+  #print(prodata)
   h <- 5
   AcquiredTime <- prodata$AcquiredTime
   QCno    <- 1:nrow(prodata)
@@ -428,7 +429,7 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
   counter <- rep(0,nrow(prodata))
 
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-
+  #print(precursors)
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
     counter[1:length(metricData)] <- counter[1:length(metricData)]+1
@@ -447,6 +448,7 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
     y[sub$QCno] <- y[sub$QCno] + 1
   }
   max_QCno <- max(which(counter!=0))
+
   pr.y = y[1:max_QCno]/counter[1:max_QCno]
 
   plot.data <- data.frame(AcquiredTime = AcquiredTime[1:max_QCno],
@@ -492,3 +494,42 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
     return(c(metricCounterAboveRed,metricCounterAboveYellowBelowRed))
 }
 ####################################################################################################
+decisionRule_warning_message_XmR <- function(prodata, data.metrics, method, peptideThresholdRed, peptideThresholdYellow,metricThresholdRed,metricThresholdYellow, L,U, type, selectMean, selectSD ) {
+  
+  XmRCounterAboveRed1 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
+                                                        L, U, type = 1,selectMean ,selectSD)[1]
+  XmRCounterAboveYellow1 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
+                                                           L, U, type = 1,selectMean ,selectSD)[2]
+  XmRCounterAboveRed2 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
+                                                        L, U, type = 2,selectMean ,selectSD)[1]
+  XmRCounterAboveYellow2 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
+                                                           L, U, type = 2,selectMean ,selectSD)[2]
+  
+  if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) return({paste("XmR RED FLAG: System performance is UNACCEPTABLE")})
+  if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 <= metricThresholdRed) return({paste("XmR RED FLAG: System performance is UNACCEPTABLE")})
+  if(XmRCounterAboveRed1 <= metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) return({paste("XmR RED FLAG: System performance is UNACCEPTABLE")})
+  if(XmRCounterAboveYellow1 > metricThresholdYellow && XmRCounterAboveYellow2 > metricThresholdYellow) return({"XmR Yellow FLAG: System performance is POOR"})
+  if(XmRCounterAboveYellow1 <= metricThresholdYellow && XmRCounterAboveYellow2 > metricThresholdYellow) return({"XmR Yellow FLAG: System performance is POOR"})
+  if(XmRCounterAboveYellow1 > metricThresholdYellow && XmRCounterAboveYellow2 <= metricThresholdYellow) return({"XmR Yellow FLAG: System performance is POOR"})
+  return({"XmR Green FLAG: System performance is acceptable"})
+}
+############################################################################################################
+decisionRule_warning_message_CUSUM <- function(prodata, data.metrics, method, peptideThresholdRed, peptideThresholdYellow,metricThresholdRed,metricThresholdYellow, L,U, type, selectMean, selectSD ) {
+  
+  CUSUMCounterAboveRed1 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,
+                                                          L, U, type = 1,selectMean ,selectSD)[1]
+  CUSUMCounterAboveYellow1 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,
+                                                             L, U, type = 1,selectMean ,selectSD)[2]
+  CUSUMCounterAboveRed2 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,
+                                                          L, U, type = 2,selectMean ,selectSD)[1]
+  CUSUMCounterAboveYellow2 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,
+                                                             L, U, type = 2,selectMean ,selectSD)[2]
+  
+  if(CUSUMCounterAboveRed1 > metricThresholdRed && CUSUMCounterAboveRed2 > metricThresholdRed) return({paste("CUSUM RED FLAG: System performance is UNACCEPTABLE")})
+  if(CUSUMCounterAboveRed1 > metricThresholdRed && CUSUMCounterAboveRed2 <= metricThresholdRed) return({paste("CUSUM RED FLAG: System performance is UNACCEPTABLE")})
+  if(CUSUMCounterAboveRed1 <= metricThresholdRed && CUSUMCounterAboveRed2 > metricThresholdRed) return({paste("CUSUM RED FLAG: System performance is UNACCEPTABLE")})
+  if(CUSUMCounterAboveYellow1 > metricThresholdYellow && CUSUMCounterAboveYellow2 > metricThresholdYellow) return({"CUSUM Yellow FLAG: System performance is POOR"})
+  if(CUSUMCounterAboveYellow1 <= metricThresholdYellow && CUSUMCounterAboveYellow2 > metricThresholdYellow) return({"CUSUM Yellow FLAG: System performance is POOR"})
+  if(CUSUMCounterAboveYellow1 > metricThresholdYellow && CUSUMCounterAboveYellow2 <= metricThresholdYellow) return({"CUSUM Yellow FLAG: System performance is POOR"})
+  return({"CUSUM Green FLAG: System performance is acceptable"})
+}

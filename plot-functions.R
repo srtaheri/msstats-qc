@@ -204,32 +204,31 @@ XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type
   y <- list(
     title = ytitle
   )
-  plot_ly(plot.data, x = ~QCno, y = ~t, type = "scatter",
+  plot_ly(plot.data, x = QCno, y = t, type = "scatter",
           name = "",  line = list(shape = "linear"),
-          marker=~list(color="dodgerblue" , size=4 , opacity=0.0)
+          marker= list(color="dodgerblue" , size=4 , opacity=0.0)
           ,showlegend = FALSE
           , text=precursor.data$Annotations
   ) %>%
     layout(xaxis = x,yaxis = y) %>%
-    add_trace(y = ~UCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="UCL") %>%
-    add_trace(y = ~LCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="LCL") 
-  #%>%
-#     add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
-#               , mode = "markers"
-#               , marker=list(color="red" , size=8 , opacity=0.5)
-#               ,showlegend = FALSE,name=""
-#     ) 
-#%>%
-#     add_trace(x = plot.data[t >= UCL, ]$QCno, y = plot.data[t >= UCL, ]$t
-#               , mode = "markers"
-#               , marker=list(color="red" , size=8 , opacity=0.5)
-#               ,showlegend = FALSE,name=""
-#     ) %>%
-#     add_trace(x = plot.data[t > LCL & t < UCL, ]$QCno, y = plot.data[t > LCL & t < UCL, ]$t
-#               , mode = "markers"
-#               , marker=list(color="blue" , size=8 , opacity=0.5)
-#               ,showlegend = FALSE,name=""
-#     )
+    add_trace(y = UCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="UCL") %>%
+    add_trace(y = LCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="LCL") %>%
+
+    add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
+              , mode = "markers"
+              , marker=list(color="red" , size=8 , opacity=0.5)
+              ,showlegend = FALSE,name=""
+    )%>%
+    add_trace(x = plot.data[t >= UCL, ]$QCno, y = plot.data[t >= UCL, ]$t
+              , mode = "markers"
+              , marker=list(color="red" , size=8 , opacity=0.5)
+              ,showlegend = FALSE,name=""
+    ) %>%
+    add_trace(x = plot.data[t > LCL & t < UCL, ]$QCno, y = plot.data[t > LCL & t < UCL, ]$t
+              , mode = "markers"
+              , marker=list(color="blue" , size=8 , opacity=0.5)
+              ,showlegend = FALSE,name=""
+    )
 
 }
 #################################################################################################################
@@ -451,22 +450,15 @@ metrics_box.plot <- function(prodata, data.metrics) {
   return(p)
 }
 #####################################################################################################
-metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,peptideThresholdRed,peptideThresholdYellow, L, U, type, title,selectMean,selectSD) {
+metrics_heat.map <- function(prodata,data.metrics, method,peptideThresholdRed,peptideThresholdYellow, L, U, type, title,selectMean,selectSD) {
 
-  color_palette <- colorRampPalette(c("green", "yellow", "red"))(3)
-  data <- heatmap.DataFrame(prodata,precursorSelection, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type,selectMean,selectSD)
+  #color_palette <- colorRampPalette(c("green", "yellow", "red"))(3)
+  data <- heatmap.DataFrame(prodata, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type,selectMean,selectSD)
 
   p <- ggplot(data,aes(time,metric, group = bin, fill = bin))
-  # p <- p + scale_fill_gradient2(low="#F0E442", high="#000000", mid="#D55E00",
-  #                               midpoint=0.5,
-  #                               #, limit=c(0.2,0.8)
-  #                               name="Correlation\n(Pearson)",guide = "legend"
-  #                               #, na.value = "red"
-  #                               )
 
-  # p <- p + scale_color_manual(values=c("Good" = "green","Bad" = "red","Warning" = "orange"),
-  #                             breaks=c("Good","Bad","Warning"),
-  #                             guide='legend')
+  p <- p + scale_fill_manual(values=c("Acceptable" = "green","Unacceptable" = "red","Poor" = "yellow")
+                            )
   p <- p + geom_tile(colour="white",size=.1)
   p <- p + coord_equal()
   #p <- p + theme_minimal(base_size = 10, base_family = "Trebuchet MS")
@@ -481,7 +473,7 @@ metrics_heat.map <- function(prodata,precursorSelection,data.metrics, method,pep
 
   #p <- p +  theme(legend.title=element_text(size=16))
   #p <- p +  theme(legend.text=element_text(size=12))
-  p<-p + scale_fill_manual(values = color_palette, name = "")
+  #p<-p + scale_fill_manual(values = color_palette, name = "")
   p <- p +  theme(axis.text=element_text(size=12))
 
    p
