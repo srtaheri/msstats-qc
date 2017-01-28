@@ -59,7 +59,7 @@ shinyServer(function(input,output,session) {
     )
     selectInput("pepSelection","Choose peptide"
                 #,choices = c(levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET])),"all peptides")
-                ,choices = c(prodata$Precursor,"all peptides")
+                ,choices = c(levels(prodata$Precursor),"all peptides")
                 )
   })
   ######Show table of data #####################################################################################################
