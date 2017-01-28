@@ -318,6 +318,8 @@ heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,p
                           metric = met,
                           bin = bin
                          )
+  
+
   return(dataFrame)
 }
 ############################################################################################
@@ -456,17 +458,19 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
   max_QCno <- max(which(counter!=0))
 
   pr.y = y[1:max_QCno]/counter[1:max_QCno]
+  
+    plot.data <- data.frame(AcquiredTime = AcquiredTime[1:max_QCno],
+                            QCno = rep(1:max_QCno,1),
+                            pr.y = pr.y,
+                            group = ifelse(rep(type==1,max_QCno),
+                                           rep("Metric mean",max_QCno),
+                                           rep("Metric dispersion",max_QCno)
+                            ),
+                            metric = rep(metric,max_QCno)
+                            ,bin = rep(0,max_QCno)
+                            )
 
-  plot.data <- data.frame(AcquiredTime = AcquiredTime[1:max_QCno],
-                          QCno = rep(1:max_QCno,1),
-                          pr.y = pr.y,
-                          group = ifelse(rep(type==1,max_QCno),
-                                         rep("Metric mean",max_QCno),
-                                         rep("Metric dispersion",max_QCno)
-                                        ),
-                          metric = rep(metric,max_QCno)
-                          ,bin = rep(0,max_QCno)
-                          )
+  
   for (i in 1:max_QCno) {
     if(plot.data$pr.y[i] >= peptideThresholdRed){
       plot.data$bin[i] <- "Unacceptable"
@@ -478,8 +482,12 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
       plot.data$bin[i] <- "Acceptable"
     }
   }
+    if(method == "XmR" &&type == 2) {
+      return(plot.data[-1,])
+    }
+    return(plot.data)
 
-  return(plot.data)
+  
 }
 #######################################################################################################
  number.Of.Out.Of.Range.Metrics <- function(prodata,data.metrics,method, peptideThresholdRed, peptideThresholdYellow, L, U, type,selectMean,selectSD) {

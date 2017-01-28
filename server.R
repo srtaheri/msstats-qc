@@ -106,11 +106,13 @@ shinyServer(function(input,output,session) {
   })
 
   output$metricThresholdYellow <- renderUI({
-    # validate(
-    #   need(!is.null(input$threshold_metric_red),"loading...")
-    # )
     numOfMetrics <- length(input$user_selected_metrics)
     threshold_metric_red <- input$threshold_metric_red
+     validate(
+       need(!is.null(numOfMetrics),"loading..."),
+       need(!is.null(threshold_metric_red),"loading...")
+     )
+    
     numericInput('threshold_metric_yellow', '', value = threshold_metric_red , min = 0, max = threshold_metric_red, step = 1)
   })
 
