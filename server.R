@@ -14,10 +14,10 @@ source("helper-functions.R")
 source("QCMetrics.R")
 
 shinyServer(function(input,output,session) {
-  COL.BEST.RET <- "Retention Time"
-  COL.FWHM <- "Full Width at Half Maximum"
-  COL.TOTAL.AREA <- "Total Peak Area"
-  COL.PEAK.ASS <- "Peak Assymetry"
+  # COL.BEST.RET <- "Retention Time"
+  # COL.FWHM <- "Full Width at Half Maximum"
+  # COL.TOTAL.AREA <- "Total Peak Area"
+  # COL.PEAK.ASS <- "Peak Assymetry"
 
 
   #### Read data  ##################################################################################################
@@ -26,13 +26,13 @@ shinyServer(function(input,output,session) {
 
   observeEvent(input$filein, {
     file1 <- input$filein
-    print("Hei THere..")
     data$df <- input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
     validate(
       need(!is.null(data$df), "Please upload your data"),
       need(is.data.frame(data$df), data$df)
     )
-    data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
+    #data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
+    data$metrics <- c(find_custom_metrics(data$df))
   }, priority = 20)
 
   observeEvent(input$sample_button, {
@@ -42,7 +42,8 @@ shinyServer(function(input,output,session) {
       need(is.data.frame(data$df), data$df)
     )
     
-    data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
+    #data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
+    data$metrics <- c(find_custom_metrics(data$df))
   }, priority = 20)
 
   observeEvent(input$clear_button, {
@@ -57,8 +58,9 @@ shinyServer(function(input,output,session) {
       need(is.data.frame(prodata), prodata)
     )
     selectInput("pepSelection","Choose peptide"
-                            ,choices = c(levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-                            ,"all peptides"))
+                #,choices = c(levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET])),"all peptides")
+                ,choices = c(prodata$Precursor,"all peptides")
+                )
   })
   ######Show table of data #####################################################################################################
    output$prodata_table <- renderDataTable({
@@ -115,8 +117,8 @@ shinyServer(function(input,output,session) {
   output$metricSelection <- renderUI({
     checkboxGroupInput("user_selected_metrics","",
                        choices = c(data$metrics),
-                       selected = c(COL.PEAK.ASS,COL.BEST.RET,
-                                    COL.FWHM, COL.TOTAL.AREA),
+                       #selected = c(COL.PEAK.ASS,COL.BEST.RET,
+                       #            COL.FWHM, COL.TOTAL.AREA),
                        inline = TRUE)
   })
 
@@ -255,10 +257,10 @@ shinyServer(function(input,output,session) {
        need(is.data.frame(prodata), prodata),
        need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
      )
-     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #For Eralp : this is the percentage of peptide user chooses for red flag
-     metricThresholdRed <- as.numeric(input$threshold_metric_red) # For Eralp : this is the number of metric user chooses for red flag
-     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #For Eralp : this is the percentage of peptide user chooses for yellow flag
-     metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) # For Eralp : this is the number of metric user chooses for yellow flag
+     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
+     metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
+     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
+     metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
      
      if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
        selectMean <- input$selectMean
@@ -293,10 +295,10 @@ shinyServer(function(input,output,session) {
       need(is.data.frame(prodata), prodata),
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
-    peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #For Eralp : this is the percentage of peptide user chooses for red flag
-    metricThresholdRed <- as.numeric(input$threshold_metric_red) # For Eralp : this is the number of metric user chooses for red flag
-    peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #For Eralp : this is the percentage of peptide user chooses for yellow flag
-    metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) # For Eralp : this is the number of metric user chooses for yellow flag
+    peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
+    metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
+    peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
+    metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
     
     if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
       selectMean <- input$selectMean

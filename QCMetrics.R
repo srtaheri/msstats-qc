@@ -1,7 +1,7 @@
-COL.BEST.RET <- "Retention Time"
-COL.FWHM <- "Full Width at Half Maximum"
-COL.TOTAL.AREA <- "Total Peak Area"
-COL.PEAK.ASS <- "Peak Assymetry"
+#COL.BEST.RET <- "Retention Time"
+#COL.FWHM <- "Full Width at Half Maximum"
+#COL.TOTAL.AREA <- "Total Peak Area"
+#COL.PEAK.ASS <- "Peak Assymetry"
 #############################################################################################
 #INPUTS : "prodata" is the data user uploads.
 #         "precursorSelection" is the precursor that user selects in Data Import tab. it can be either one precursor(peptide) or it can be "all peptides"
@@ -129,7 +129,8 @@ CP.data.prepare <- function(prodata, metricData, type) {
 #        "data.metrics" is all the available metrics. It is defined in server.R
 get_CP_tho.hat <- function(prodata, L, U, data.metrics) {
   tho.hat <- data.frame(tho.hat = c(), metric = c(), group = c(), y=c())
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- prodata$Precursor
   for(metric in data.metrics) {
     for (j in 1:nlevels(prodata$Precursor)) {
       metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = TRUE)
@@ -196,7 +197,8 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type) {
   y.neg <- rep(0,nrow(prodata))
   counter <- rep(0,nrow(prodata))
 
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- prodata$Precursor
 
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T)
@@ -246,7 +248,8 @@ XmR.Summary.prepare <- function(prodata, metric, L, U,type,selectMean,selectSD) 
   y.neg <- rep(0,nrow(prodata))
   counter <- rep(0,nrow(prodata))
 
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- prodata$Precursor
 
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
@@ -319,7 +322,8 @@ heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,p
 }
 ############################################################################################
 Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type, XmR.type,selectMean,selectSD) {
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- prodata$Precursor
   QCno.out.range <- c()
 
   for(j in 1:length(precursors)) {
@@ -335,7 +339,8 @@ Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type, XmR.type
 #############################################################################################
 Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.type) {
   h <- 5
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- prodata$Precursor
   QCno.out.range <- c()
 
   for(j in 1:length(precursors)) {
@@ -350,7 +355,8 @@ Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.
 }
 ###############################################################################################################
 XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group, XmR.type,selectMean,selectSD) {
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- prodata$Precursor
   precursors2 <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
   for(j in 1:length(precursors)) {
@@ -385,7 +391,8 @@ XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,selectMean,selec
 }
 #################################################################################################################
 CUSUM.Radar.Plot.prepare <- function(prodata,L,U, metric,type,group, CUSUM.type) {
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- prodata$Precursor
   precursors2 <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
   for(j in 1:length(precursors)) {
@@ -419,17 +426,16 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U) {
 }
 #######################################################################################################
 Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThresholdRed, peptideThresholdYellow, L, U,type,selectMean,selectSD) {
-  #peptideThresholdGood = peptideThresholdRed
-  #peptideThresholdWarn = peptideThresholdYellow
-  #print(prodata)
+
   h <- 5
   AcquiredTime <- prodata$AcquiredTime
   QCno    <- 1:nrow(prodata)
   y <- rep(0,nrow(prodata))
   counter <- rep(0,nrow(prodata))
 
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-  #print(precursors)
+  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- prodata$Precursor
+  
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T)
     counter[1:length(metricData)] <- counter[1:length(metricData)]+1
