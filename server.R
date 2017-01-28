@@ -248,7 +248,7 @@ shinyServer(function(input,output,session) {
   }, height = my_height )
 
   ################## decision message for XmR in summary tab #########
-   output$summary_decision_txt <- renderText({
+   output$summary_decision_txt <- renderUI({
      prodata <- data$df
      validate(
        need(!is.null(prodata), "Please upload your data"),
@@ -268,24 +268,25 @@ shinyServer(function(input,output,session) {
        selectMean <- NULL
        selectSD <- NULL
      }
-     if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
-       paste(
+     if("XmR" %in% input$summary_controlChart_select && "CUSUM" %in% input$summary_controlChart_select) {
+       HTML(paste(
          decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                            input$L, input$U, type = 2,selectMean ,selectSD),
+                                            input$L, input$U, type = 2,selectMean ,selectSD),"\n\n",
          decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                          input$L, input$U, type = 2,selectMean ,selectSD)
-       )
-     }else if("CUSUM" %in% input$heatmap_controlChart_select) {
+                                          input$L, input$U, type = 2,selectMean ,selectSD),
+         sep = "<br/>"
+       ))
+     }else if("CUSUM" %in% input$summary_controlChart_select) {
        decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
                                           input$L, input$U, type = 2,selectMean ,selectSD)
-     }else if("XmR" %in% input$heatmap_controlChart_select) {
+     }else if("XmR" %in% input$summary_controlChart_select) {
        decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
                                         input$L, input$U, type = 2,selectMean ,selectSD)
      }else {
      }
   })
   ################## decision message for XmR in heatmap tab #########
-  output$heatmap_txt <- renderText({
+  output$heatmap_txt <- renderUI({
     prodata <- data$df
     validate(
       need(!is.null(prodata), "Please upload your data"),
@@ -306,12 +307,13 @@ shinyServer(function(input,output,session) {
       selectSD <- NULL
     }
     if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
-      paste(
+      HTML(paste(
         decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
                                          input$L, input$U, type = 2,selectMean ,selectSD),
         decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                         input$L, input$U, type = 2,selectMean ,selectSD)
-      )
+                                         input$L, input$U, type = 2,selectMean ,selectSD),
+        sep = "<br/><br/>"
+      ))
     }else if("CUSUM" %in% input$heatmap_controlChart_select) {
       decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
                                        input$L, input$U, type = 2,selectMean ,selectSD)
