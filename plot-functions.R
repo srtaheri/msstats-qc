@@ -21,7 +21,7 @@ CUSUM.outrange.thld <- 5
 #        "normalization" is either TRUE or FALSE
 #        "y.title1" and "y.title2" are titles of left and right plot which are Individual Value and Moving Range
 # DESCRIPTION : Draws together the "Individual Value" and "Moving Range plots" (left and right plot) for each metric and method.
-render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.method, normalization, y.title1, y.title2,selectMean,selectSD){
+render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.method, normalization, y.title1, y.title2,selectMean,selectSD, guidset_selected){
   validate(
     need(!is.null(prodata), "Please upload your data")
   )
@@ -30,9 +30,9 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
 
   if(precursorSelection == "all peptides") {
     results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
-      metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = normalization)
-      plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title1, type = 1,selectMean,selectSD)
-      plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title2, type = 2,selectMean,selectSD)
+      metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = normalization,selectMean,selectSD, guidset_selected)
+      plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title1, type = 1,selectMean,selectSD, guidset_selected)
+      plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title2, type = 2,selectMean,selectSD, guidset_selected)
     })
 
     do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>%
@@ -40,10 +40,10 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
   }
 
   else {
-    metricData <- getMetricData(prodata, precursorSelection, L, U, metric = metric, normalization)
-
-    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title1, type = 1,selectMean,selectSD)
-    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2,selectMean,selectSD)
+    metricData <- getMetricData(prodata, precursorSelection, L, U, metric = metric, normalization,selectMean,selectSD, guidset_selected)
+    print(paste("i am L:",L))
+    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title1, type = 1,selectMean,selectSD, guidset_selected)
+    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2,selectMean,selectSD, guidset_selected)
 
     subplot(plot1,plot2)
   }
@@ -57,13 +57,13 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
 #          "y.title" is the title of the plot which is either Individual Value or Moving Range
 #          "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
 #DESCRIPTION : draw one plot (which is either Individual Value or Moving Range based on the type user chooses) for each metric and method
-do.plot <- function(prodata, metricData, precursorSelection, L, U, plot.method,  y.title, type,selectMean,selectSD) {
+do.plot <- function(prodata, metricData, precursorSelection, L, U, plot.method,  y.title, type,selectMean,selectSD, guidset_selected) {
   if(plot.method=="CUSUM") {
     CUSUM.plot(prodata, metricData, precursorSelection, L, U,  y.title, type)
   } else if(plot.method=="CP") {
     CP.plot(prodata, metricData, precursorSelection, y.title, type)
   } else if(plot.method=="XmR") {
-    XmR.plot(prodata, metricData, precursorSelection, L, U, y.title, type,selectMean,selectSD)
+    XmR.plot(prodata, metricData, precursorSelection, L, U, y.title, type,selectMean,selectSD, guidset_selected)
   }
 }
 #################################################################################################
@@ -191,9 +191,9 @@ CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
 #          "ytitle" is the title of the plot which is either Individual Value or Moving Range
 #          "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
 #DESCRIPTION: draws one XmR plot based on type for each given metric
-XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type,selectMean,selectSD) {
+XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type,selectMean,selectSD, guidset_selected) {
   precursor.data <- prodata[prodata$Precursor==precursorSelection,]
-  plot.data <- XmR.data.prepare(prodata, metricData, L, U, type,selectMean,selectSD)
+  plot.data <- XmR.data.prepare(prodata, metricData, L, U, type,selectMean,selectSD, guidset_selected)
 
   #y.max=ifelse(max(plot.data$t)>=UCL,(max(plot.data$t)),UCL)
   #y.min=ifelse(min(plot.data$t)<=LCL,(min(plot.data$t)),LCL)
@@ -204,31 +204,31 @@ XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type
   y <- list(
     title = ytitle
   )
-  plot_ly(plot.data, x = QCno, y = t, type = "scatter",
+  plot_ly(plot.data, x = ~QCno, y = ~t, type = "scatter",
           name = "",  line = list(shape = "linear"),
           marker= list(color="dodgerblue" , size=4 , opacity=0.0)
           ,showlegend = FALSE
           , text=precursor.data$Annotations
-  ) %>%
-    layout(xaxis = x,yaxis = y) %>%
-    add_trace(y = UCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="UCL") %>%
-    add_trace(y = LCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="LCL") %>%
-
-    add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
-              , mode = "markers"
-              , marker=list(color="red" , size=8 , opacity=0.5)
-              ,showlegend = FALSE,name=""
-    )%>%
-    add_trace(x = plot.data[t >= UCL, ]$QCno, y = plot.data[t >= UCL, ]$t
-              , mode = "markers"
-              , marker=list(color="red" , size=8 , opacity=0.5)
-              ,showlegend = FALSE,name=""
-    ) %>%
-    add_trace(x = plot.data[t > LCL & t < UCL, ]$QCno, y = plot.data[t > LCL & t < UCL, ]$t
-              , mode = "markers"
-              , marker=list(color="blue" , size=8 , opacity=0.5)
-              ,showlegend = FALSE,name=""
-    )
+  )
+    # layout(xaxis = x,yaxis = y) %>%
+    # add_trace(y = ~UCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="UCL") %>%
+    # add_trace(y = ~LCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="LCL") %>%
+    # 
+    # add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
+    #           , mode = "markers"
+    #           , marker=list(color="red" , size=8 , opacity=0.5)
+    #           ,showlegend = FALSE,name=""
+    # )%>%
+    # add_trace(x = plot.data[t >= UCL, ]$QCno, y = plot.data[t >= UCL, ]$t
+    #           , mode = "markers"
+    #           , marker=list(color="red" , size=8 , opacity=0.5)
+    #           ,showlegend = FALSE,name=""
+    #) %>%
+    # add_trace(x = plot.data[t > LCL & t < UCL, ]$QCno, y = plot.data[t > LCL & t < UCL, ]$t
+    #           , mode = "markers"
+    #           , marker=list(color="blue" , size=8 , opacity=0.5)
+    #           ,showlegend = FALSE,name=""
+    # )
 
 }
 #################################################################################################################
@@ -401,40 +401,7 @@ CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
       plot.margin = unit(c(1,3,1,1), "lines")
     )
 }
-#################################################################################################################
 
-#### Panel.cor for drawing scatter plot matrix ############################################################################
-# panel.cor <- function(x, y, digits = 2, cex.cor, ...) {
-#   usr <- par("usr"); on.exit(par(usr))
-#   par(usr = c(0, 1, 0, 1))
-#   # correlation coefficient
-#   r <- cor(x, y)
-#   txt <- format(c(r, 0.123456789), digits = digits)[1]
-#   txt <- paste("r= ", txt, sep = "")
-#   text(0.5, 0.6, txt)
-#
-#   # p-value calculation
-#   p <- cor.test(x, y)$p.value
-#   txt2 <- format(c(p, 0.123456789), digits = digits)[1]
-#   txt2 <- paste("p= ", txt2, sep = "")
-#   if(p<0.01) txt2 <- paste("p= ", "<0.01", sep = "")
-#   text(0.5, 0.4, txt2)
-# }
-#########################################################################################################################
-# metrics_scatter.plot <- function(prodata, L, U, metric, normalization) {
-#
-#   multidata<-matrix(0,length(prodata$Precursor),nlevels(prodata$Precursor))
-#   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-#   for (j in 1:nlevels(prodata$Precursor)) {
-#     z <- getMetricData(prodata, precursors[j], L, U, metric, normalization)
-#     if(is.null(z))
-#       return(NULL)
-#     multidata[1:length(z),j]<-z
-#   }
-#   colnames(multidata) <- substring(precursors, first = 1, last = 3)
-#   multidata=data.frame(multidata)
-#   pairs(multidata, upper.panel = panel.cor, col = "blue")
-# }
 #########################################################################################################################
 metrics_box.plot <- function(prodata, data.metrics) {
   plots <- list()

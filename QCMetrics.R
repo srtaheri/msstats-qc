@@ -9,7 +9,7 @@
 #         "metric" is one of these metrics: COL.BEST.RET,COL.FWHM, COL.TOTAL.AREA,COL.PEAK.ASS or a metric that user defines in his data set
 #         "normalization" is either TRUE or FALSE
 #Description of function : it gets the metric column only for the precursor chosen and either return the column as it is or normalize it and then return it
-getMetricData <- function(prodata, precursorSelection, L, U, metric, normalization) {
+getMetricData <- function(prodata, precursorSelection, L, U, metric, normalization,selectMean,selectSD, guidset_selected) {
   precursor.data<-prodata[prodata$Precursor==precursorSelection,] #"Precursor" is one of the columns in data that shows the name of peptides. This gets only the part of data related to the selected peptide
   metricData <- 0
 
@@ -19,8 +19,14 @@ getMetricData <- function(prodata, precursorSelection, L, U, metric, normalizati
 
   metricData = precursor.data[,metric]
   if(normalization == TRUE) {
-    mu=mean(metricData[L:U]) # in-control process mean
-    sd=sd(metricData[L:U]) # in-control process variance
+    if(guidset_selected) {
+      mu=mean(metricData[L:U]) # in-control process mean
+      sd=sd(metricData[L:U]) # in-control process variance
+    }else {
+      mu = selectMean
+      sd = selectSD
+    }
+    
     if(sd == 0) {sd <- 0.0001}
     metricData=scale(metricData[1:length(metricData)],mu,sd) # transformation for N(0,1) )
     return(metricData)
@@ -152,7 +158,7 @@ get_CP_tho.hat <- function(prodata, L, U, data.metrics) {
 #        "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
 #        "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
 #DESCRIPTION : returns a data frame for XmR that contains all the information needed to plot XmR
-XmR.data.prepare <- function(prodata, metricData, L,U, type,selectMean,selectSD) {
+XmR.data.prepare <- function(prodata, metricData, L,U, type,selectMean,selectSD, guidset_selected) {
   t <- numeric(length(metricData)-1)
   UCL <- 0
   LCL <- 0
@@ -162,7 +168,7 @@ XmR.data.prepare <- function(prodata, metricData, L,U, type,selectMean,selectSD)
 
   QCno=1:length(metricData)
   if(type == 1) {
-    if(is.null(selectMean) && is.null(selectSD)) {
+    if(guidset_selected) {
       UCL=mean(metricData[L:U])+2.66*sd(t[L:U])
       LCL=mean(metricData[L:U])-2.66*sd(t[L:U])
     }else {
@@ -173,14 +179,19 @@ XmR.data.prepare <- function(prodata, metricData, L,U, type,selectMean,selectSD)
 
   } else if(type == 2) {
     ## Calculate MR chart statistics and limits
-    if(is.null(selectMean) && is.null(selectSD)) {
+    if(guidset_selected) {
       UCL=3.267*sd(t[1:L-U])
+      #print(UCL)
+      #print(sd(t[1:L-U]))
     }else{
       UCL = 3.267 * selectSD
+      #print(selectSD)
+      #print(UCL)
     }
     LCL=0
   }
   plot.data=data.frame(QCno,metricData,t,UCL,LCL)
+  print(plot.data)
   return(plot.data)
 }
 ############################################################################################

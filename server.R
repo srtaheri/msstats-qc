@@ -72,16 +72,21 @@ shinyServer(function(input,output,session) {
    }, options = list(pageLength = 25))
 ###### selection tab in Data Improt and selection #####################################################
   output$selectMeanSD <- renderUI({
-    fluidRow(
-      column(6,
-             numericInput("selectMean","mean",value = 1)
-      ),
-      column(6,
-             numericInput("selectSD","standard deviation",value = 1)
-      )
-    )
+    lapply(input$user_selected_metrics,
+           function(x){
+             fluidRow(
+               column(4,paste(x,":")),
+               column(4,
+                      numericInput(paste0("selectMean@",x),"mean",value = 1)
+               ),
+               column(4,
+                      numericInput(paste0("selectSD@",x),"standard deviation",value = 1)
+               )
+             )
+           })
   })
 
+  
   output$selectGuideSet <- renderUI({
     fluidRow(
       column(6,
@@ -127,20 +132,14 @@ shinyServer(function(input,output,session) {
   ################################################################# plots ###################################################
   #################################################################################################################
   output$XmR_tabset <- renderUI({
+    is_guidset_selected <- FALSE
     validate(
       need(!is.null(data$df), "Please upload your data first"),
       need(is.data.frame(data$df), data$df),
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
-    if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
-      selectMean <- input$selectMean
-      selectSD <- input$selectSD
-      print("I want to select myself")
-    }
     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
-      selectMean <- NULL
-      selectSD <- NULL
-      print("I want guide set")
+      is_guidset_selected <- TRUE
     }
     Tabs <- lapply(input$user_selected_metrics,
                    function(x) {
@@ -153,7 +152,9 @@ shinyServer(function(input,output,session) {
                                                              input$U, metric = x,
                                                              plot.method = "XmR", normalization = FALSE,
                                                              y.title1 = "Individual Value", y.title2 = "Moving Range",
-                                                             selectMean = input$selectMean,selectSD = input$selectSD))
+                                                             selectMean = input[[paste0("selectMean@",x)]],selectSD = input[[paste0("selectSD@",x)]],
+                                                             guidset_selected = is_guidset_selected)
+                                             )
 
                                 )
                    })
