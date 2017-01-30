@@ -21,7 +21,7 @@ CUSUM.outrange.thld <- 5
 #        "normalization" is either TRUE or FALSE
 #        "y.title1" and "y.title2" are titles of left and right plot which are Individual Value and Moving Range
 # DESCRIPTION : Draws together the "Individual Value" and "Moving Range plots" (left and right plot) for each metric and method.
-render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.method, normalization, y.title1, y.title2,selectMean,selectSD, guidset_selected){
+render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.method, normalization, y.title1, y.title2,selectMean=NULL,selectSD=NULL, guidset_selected){
   validate(
     need(!is.null(prodata), "Please upload your data")
   )
@@ -41,11 +41,12 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
 
   else {
     metricData <- getMetricData(prodata, precursorSelection, L, U, metric = metric, normalization,selectMean,selectSD, guidset_selected)
-    print(paste("i am L:",L))
     plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title1, type = 1,selectMean,selectSD, guidset_selected)
     plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2,selectMean,selectSD, guidset_selected)
 
     subplot(plot1,plot2)
+    #plot1
+  
   }
 }
 #################################################################################################################
@@ -86,63 +87,78 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, t
   y <- list(
     title = ytitle
   )
+  print(plot.data)
+  #plot_ly(plot.data, x = ~QCno, y = ~CUSUM.poz,showlegend = TRUE, type = "scatter", mode = "markers", color = ~outRangeInRangePoz)%>%
+  plot_ly(plot.data, x = ~QCno, y = ~CUSUM.poz,showlegend = FALSE)%>%
+    #add_markers(x = ~QCno, y = ~CUSUM.poz, color = ~outRangeInRangePoz,colors = colorRamp(c("green", "darkorange", "red")), name = "CUSUM Poz")%>%
+    #add_markers(x = ~QCno, y = ~CUSUM.neg,showlegend = FALSE, type = "scatter", mode = "markers", color = ~outRangeInRangeNeg,colors = colorRamp(c("blue", "darkorange", "purple")))%>%
+    add_lines(y = CUSUM.outrange.thld, color = I("red"), name = "CUSUM thld", showlegend = FALSE) %>%
+    add_lines(y = -CUSUM.outrange.thld, color = I("red"), name = "CUSUM thld", showlegend = FALSE) %>%
+    add_lines(x = ~QCno, y = ~CUSUM.poz, color = I("aquamarine"),name = "CUSUM+", showlegend = TRUE)%>%
+    add_lines(x = ~QCno, y = ~CUSUM.neg, color = I("blue"), name = "CUSUM-",showlegend = TRUE)%>%
+    add_markers(x = ~QCno, y = ~CUSUM.neg, color = ~outRangeInRangeNeg,colors = c("red","green"),showlegend = TRUE)%>%
+    add_markers(x = ~QCno, y = ~CUSUM.poz, color = ~outRangeInRangePoz,colors = c("red","green"),showlegend = TRUE)
 
-  p <- plot_ly(plot.data
-               , x = QCno
-               , y = CUSUM.poz
-               , line = list(color = "dodgerblue")
-               , name = "CUSUM+"
-               , showlegend = FALSE
-               , text = Annotations
-  ) %>%
-    add_trace(  x = QCno
-              , y = CUSUM.neg
-              , line = list(color = "blue")
-              , name = "CUSUM-"
-              , showlegend = FALSE
-              , text = Annotations
-    ) %>%
-    layout(xaxis = x,yaxis = y, showlegend = FALSE) %>%
-    add_trace(x=c(0, max(plot.data$QCno)),y = c(CUSUM.outrange.thld,CUSUM.outrange.thld), marker=list(color="red" , size=4 , opacity=0.5), name = "UCL",showlegend = FALSE) %>%
-    add_trace(x=c(0, max(plot.data$QCno)),y = c(-CUSUM.outrange.thld,-CUSUM.outrange.thld), marker=list(color="red" , size=4 , opacity=0.5), name = "LCL",showlegend = FALSE) %>%
-    add_trace(  x = QCno
-              , y = CUSUM.neg
-              , mode = "markers"
-              , marker=list(color="blue" , size=5 , opacity=0.5)
-              , showlegend = FALSE,name=""
-    ) %>%
-    add_trace(  x = QCno
-                , y = CUSUM.poz
-                , mode = "markers"
-                , marker=list(color="blue" , size=5 , opacity=0.5)
-                , showlegend = FALSE,name=""
-    ) %>%
-    add_trace(x = plot.data[CUSUM.poz <= -CUSUM.outrange.thld, ]$QCno,
-              y = plot.data[CUSUM.poz <= -CUSUM.outrange.thld, ]$CUSUM.poz,
-              mode = "markers",
-              marker=list(color="red" , size=5 , opacity=0.5),
-              showlegend = FALSE,name=""
-    ) %>%
-    add_trace(x = plot.data[CUSUM.poz >= CUSUM.outrange.thld, ]$QCno,
-              y = plot.data[CUSUM.poz >= CUSUM.outrange.thld, ]$CUSUM.poz,
-              mode = "markers",
-              marker=list(color="red" , size=5 , opacity=0.5),
-              showlegend = FALSE,name=""
-    )%>%
-    add_trace(x = plot.data[CUSUM.neg <= -CUSUM.outrange.thld, ]$QCno,
-              y = plot.data[CUSUM.neg <= -CUSUM.outrange.thld, ]$CUSUM.neg,
-              mode = "markers",
-              marker=list(color="red" , size=5 , opacity=0.5),
-              showlegend = FALSE,name=""
-    ) %>%
-    add_trace(x = plot.data[CUSUM.neg >= CUSUM.outrange.thld, ]$QCno,
-              y = plot.data[CUSUM.neg >= CUSUM.outrange.thld, ]$CUSUM.neg,
-              mode = "markers",
-              marker=list(color="red" , size=5 , opacity=0.5),
-              showlegend = FALSE,name=""
-    )
+   
+    # add_trace(x = ~QCno, y = ~t, color = ~InRangeOutRange, type="scatter", mode="markers", colors = c("blue","red"), inherit=FALSE)%>%
+    # layout(xaxis = x,yaxis = y)
+  
+  # p <- plot_ly(plot.data
+  #              , x = QCno
+  #              , y = CUSUM.poz
+  #              , line = list(color = "dodgerblue")
+  #              , name = "CUSUM+"
+  #              , showlegend = FALSE
+  #              , text = Annotations
+  # ) %>%
+  #   add_trace(  x = QCno
+  #             , y = CUSUM.neg
+  #             , line = list(color = "blue")
+  #             , name = "CUSUM-"
+  #             , showlegend = FALSE
+  #             , text = Annotations
+  #   ) %>%
+  #   layout(xaxis = x,yaxis = y, showlegend = FALSE) %>%
+  #   add_trace(x=c(0, max(plot.data$QCno)),y = c(CUSUM.outrange.thld,CUSUM.outrange.thld), marker=list(color="red" , size=4 , opacity=0.5), name = "UCL",showlegend = FALSE) %>%
+  #   add_trace(x=c(0, max(plot.data$QCno)),y = c(-CUSUM.outrange.thld,-CUSUM.outrange.thld), marker=list(color="red" , size=4 , opacity=0.5), name = "LCL",showlegend = FALSE) %>%
+  #   add_trace(  x = QCno
+  #             , y = CUSUM.neg
+  #             , mode = "markers"
+  #             , marker=list(color="blue" , size=5 , opacity=0.5)
+  #             , showlegend = FALSE,name=""
+  #   ) %>%
+  #   add_trace(  x = QCno
+  #               , y = CUSUM.poz
+  #               , mode = "markers"
+  #               , marker=list(color="blue" , size=5 , opacity=0.5)
+  #               , showlegend = FALSE,name=""
+  #   ) %>%
+  #   add_trace(x = plot.data[CUSUM.poz <= -CUSUM.outrange.thld, ]$QCno,
+  #             y = plot.data[CUSUM.poz <= -CUSUM.outrange.thld, ]$CUSUM.poz,
+  #             mode = "markers",
+  #             marker=list(color="red" , size=5 , opacity=0.5),
+  #             showlegend = FALSE,name=""
+  #   ) %>%
+  #   add_trace(x = plot.data[CUSUM.poz >= CUSUM.outrange.thld, ]$QCno,
+  #             y = plot.data[CUSUM.poz >= CUSUM.outrange.thld, ]$CUSUM.poz,
+  #             mode = "markers",
+  #             marker=list(color="red" , size=5 , opacity=0.5),
+  #             showlegend = FALSE,name=""
+  #   )%>%
+  #   add_trace(x = plot.data[CUSUM.neg <= -CUSUM.outrange.thld, ]$QCno,
+  #             y = plot.data[CUSUM.neg <= -CUSUM.outrange.thld, ]$CUSUM.neg,
+  #             mode = "markers",
+  #             marker=list(color="red" , size=5 , opacity=0.5),
+  #             showlegend = FALSE,name=""
+  #   ) %>%
+  #   add_trace(x = plot.data[CUSUM.neg >= CUSUM.outrange.thld, ]$QCno,
+  #             y = plot.data[CUSUM.neg >= CUSUM.outrange.thld, ]$CUSUM.neg,
+  #             mode = "markers",
+  #             marker=list(color="red" , size=5 , opacity=0.5),
+  #             showlegend = FALSE,name=""
+  #   )
 
-  return(p)
+  #return(p)
 }
 #########################################################################################################################
 # INPUTS : "prodata" is the data user uploads.
@@ -164,24 +180,11 @@ CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
   y <- list(
     title = ytitle
   )
-
-  plot_ly(plot.data, x = QCno, y = Et
-          ,type = "scatter"
-          ,line = list(shape = "linear")
-          ,showlegend = FALSE,name=""
-          , text=precursor.data$Annotations
-  ) %>%
-    layout(xaxis = x,yaxis = y) %>%
-    add_trace( x = c(tho.hat,tho.hat), y = c(0, (max(Et)+2))
-               ,marker=list(color="red", size=4, opacity=0.5)
-               , mode = "lines"
-               ,showlegend = FALSE,name=""
-    ) %>%
-    add_trace(x = QCno, y =  Et
-              ,mode = "markers"
-              , marker=list(color="blue" , size=8 , opacity=0.5)
-              ,showlegend = FALSE,name=""
-    )
+    plot_ly(plot.data, x = ~QCno, y = ~Et,showlegend = FALSE)%>% #,text=precursor.data$Annotations)
+      add_lines(x = ~tho.hat, color = I("red"))%>%
+      add_lines(x = ~QCno, y = ~Et, color = I("blue"))%>%
+      add_markers(x = ~QCno, y = ~Et, color = I("purple"))
+    # work on title
 }
 #########################################################################################################################
 # INPUTS : "prodata" is the data user uploads.
@@ -204,31 +207,15 @@ XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type
   y <- list(
     title = ytitle
   )
-  plot_ly(plot.data, x = ~QCno, y = ~t, type = "scatter",
-          name = "",  line = list(shape = "linear"),
-          marker= list(color="dodgerblue" , size=4 , opacity=0.0)
-          ,showlegend = FALSE
-          , text=precursor.data$Annotations
-  )
-    # layout(xaxis = x,yaxis = y) %>%
-    # add_trace(y = ~UCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="UCL") %>%
-    # add_trace(y = ~LCL, type = "scatter", marker=list(color="red" , size=1 , opacity=0.5), mode = "markers",showlegend = FALSE,name="LCL") %>%
-    # 
-    # add_trace(x = plot.data[t <= LCL, ]$QCno, y = plot.data[t <= LCL, ]$t
-    #           , mode = "markers"
-    #           , marker=list(color="red" , size=8 , opacity=0.5)
-    #           ,showlegend = FALSE,name=""
-    # )%>%
-    # add_trace(x = plot.data[t >= UCL, ]$QCno, y = plot.data[t >= UCL, ]$t
-    #           , mode = "markers"
-    #           , marker=list(color="red" , size=8 , opacity=0.5)
-    #           ,showlegend = FALSE,name=""
-    #) %>%
-    # add_trace(x = plot.data[t > LCL & t < UCL, ]$QCno, y = plot.data[t > LCL & t < UCL, ]$t
-    #           , mode = "markers"
-    #           , marker=list(color="blue" , size=8 , opacity=0.5)
-    #           ,showlegend = FALSE,name=""
-    # )
+  
+  
+  plot_ly(plot.data, x = ~QCno, y = ~t,showlegend = FALSE) %>%
+    add_lines(y = ~LCL, color = I("red"), name = "LCL") %>%
+    add_lines(y = ~UCL, color = I("red"), name = "UCL") %>%
+    add_lines(x = ~QCno, y = ~t, color = I("blue")) %>%
+    #add_markers(color= ~InRangeOutRange, colours=c("blue","red")) %>%
+    add_trace(x = ~QCno, y = ~t, color = ~InRangeOutRange, type="scatter", mode="markers", colors = c("blue","red"), inherit=FALSE)%>%
+    layout(xaxis = x,yaxis = y)
 
 }
 #################################################################################################################

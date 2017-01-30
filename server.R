@@ -177,7 +177,7 @@ shinyServer(function(input,output,session) {
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                  tags$div("It may take a while to load the plots, please wait...",
                                                           id="loadmessage")),
-                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CUSUM", normalization = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation"))
+                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CUSUM", normalization = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation",guidset_selected = TRUE))
                                 )
                    })
 
@@ -198,7 +198,7 @@ shinyServer(function(input,output,session) {
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                  tags$div("It may take a while to load the plots, please wait...",
                                                           id="loadmessage")),
-                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CP", normalization = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation"))
+                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CP", normalization = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation",guidset_selected = TRUE))
                                 )
                    })
 

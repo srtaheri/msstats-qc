@@ -22,9 +22,11 @@ getMetricData <- function(prodata, precursorSelection, L, U, metric, normalizati
     if(guidset_selected) {
       mu=mean(metricData[L:U]) # in-control process mean
       sd=sd(metricData[L:U]) # in-control process variance
+      print("good")
     }else {
       mu = selectMean
       sd = selectSD
+      print("bad")
     }
     
     if(sd == 0) {sd <- 0.0001}
@@ -58,8 +60,11 @@ find_custom_metrics <- function(prodata) {
 #        "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
 #DESCRIPTION : returns a data frame for CUSUM that contains all the information needed to plot CUSUM
 CUSUM.data.prepare <- function(prodata, metricData, precursorSelection, L, U, type) {
-
+  print("hi")
   k=0.5
+  CUSUM.outrange.thld <- 5
+  outRangeInRangePoz = rep(0,length(metricData))
+  outRangeInRangeNeg = rep(0,length(metricData))
   #precursor.data only gets the data for the selected precursor
   precursor.data <- prodata[prodata$Precursor==precursorSelection,] #"Precursor" is one of the columns in data that shows the name of peptides
 
@@ -84,14 +89,27 @@ CUSUM.data.prepare <- function(prodata, metricData, precursorSelection, L, U, ty
   }
 
   QCno = 1:length(metricData)
-
+  for(i in 1:length(metricData)) {
+    if(Cpoz[i] >= CUSUM.outrange.thld || Cpoz[i] <= -CUSUM.outrange.thld)
+      outRangeInRangePoz[i] <- "OutRangeCUSUM+"
+    else
+      outRangeInRangePoz[i] <- "InRangeCUSUM+"
+  }
+  for(i in 1:length(metricData)) {
+    if(-Cneg[i] >= CUSUM.outrange.thld || -Cneg[i] <= -CUSUM.outrange.thld)
+      outRangeInRangeNeg[i] <- "OutRangeCUSUM-"
+    else
+      outRangeInRangeNeg[i] <- "InRangeCUSUM-"
+  }
   plot.data =
     data.frame(QCno = QCno
                ,CUSUM.poz = Cpoz
                ,CUSUM.neg = -Cneg
                ,Annotations=precursor.data$Annotations
+               ,outRangeInRangePoz = outRangeInRangePoz
+               ,outRangeInRangeNeg = outRangeInRangeNeg
                )
-
+  print(plot.data)
   return(plot.data)
 }
 ###################################################################################################
@@ -162,11 +180,13 @@ XmR.data.prepare <- function(prodata, metricData, L,U, type,selectMean,selectSD,
   t <- numeric(length(metricData)-1)
   UCL <- 0
   LCL <- 0
+  InRangeOutRange <- rep(0,length(metricData))
   for(i in 2:length(metricData)) {
     t[i]=abs(metricData[i]-metricData[i-1]) # Compute moving range of metricData
   }
-
+  
   QCno=1:length(metricData)
+  outRangeInRange = rep(0,length(metricData))
   if(type == 1) {
     if(guidset_selected) {
       UCL=mean(metricData[L:U])+2.66*sd(t[L:U])
@@ -181,17 +201,19 @@ XmR.data.prepare <- function(prodata, metricData, L,U, type,selectMean,selectSD,
     ## Calculate MR chart statistics and limits
     if(guidset_selected) {
       UCL=3.267*sd(t[1:L-U])
-      #print(UCL)
-      #print(sd(t[1:L-U]))
     }else{
       UCL = 3.267 * selectSD
-      #print(selectSD)
-      #print(UCL)
     }
     LCL=0
   }
-  plot.data=data.frame(QCno,metricData,t,UCL,LCL)
-  print(plot.data)
+  for(i in 1:length(metricData)) {
+    if(t[i] > LCL || t[i] < UCL)
+      InRangeOutRange[i] <- "InRange"
+    else
+      InRangeOutRange[i] <- "OutRange"
+  }
+  plot.data=data.frame(QCno,metricData,t,UCL,LCL,InRangeOutRange)
+  #print(plot.data)
   return(plot.data)
 }
 ############################################################################################
