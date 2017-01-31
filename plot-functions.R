@@ -77,7 +77,7 @@ do.plot <- function(prodata, metricData, precursorSelection, L, U, plot.method, 
 #DESCRIPTION: draws one CUSUM plot based on type for each given metric
 CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, type) {
   plot.data <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)
-
+  #print(plot.data)
   #ymax=ifelse(max(plot.data$CUSUM)>=CUSUM.outrange.thld,(max(plot.data$CUSUM)),CUSUM.outrange.thld)
   #ymin=ifelse(min(plot.data$CUSUM)<=-CUSUM.outrange.thld,(min(plot.data$CUSUM)),-CUSUM.outrange.thld)
   x <- list(
@@ -87,7 +87,7 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, t
   y <- list(
     title = ytitle
   )
-  print(plot.data)
+  
   #plot_ly(plot.data, x = ~QCno, y = ~CUSUM.poz,showlegend = TRUE, type = "scatter", mode = "markers", color = ~outRangeInRangePoz)%>%
   plot_ly(plot.data, x = ~QCno, y = ~CUSUM.poz,showlegend = FALSE)%>%
     #add_markers(x = ~QCno, y = ~CUSUM.poz, color = ~outRangeInRangePoz,colors = colorRamp(c("green", "darkorange", "red")), name = "CUSUM Poz")%>%
@@ -219,9 +219,9 @@ XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type
 
 }
 #################################################################################################################
-XmR.Summary.plot <- function(prodata,data.metrics, L, U,selectMean,selectSD) {
-  dat <- XmR.Summary.DataFrame(prodata,data.metrics, L, U,selectMean,selectSD)
-  tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics)
+XmR.Summary.plot <- function(prodata,data.metrics, L, U,listMean,listSD, guidset_selected) {
+  dat <- XmR.Summary.DataFrame(prodata,data.metrics, L, U,listMean,listSD, guidset_selected)
+  tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics,listMean,listSD, guidset_selected)
   gg <- ggplot(dat)
   gg <- gg + geom_hline(yintercept=0, alpha=0.5)
   gg <- gg + geom_smooth(method="loess",aes(x=dat$QCno, y=dat$pr.y,colour = group, group = group))
@@ -258,10 +258,10 @@ XmR.Summary.plot <- function(prodata,data.metrics, L, U,selectMean,selectSD) {
 
 }
 ###############################################################################################
-CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
+CUSUM.Summary.plot <- function(prodata, data.metrics, L, U,listMean,listSD, guidset_selected) {
    h <- 5
-   dat <- CUSUM.Summary.DataFrame(prodata, data.metrics, L, U)
-   tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics)
+   dat <- CUSUM.Summary.DataFrame(prodata, data.metrics, L, U,listMean,listSD, guidset_selected)
+   tho.hat.df <- get_CP_tho.hat(prodata, L, U, data.metrics,listMean,listSD, guidset_selected)
 
    gg <- ggplot(dat)
    gg <- gg + geom_hline(yintercept=0, alpha=0.5)
@@ -304,9 +304,9 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U) {
 
 }
 ####################################################################
-XmR.Radar.Plot <- function(prodata, data.metrics, L,U,selectMean,selectSD) {
+XmR.Radar.Plot <- function(prodata, data.metrics, L,U,listMean,listSD,guidset_selected) {
 
-  dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U,selectMean,selectSD)
+  dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U,listMean,listSD,guidset_selected)
   #write.csv(file="dataRadar.csv",dat)
 
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby),
@@ -348,8 +348,8 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U,selectMean,selectSD) {
 }
 
 #################################################################################################################
-CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U) {
-  dat <- CUSUM.Radar.Plot.DataFrame(prodata, data.metrics, L,U)
+CUSUM.Radar.Plot <- function(prodata, data.metrics, L,U,listMean,listSD,guidset_selected) {
+  dat <- CUSUM.Radar.Plot.DataFrame(prodata, data.metrics, L,U,listMean,listSD,guidset_selected)
 
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby),
                   group = group, colour = group, fill = group)) +
@@ -404,10 +404,10 @@ metrics_box.plot <- function(prodata, data.metrics) {
   return(p)
 }
 #####################################################################################################
-metrics_heat.map <- function(prodata,data.metrics, method,peptideThresholdRed,peptideThresholdYellow, L, U, type, title,selectMean,selectSD) {
+metrics_heat.map <- function(prodata,data.metrics, method,peptideThresholdRed,peptideThresholdYellow, L, U, type, title,listMean, listSD, guidset_selected) {
 
   #color_palette <- colorRampPalette(c("green", "yellow", "red"))(3)
-  data <- heatmap.DataFrame(prodata, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type,selectMean,selectSD)
+  data <- heatmap.DataFrame(prodata, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type,listMean, listSD, guidset_selected)
 
   p <- ggplot(data,aes(time,metric, group = bin, fill = bin))
 

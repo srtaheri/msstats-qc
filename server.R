@@ -132,12 +132,13 @@ shinyServer(function(input,output,session) {
   ################################################################# plots ###################################################
   #################################################################################################################
   output$XmR_tabset <- renderUI({
-    is_guidset_selected <- FALSE
+    
     validate(
       need(!is.null(data$df), "Please upload your data first"),
       need(is.data.frame(data$df), data$df),
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
+    is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
       is_guidset_selected <- TRUE
     }
@@ -169,6 +170,10 @@ shinyServer(function(input,output,session) {
       need(is.data.frame(data$df), data$df),
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
+    is_guidset_selected <- FALSE
+    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+      is_guidset_selected <- TRUE
+    }
     Tabs <- lapply(input$user_selected_metrics,
                    function(x) {
 
@@ -177,7 +182,7 @@ shinyServer(function(input,output,session) {
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                  tags$div("It may take a while to load the plots, please wait...",
                                                           id="loadmessage")),
-                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CUSUM", normalization = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation",guidset_selected = TRUE))
+                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CUSUM", normalization = TRUE, y.title1 = "CUSUM mean", y.title2 = "CUSUM variation",selectMean = input[[paste0("selectMean@",x)]],selectSD = input[[paste0("selectSD@",x)]],guidset_selected = is_guidset_selected))
                                 )
                    })
 
@@ -191,6 +196,10 @@ shinyServer(function(input,output,session) {
       need(is.data.frame(data$df), data$df),
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
+    is_guidset_selected <- FALSE
+    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+      is_guidset_selected <- TRUE
+    }
     Tabs <- lapply(input$user_selected_metrics,
                    function(x) {
                        tabPanel(x,
@@ -198,7 +207,7 @@ shinyServer(function(input,output,session) {
                                 conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                  tags$div("It may take a while to load the plots, please wait...",
                                                           id="loadmessage")),
-                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CP", normalization = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation",guidset_selected = TRUE))
+                                renderPlotly(render.QC.chart(data$df, input$pepSelection, input$L, input$U, metric = x, plot.method = "CP", normalization = TRUE, y.title1 = "Change point for mean", y.title2 = "Change point for variation",selectMean = input[[paste0("selectMean@",x)]],selectSD = input[[paste0("selectSD@",x)]],guidset_selected = is_guidset_selected))
                                 )
                    })
 
@@ -206,7 +215,7 @@ shinyServer(function(input,output,session) {
   })
   ######################################################### height and width in Summary tab ########################################
   my_height <- reactive({
-    my_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*200
+    my_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*230
   })
 
   heatmap_width <- reactive({
@@ -222,7 +231,7 @@ shinyServer(function(input,output,session) {
       need(is.data.frame(prodata), prodata),
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
-    metrics_box.plot(prodata, data.metrics = data$metrics)
+    metrics_box.plot(prodata, data.metrics = input$user_selected_metrics)
   })
 
   ###############   summary plots and radar plots ############################################################################
@@ -234,11 +243,22 @@ shinyServer(function(input,output,session) {
       need(is.data.frame(prodata), prodata),
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
+    
+    is_guidset_selected <- FALSE
+    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+      is_guidset_selected <- TRUE
+    }
+    listMean <- list()
+    listSD <- list()
+    for(metric in input$user_selected_metrics){
+      listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
+      listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
+    }
 
-    p1 <- XmR.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U, selectMean = input$selectMean,selectSD = input$selectSD)
-    p2 <- XmR.Radar.Plot(prodata, data.metrics = input$user_selected_metrics,input$L,input$U,selectMean = input$selectMean,selectSD = input$selectSD)
-    p3 <- CUSUM.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U)
-    p4 <- CUSUM.Radar.Plot(prodata, data.metrics = input$user_selected_metrics, input$L,input$U)
+    p1 <- XmR.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U, listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+    p2 <- XmR.Radar.Plot(prodata, data.metrics = input$user_selected_metrics,input$L,input$U,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+    p3 <- CUSUM.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+    p4 <- CUSUM.Radar.Plot(prodata, data.metrics = input$user_selected_metrics, input$L,input$U,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
 
     if("XmR" %in% input$summary_controlChart_select && "CUSUM" %in% input$summary_controlChart_select) {
       grid.arrange(p1,p2,p3,p4, ncol = 1)
@@ -265,28 +285,30 @@ shinyServer(function(input,output,session) {
      peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
      metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
      
-     if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
-       selectMean <- input$selectMean
-       selectSD <- input$selectSD
-     }
+     is_guidset_selected <- FALSE
      if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
-       selectMean <- NULL
-       selectSD <- NULL
+       is_guidset_selected <- TRUE
+     }
+     listMean <- list()
+     listSD <- list()
+     for(metric in input$user_selected_metrics){
+       listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
+       listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
      }
      if("XmR" %in% input$summary_controlChart_select && "CUSUM" %in% input$summary_controlChart_select) {
        HTML(paste(
-         decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                            input$L, input$U, type = 2,selectMean ,selectSD),"\n\n",
-         decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                          input$L, input$U, type = 2,selectMean ,selectSD),
+         decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                            input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),"\n\n",
+         decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                          input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
          sep = "<br/>"
        ))
      }else if("CUSUM" %in% input$summary_controlChart_select) {
-       decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                          input$L, input$U, type = 2,selectMean ,selectSD)
+       decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                          input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
      }else if("XmR" %in% input$summary_controlChart_select) {
-       decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                        input$L, input$U, type = 2,selectMean ,selectSD)
+       decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                        input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
      }else {
      }
   })
@@ -303,28 +325,30 @@ shinyServer(function(input,output,session) {
     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
     metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
     
-    if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
-      selectMean <- input$selectMean
-      selectSD <- input$selectSD
-    }
+    is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
-      selectMean <- NULL
-      selectSD <- NULL
+      is_guidset_selected <- TRUE
+    }
+    listMean <- list()
+    listSD <- list()
+    for(metric in input$user_selected_metrics){
+      listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
+      listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
     }
     if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
       HTML(paste(
-        decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                         input$L, input$U, type = 2,selectMean ,selectSD),
-        decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                         input$L, input$U, type = 2,selectMean ,selectSD),
+        decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                         input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
+        decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                         input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
         sep = "<br/><br/>"
       ))
     }else if("CUSUM" %in% input$heatmap_controlChart_select) {
-      decisionRule_warning_message_CUSUM(prodata,data$metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                       input$L, input$U, type = 2,selectMean ,selectSD)
+      decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                       input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
     }else if("XmR" %in% input$heatmap_controlChart_select) {
-      decisionRule_warning_message_XmR(prodata,data$metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                       input$L, input$U, type = 2,selectMean ,selectSD)
+      decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+                                       input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
     }else {
     }
 
@@ -343,34 +367,38 @@ shinyServer(function(input,output,session) {
     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100
     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
-    if(input$selectGuideSetOrMeanSD == "I want to select mean and standard deviation myself") {
-      selectMean <- input$selectMean
-      selectSD <- input$selectSD
-    }
+    
+    is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
-      selectMean <- NULL
-      selectSD <- NULL
+      is_guidset_selected <- TRUE
+    }
+     
+    listMean <- list()
+    listSD <- list()
+    for(metric in input$user_selected_metrics){
+     listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
+     listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
     }
     p1 <- metrics_heat.map(prodata,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
                            title = "Heatmap (Changes in mean of QC metric-X)",
-                           selectMean, selectSD)
+                           listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
     p2 <- metrics_heat.map(prodata,
                            data.metrics = input$user_selected_metrics, method = "XmR",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
                            title = "Heatmap (Changes in variability of QC metric-mR)",
-                           selectMean, selectSD)
+                           listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
     p3 <- metrics_heat.map(prodata,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
                            title = "Heatmap (Changes in mean of QC metric-CUSUMm)",
-                           selectMean, selectSD)
+                           listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
     p4 <- metrics_heat.map(prodata,
                            data.metrics = input$user_selected_metrics, method = "CUSUM",
                            peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
                            title = "Heatmap (Changes in variability of QC metric-CUSUMv)",
-                           selectMean, selectSD)
+                           listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
     if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
       grid.arrange(p1,p2,p3,p4, ncol = 1)
     }
