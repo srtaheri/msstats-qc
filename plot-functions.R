@@ -46,7 +46,7 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
 
     subplot(plot1,plot2)
     #plot1
-  
+
   }
 }
 #################################################################################################################
@@ -87,7 +87,7 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, t
   y <- list(
     title = ytitle
   )
-  
+
   #plot_ly(plot.data, x = ~QCno, y = ~CUSUM.poz,showlegend = TRUE, type = "scatter", mode = "markers", color = ~outRangeInRangePoz)%>%
   plot_ly(plot.data, x = ~QCno, y = ~CUSUM.poz,showlegend = FALSE)%>%
     #add_markers(x = ~QCno, y = ~CUSUM.poz, color = ~outRangeInRangePoz,colors = colorRamp(c("green", "darkorange", "red")), name = "CUSUM Poz")%>%
@@ -99,10 +99,10 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, t
     add_markers(x = ~QCno, y = ~CUSUM.neg, color = ~outRangeInRangeNeg,colors = c("red","green"),showlegend = TRUE)%>%
     add_markers(x = ~QCno, y = ~CUSUM.poz, color = ~outRangeInRangePoz,colors = c("red","green"),showlegend = TRUE)
 
-   
+
     # add_trace(x = ~QCno, y = ~t, color = ~InRangeOutRange, type="scatter", mode="markers", colors = c("blue","red"), inherit=FALSE)%>%
     # layout(xaxis = x,yaxis = y)
-  
+
   # p <- plot_ly(plot.data
   #              , x = QCno
   #              , y = CUSUM.poz
@@ -183,7 +183,8 @@ CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
     plot_ly(plot.data, x = ~QCno, y = ~Et,showlegend = FALSE)%>% #,text=precursor.data$Annotations)
       add_lines(x = ~tho.hat, color = I("red"))%>%
       add_lines(x = ~QCno, y = ~Et, color = I("blue"))%>%
-      add_markers(x = ~QCno, y = ~Et, color = I("purple"))
+      add_markers(x = ~QCno, y = ~Et, color = I("purple"))%>%
+      layout(xaxis = x,yaxis = y)
     # work on title
 }
 #########################################################################################################################
@@ -207,8 +208,8 @@ XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type
   y <- list(
     title = ytitle
   )
-  
-  
+
+
   plot_ly(plot.data, x = ~QCno, y = ~t,showlegend = FALSE) %>%
     add_lines(y = ~LCL, color = I("red"), name = "LCL") %>%
     add_lines(y = ~UCL, color = I("red"), name = "UCL") %>%
