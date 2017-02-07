@@ -309,7 +309,7 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U,listMean,listSD,guidset_se
 
   dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U,listMean,listSD,guidset_selected)
   #write.csv(file="dataRadar.csv",dat)
-
+  
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby),
                   group = group, colour = group, fill=group)) +
     coord_polar() +

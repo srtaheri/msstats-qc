@@ -181,6 +181,7 @@ XmR.data.prepare <- function(prodata, metricData, L,U, type,selectMean,selectSD,
   UCL <- 0
   LCL <- 0
   InRangeOutRange <- rep(0,length(metricData))
+  
   for(i in 2:length(metricData)) {
     t[i]=abs(metricData[i]-metricData[i-1]) # Compute moving range of metricData
   }
@@ -356,58 +357,72 @@ heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,p
   return(dataFrame)
 }
 ############################################################################################
-Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type, XmR.type,selectMean,selectSD, guidset_selected) {
-  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-  precursors <- prodata$Precursor
-  QCno.out.range <- c()
-
-  for(j in 1:length(precursors)) {
-    metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
-    plot.data <- XmR.data.prepare(prodata, metricData , L = L, U = U, type ,selectMean,selectSD, guidset_selected)
-    if(XmR.type == "poz")
-      QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$t >= plot.data$UCL, ]$QCno))
-    else
-      QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$t <= plot.data$LCL, ]$QCno))
-  }
-  return(QCno.out.range)
-}
+# Compute.QCno.OutOfRangePeptide.XmR <- function(prodata,L,U,metric,type, XmR.type,selectMean,selectSD, guidset_selected) {
+#   #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+#   precursors <- prodata$Precursor
+#   QCno.out.range <- c()
+# 
+#   for(j in 1:length(precursors)) {
+#     metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
+#     plot.data <- XmR.data.prepare(prodata, metricData , L = L, U = U, type ,selectMean,selectSD, guidset_selected)
+#     if(XmR.type == "poz")
+#       QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$t >= plot.data$UCL, ]$QCno))
+#     else
+#       QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$t <= plot.data$LCL, ]$QCno))
+#   }
+#   return(QCno.out.range)
+# }
 #############################################################################################
-Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.type,selectMean,selectSD, guidset_selected) {
-  h <- 5
-  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
-  precursors <- prodata$Precursor
-  QCno.out.range <- c()
-
-  for(j in 1:length(precursors)) {
-    metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
-    plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
-    if(CUSUM.type == "poz")
-      QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno))
-    else
-    QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno))
-  }
-  return(QCno.out.range)
-}
+# Compute.QCno.OutOfRangePeptide.CUSUM <- function(prodata,L,U,metric,type, CUSUM.type,selectMean,selectSD, guidset_selected) {
+#   h <- 5
+#   #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+#   precursors <- prodata$Precursor
+#   QCno.out.range <- c()
+# 
+#   for(j in 1:length(precursors)) {
+#     metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
+#     plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
+#     if(CUSUM.type == "poz")
+#       QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno))
+#     else
+#       QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno))
+#   }
+#   return(QCno.out.range)
+# }
 ###############################################################################################################
-XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group, XmR.type,selectMean,selectSD, guidset_selected) {
+XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group,selectMean,selectSD, guidset_selected) {
   #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   precursors <- prodata$Precursor
   precursors2 <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
+  QCno.out.range.poz <- c()
+  QCno.out.range.neg <- c()
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
     QCno.length <- c(QCno.length,length(metricData))
+    plot.data <- XmR.data.prepare(prodata, metricData , L = L, U = U, type ,selectMean,selectSD, guidset_selected)
+    QCno.out.range.poz <- c(QCno.out.range.poz,length(plot.data[plot.data$t >= plot.data$UCL, ]$QCno))
+    QCno.out.range.neg <- c(QCno.out.range.neg,length(plot.data[plot.data$t <= plot.data$LCL, ]$QCno))
   }
-  dat <- data.frame(peptides = precursors2,
-             OutRangeQCno  = Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type, XmR.type,selectMean,selectSD, guidset_selected),
+  #pr <- Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type, XmR.type,selectMean,selectSD, guidset_selected)
+  dat.poz <- data.frame(peptides = precursors2,
+             OutRangeQCno  = QCno.out.range.poz,
              group         = rep(group,length(precursors)),
              orderby       = seq(1:length(precursors)),
              metric        = rep(metric, length(precursors)),
              tool          = rep("XmR",length(precursors)),
-             probability   = (Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type, XmR.type,selectMean,selectSD, guidset_selected)/QCno.length)
+             probability   = QCno.out.range.poz/QCno.length
              )
-
-  return(dat)
+  dat.neg <- data.frame(peptides = precursors2,
+                        OutRangeQCno  = QCno.out.range.neg,
+                        group         = rep(group,length(precursors)),
+                        orderby       = seq(1:length(precursors)),
+                        metric        = rep(metric, length(precursors)),
+                        tool          = rep("XmR",length(precursors)),
+                        probability   = QCno.out.range.neg/QCno.length
+  )
+  
+  return(list(dat.poz,dat.neg))
 }
 ################################################################################################
 XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,listMean,listSD,guidset_selected) {
@@ -416,10 +431,13 @@ XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,listMean,listSD,
                     probability   = c()
                     )
   for (metric in data.metrics) {
-    data.1 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Metric mean increase", XmR.type = "poz",selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
-    data.2 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Metric mean decrease", XmR.type = "neg",selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
-    data.3 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Metric dispersion increase", XmR.type = "poz",selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
-    data.4 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Metric dispersion decrease", XmR.type = "neg",selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
+    a1 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Metric mean increase",selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
+    data.1 <- a1[[1]]
+    data.2 <- a1[[2]]
+    
+    a2 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Metric dispersion increase",selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
+    data.3 <- a2[[1]]
+    data.4 <- a2[[2]]
     dat <- rbind(dat, data.1, data.2, data.3, data.4)
   }
   return(dat)
@@ -427,20 +445,28 @@ XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,listMean,listSD,
 #################################################################################################################
 CUSUM.Radar.Plot.prepare <- function(prodata,L,U, metric,type,group, CUSUM.type,selectMean,selectSD, guidset_selected) {
   #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  h <- 5
   precursors <- prodata$Precursor
   precursors2 <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
+  QCno.out.range <- c()
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
     QCno.length <- c(QCno.length,length(metricData))
+    plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
+    if(CUSUM.type == "poz")
+      QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno))
+    else
+      QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]$QCno))
   }
+  #pr <- Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = metric,type = type, CUSUM.type,selectMean,selectSD, guidset_selected)
   dat <- data.frame(peptides = precursors2,
-                    OutRangeQCno  = Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = metric,type = type, CUSUM.type,selectMean,selectSD, guidset_selected),
+                    OutRangeQCno  = QCno.out.range,
                     group         = rep(group,length(precursors)),
                     orderby       = seq(1:length(precursors)),
                     metric        = rep(metric, length(precursors)),
                     tool          = rep("XmR",length(precursors)),
-                    probability   = (Compute.QCno.OutOfRangePeptide.CUSUM(prodata,L,U,metric = metric,type = type, CUSUM.type,selectMean,selectSD, guidset_selected)/QCno.length)
+                    probability   = QCno.out.range/QCno.length
   )
   return(dat)
 }
@@ -461,7 +487,6 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,listMean,listS
 }
 #######################################################################################################
 Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThresholdRed, peptideThresholdYellow, L, U,type,selectMean,selectSD, guidset_selected) {
-
   h <- 5
   AcquiredTime <- prodata$AcquiredTime
   QCno    <- 1:nrow(prodata)
@@ -470,6 +495,7 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
 
   #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   precursors <- prodata$Precursor
+<<<<<<< HEAD
 
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
@@ -479,18 +505,34 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
       sub1 <- plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]
       sub2 <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
     }else if(method == "XmR") {
+=======
+  if(method == "XmR") {
+    for(precursor in precursors) {
+      metricData <- getMetricData(prodata, precursor, L = L, U = U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
+      counter[1:length(metricData)] <- counter[1:length(metricData)]+1
+>>>>>>> origin/master
       plot.data <- XmR.data.prepare(prodata, metricData , L , U , type,selectMean,selectSD, guidset_selected)
-      sub1 <- plot.data[plot.data$t >= plot.data$UCL, ]
-      sub2 <- plot.data[plot.data$t <= plot.data$LCL, ]
+      sub <- plot.data[plot.data$InRangeOutRange == "OutRange",]
+      #sub1 <- plot.data[(plot.data$t >= plot.data$UCL), ]
+      #sub2 <- plot.data[plot.data$t <= plot.data$LCL, ]
+      #sub <- rbind(sub1,sub2)
+      y[sub$QCno] <- y[sub$QCno] + 1
     }
-
-    sub <- rbind(sub1,sub2)
-
-    y[sub$QCno] <- y[sub$QCno] + 1
+  } else if(method == "CUSUM") {
+    for(precursor in precursors) {
+      metricData <- getMetricData(prodata, precursor, L = L, U = U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
+      counter[1:length(metricData)] <- counter[1:length(metricData)]+1
+      plot.data <- CUSUM.data.prepare(prodata, metricData, precursor, L, U, type)
+      sub <- plot.data[(plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h) | (plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h), ]
+      #sub2 <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
+      #sub <- rbind(sub1,sub2)
+      y[sub$QCno] <- y[sub$QCno] + 1
+    }
   }
   max_QCno <- max(which(counter!=0))
 
   pr.y = y[1:max_QCno]/counter[1:max_QCno]
+<<<<<<< HEAD
 
     plot.data <- data.frame(AcquiredTime = AcquiredTime[1:max_QCno],
                             QCno = rep(1:max_QCno,1),
@@ -504,6 +546,20 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
                             )
 
 
+=======
+  
+  plot.data <- data.frame(AcquiredTime = AcquiredTime[1:max_QCno],
+                          QCno = rep(1:max_QCno,1),
+                          pr.y = pr.y,
+                          group = ifelse(rep(type==1,max_QCno),
+                                         rep("Metric mean",max_QCno),
+                                         rep("Metric dispersion",max_QCno)
+                          ),
+                          metric = rep(metric,max_QCno)
+                          ,bin = rep(0,max_QCno)
+                          )
+    
+>>>>>>> origin/master
   for (i in 1:max_QCno) {
     if(plot.data$pr.y[i] >= peptideThresholdRed){
       plot.data$bin[i] <- "Unacceptable"
@@ -515,11 +571,20 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
       plot.data$bin[i] <- "Acceptable"
     }
   }
+<<<<<<< HEAD
     if(method == "XmR" &&type == 2) {
       return(plot.data[-1,])
     }
     return(plot.data)
 
+=======
+  if(method == "XmR" &&type == 2) {
+    return(plot.data[-1,])
+  }
+  
+  
+  return(plot.data)
+>>>>>>> origin/master
 
 }
 #######################################################################################################
@@ -528,13 +593,26 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
   metricCounterAboveRed = 0
   metricCounterAboveYellowBelowRed = 0
   for (metric in data.metrics) {
-    data <- Decision.DataFrame.prepare(prodata, metric,method,peptideThresholdRed, peptideThresholdYellow, L, U,type,selectMean = listMean[[metric]],selectSD = listSD[[metric]], guidset_selected)
-    aboveYellow <- data[data$pr.y >= peptideThresholdYellow,]
-    aboveYellowBelowRed <- aboveYellow[aboveYellow$pr.y < peptideThresholdRed,]
-    if(nrow(data[data$pr.y >= peptideThresholdRed,]) > 0) {
+    QCno    <- 1:nrow(prodata)
+    y <- rep(0,nrow(prodata))
+    counter <- rep(0,nrow(prodata))
+    for(precursor in prodata$Precursor) {
+      metricData <- getMetricData(prodata, precursor, L = L, U = U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
+      counter[1:length(metricData)] <- counter[1:length(metricData)]+1
+      plot.data <- XmR.data.prepare(prodata, metricData , L , U , type,selectMean,selectSD, guidset_selected)
+      sub <- plot.data[plot.data$InRangeOutRange == "OutRange",]
+      y[sub$QCno] <- y[sub$QCno] + 1
+    }
+    max_QCno <- max(which(counter!=0))
+    pr.y = y[1:max_QCno]/counter[1:max_QCno]
+    
+    aboveYellow <- which(pr.y >= peptideThresholdYellow)
+    aboveYellowBelowRed <- which(pr.y >= peptideThresholdYellow & pr.y < peptideThresholdRed)
+    
+    if(length(which(pr.y >= peptideThresholdRed)) > 0) {
       metricCounterAboveRed = metricCounterAboveRed + 1
     }
-    if(nrow(aboveYellowBelowRed) > 0) {
+    if(length(aboveYellowBelowRed) > 0) {
       metricCounterAboveYellowBelowRed = metricCounterAboveYellowBelowRed + 1
     }
   }
@@ -542,6 +620,7 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
 }
 ####################################################################################################
 decisionRule_warning_message_XmR <- function(prodata, data.metrics, method, peptideThresholdRed, peptideThresholdYellow,metricThresholdRed,metricThresholdYellow, L,U, type, listMean,listSD , guidset_selected) {
+<<<<<<< HEAD
 
   XmRCounterAboveRed1 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
                                                         L, U, type = 1,listMean,listSD, guidset_selected)[1]
@@ -552,6 +631,19 @@ decisionRule_warning_message_XmR <- function(prodata, data.metrics, method, pept
   XmRCounterAboveYellow2 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
                                                            L, U, type = 2,listMean,listSD, guidset_selected)[2]
 
+=======
+  
+  a1 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
+                                      L, U, type = 1,listMean,listSD, guidset_selected)
+  XmRCounterAboveRed1 <- a1[1]
+  XmRCounterAboveYellow1 <- a1[2]
+  
+  a2 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
+                                       L, U, type = 2,listMean,listSD, guidset_selected)
+  XmRCounterAboveRed2 <- a2[1]
+  XmRCounterAboveYellow2 <- a2[2]
+  
+>>>>>>> origin/master
   if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) return({paste("XmR RED FLAG: System performance is UNACCEPTABLE")})
   if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 <= metricThresholdRed) return({paste("XmR RED FLAG: System performance is UNACCEPTABLE")})
   if(XmRCounterAboveRed1 <= metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) return({paste("XmR RED FLAG: System performance is UNACCEPTABLE")})
@@ -562,6 +654,7 @@ decisionRule_warning_message_XmR <- function(prodata, data.metrics, method, pept
 }
 ############################################################################################################
 decisionRule_warning_message_CUSUM <- function(prodata, data.metrics, method, peptideThresholdRed, peptideThresholdYellow,metricThresholdRed,metricThresholdYellow, L,U, type, listMean,listSD, guidset_selected ) {
+<<<<<<< HEAD
 
   CUSUMCounterAboveRed1 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,
                                                           L, U, type = 1,listMean,listSD, guidset_selected)[1]
@@ -572,6 +665,19 @@ decisionRule_warning_message_CUSUM <- function(prodata, data.metrics, method, pe
   CUSUMCounterAboveYellow2 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,
                                                              L, U, type = 2,listMean,listSD, guidset_selected)[2]
 
+=======
+  
+  a1 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,
+                                       L, U, type = 1,listMean,listSD, guidset_selected)
+  CUSUMCounterAboveRed1 <- a1[1]
+  CUSUMCounterAboveYellow1 <- a1[2]
+  
+  a2 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,
+                                       L, U, type = 2,listMean,listSD, guidset_selected)
+  CUSUMCounterAboveRed2 <- a2[1]
+  CUSUMCounterAboveYellow2 <-a2[2]
+  
+>>>>>>> origin/master
   if(CUSUMCounterAboveRed1 > metricThresholdRed && CUSUMCounterAboveRed2 > metricThresholdRed) return({paste("CUSUM RED FLAG: System performance is UNACCEPTABLE")})
   if(CUSUMCounterAboveRed1 > metricThresholdRed && CUSUMCounterAboveRed2 <= metricThresholdRed) return({paste("CUSUM RED FLAG: System performance is UNACCEPTABLE")})
   if(CUSUMCounterAboveRed1 <= metricThresholdRed && CUSUMCounterAboveRed2 > metricThresholdRed) return({paste("CUSUM RED FLAG: System performance is UNACCEPTABLE")})

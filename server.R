@@ -255,21 +255,25 @@ shinyServer(function(input,output,session) {
       listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
     }
 
-    p1 <- XmR.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U, listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-    p2 <- XmR.Radar.Plot(prodata, data.metrics = input$user_selected_metrics,input$L,input$U,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-    p3 <- CUSUM.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-    p4 <- CUSUM.Radar.Plot(prodata, data.metrics = input$user_selected_metrics, input$L,input$U,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-
-    if("XmR" %in% input$summary_controlChart_select && "CUSUM" %in% input$summary_controlChart_select) {
-      grid.arrange(p1,p2,p3,p4, ncol = 1)
+    plots <- list()
+    i <- 1
+    for(method in input$summary_controlChart_select) {
+      p1 <- NULL
+      p2 <- NULL
+      if(method == "XmR") {
+        p1 <- XmR.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U, listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+        p2 <- XmR.Radar.Plot(prodata, data.metrics = input$user_selected_metrics,input$L,input$U,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+      } else if(method == "CUSUM") {
+        p1 <- CUSUM.Summary.plot(prodata, data.metrics = input$user_selected_metrics, input$L, input$U,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+        p2 <- CUSUM.Radar.Plot(prodata, data.metrics = input$user_selected_metrics, input$L,input$U,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+      }
+      plots[[i]]   <- p1
+      plots[[i+1]] <- p2
+      
+      i <- i+2
     }
-    else if("XmR" %in% input$summary_controlChart_select) {
-      grid.arrange(p1,p2, ncol = 1)
-    }else if("CUSUM" %in% input$summary_controlChart_select) {
-      grid.arrange(p3,p4,ncol = 1)
-    }else {
-    }
-
+    if(length(plots) > 0)
+      do.call("grid.arrange", c(plots, ncol = 1))
   }, height = my_height )
 
   ################## decision message for XmR in summary tab #########
@@ -284,7 +288,7 @@ shinyServer(function(input,output,session) {
      metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
      peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
      metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
-     
+
      is_guidset_selected <- FALSE
      if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
        is_guidset_selected <- TRUE
@@ -324,7 +328,7 @@ shinyServer(function(input,output,session) {
     metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
     metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
-    
+
     is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
       is_guidset_selected <- TRUE
@@ -367,47 +371,40 @@ shinyServer(function(input,output,session) {
     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100
     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
-    
+
     is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
       is_guidset_selected <- TRUE
     }
-     
+
     listMean <- list()
     listSD <- list()
     for(metric in input$user_selected_metrics){
      listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
      listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
     }
-    p1 <- metrics_heat.map(prodata,
-                           data.metrics = input$user_selected_metrics, method = "XmR",
-                           peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
-                           title = "Heatmap (Changes in mean of QC metric-X)",
-                           listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
-    p2 <- metrics_heat.map(prodata,
-                           data.metrics = input$user_selected_metrics, method = "XmR",
-                           peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
-                           title = "Heatmap (Changes in variability of QC metric-mR)",
-                           listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
-    p3 <- metrics_heat.map(prodata,
-                           data.metrics = input$user_selected_metrics, method = "CUSUM",
-                           peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
-                           title = "Heatmap (Changes in mean of QC metric-CUSUMm)",
-                           listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
-    p4 <- metrics_heat.map(prodata,
-                           data.metrics = input$user_selected_metrics, method = "CUSUM",
-                           peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
-                           title = "Heatmap (Changes in variability of QC metric-CUSUMv)",
-                           listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
-    if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
-      grid.arrange(p1,p2,p3,p4, ncol = 1)
+    
+    plots <- list()
+    i <- 1
+    for(method in input$heatmap_controlChart_select) {
+      p1 <- metrics_heat.map(prodata,
+                             data.metrics = input$user_selected_metrics, method = method,
+                             peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
+                             title = "Heatmap (Changes in mean of QC metric-X)",
+                             listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
+      p2 <- metrics_heat.map(prodata,
+                             data.metrics = input$user_selected_metrics, method = method,
+                             peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
+                             title = "Heatmap (Changes in variability of QC metric-mR)",
+                             listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
+      plots[[i]]   <- p1
+      plots[[i+1]] <- p2
+      
+      i <- i+2
     }
-    else if("XmR" %in% input$heatmap_controlChart_select) {
-      grid.arrange(p1,p2, ncol = 1)
-    }else if("CUSUM" %in% input$heatmap_controlChart_select) {
-      grid.arrange(p3,p4,ncol = 1)
-    }else {
-    }
+    if(length(plots) > 0)
+      do.call("grid.arrange", c(plots, ncol = 1))
+
   }, height = my_height, width = heatmap_width)
 
   ############################################################################################################################
