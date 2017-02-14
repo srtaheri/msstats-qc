@@ -1,3 +1,5 @@
+options(shiny.maxRequestSize=1000*1024^2)
+ 
 library(shiny)
 library(shinyBS)
 library(shinyjs)
@@ -390,12 +392,12 @@ shinyServer(function(input,output,session) {
       p1 <- metrics_heat.map(prodata,
                              data.metrics = input$user_selected_metrics, method = method,
                              peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
-                             title = "Heatmap (Changes in mean of QC metric-X)",
+                             title = "Decision-map (Changes in mean of QC metric-CUSUMm Chart)",
                              listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
       p2 <- metrics_heat.map(prodata,
                              data.metrics = input$user_selected_metrics, method = method,
                              peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
-                             title = "Heatmap (Changes in variability of QC metric-mR)",
+                             title = "Decision-map (Changes in variability of QC metric-mR Chart)",
                              listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
       plots[[i]]   <- p1
       plots[[i+1]] <- p2

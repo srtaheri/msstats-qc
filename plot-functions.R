@@ -411,7 +411,7 @@ metrics_heat.map <- function(prodata,data.metrics, method,peptideThresholdRed,pe
 
   p <- ggplot(data,aes(time,metric, group = bin, fill = bin))
 
-  p <- p + scale_fill_manual(values=c("Acceptable" = "green","Unacceptable" = "red","Poor" = "yellow")
+  p <- p + scale_fill_manual(values=c("Acceptable" = "green","Unacceptable" = "red","Poor" = "yellow", name = "")
                             )
   p <- p + geom_tile(colour="white",size=.1)
   p <- p + coord_equal()
@@ -428,7 +428,7 @@ metrics_heat.map <- function(prodata,data.metrics, method,peptideThresholdRed,pe
   #p <- p +  theme(legend.title=element_text(size=16))
   #p <- p +  theme(legend.text=element_text(size=12))
   #p<-p + scale_fill_manual(values = color_palette, name = "")
-  p <- p +  theme(axis.text=element_text(size=12))
+  p <- p +  theme(axis.text=element_text(size=12),legend.title = element_blank())
 
    p
 }
