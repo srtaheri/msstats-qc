@@ -1,4 +1,4 @@
-options(shiny.maxRequestSize=1000*1024^2)
+options(shiny.maxRequestSize=100*1024^2)
  
 library(shiny)
 library(shinyBS)
@@ -141,7 +141,7 @@ shinyServer(function(input,output,session) {
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
     is_guidset_selected <- FALSE
-    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+    if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
       is_guidset_selected <- TRUE
     }
     Tabs <- lapply(input$user_selected_metrics,
@@ -173,7 +173,7 @@ shinyServer(function(input,output,session) {
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
     is_guidset_selected <- FALSE
-    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+    if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
       is_guidset_selected <- TRUE
     }
     Tabs <- lapply(input$user_selected_metrics,
@@ -199,7 +199,7 @@ shinyServer(function(input,output,session) {
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
     )
     is_guidset_selected <- FALSE
-    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+    if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
       is_guidset_selected <- TRUE
     }
     Tabs <- lapply(input$user_selected_metrics,
@@ -247,7 +247,7 @@ shinyServer(function(input,output,session) {
     )
     
     is_guidset_selected <- FALSE
-    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+    if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
       is_guidset_selected <- TRUE
     }
     listMean <- list()
@@ -292,7 +292,7 @@ shinyServer(function(input,output,session) {
      metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
 
      is_guidset_selected <- FALSE
-     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+     if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
        is_guidset_selected <- TRUE
      }
      listMean <- list()
@@ -332,7 +332,7 @@ shinyServer(function(input,output,session) {
     metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
 
     is_guidset_selected <- FALSE
-    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+    if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
       is_guidset_selected <- TRUE
     }
     listMean <- list()
@@ -375,7 +375,7 @@ shinyServer(function(input,output,session) {
     if(is.null(prodata$AcquiredTime)) return(NULL)
 
     is_guidset_selected <- FALSE
-    if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
+    if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
       is_guidset_selected <- TRUE
     }
 

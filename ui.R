@@ -4,12 +4,11 @@ library(plotly)
 library(markdown)
 library(shinythemes)
 shinyUI(fluidPage(
-  theme = shinytheme("yeti"),
+  theme = shinytheme("flatly"),
   shinyjs::useShinyjs(),
-  titlePanel(title=p(strong("MSstatsQC"),align = "center",style="color:#444444;",style="font-size:170%;",
-               style="font-family:inherit;"),windowTitle = "MSstatsQC"),
-  navbarPage(h4("System suitability monitoring tools for quantitative mass spectrometry based proteomic
-                experiments"),
+  titlePanel(title=p(("MSstatsQC"),align = "center",style="color:#0A4476;",style="font-size:170%;",
+               style="font-family:arial;"),windowTitle = "MSstatsQC"),
+  navbarPage(h4("Longitudinal system suitability monitoring and quality control for targeted proteomic experiments"),
 #################################################################################################################
               tabPanel("Home",
                          tags$img(src='logo.png', height=220, width=220, style = "float: right"),
@@ -89,20 +88,20 @@ shinyUI(fluidPage(
 
                                     sidebarPanel(
                                       wellPanel(
-                                        p("Please upload your data (Comma-separated (*.csv) QC file format)"),
+                                        p("Upload your data (Comma-separated (*.csv) QC file format)"),
                                         p("To see acceptable sample data, look at", strong("Help"),"tab"),
                                         fileInput("filein", "Upload file")
                                       ),
 
                                       wellPanel(
-                                        p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
+                                        p("If you want to run", strong("MSstatsQC"), "with sample data file, click this button"),
                                         actionButton("sample_button", "Run with sample data")
                                         #bsTooltip("sample_button","If you want to run MSstatsQC with sample data file, please click this button", placement = "bottom", trigger = "hover",
                                                   #options = NULL)
                                       ),
 
                                       wellPanel(
-                                        p("If you want to clean existing results, please click this button"),
+                                        p("If you want to clean existing results, click this button"),
                                         actionButton("clear_button", "Clear the data and plots")
                                         #bsTooltip("clear_button","click this button to clear your data and all the tables and plots from the system.", placement = "bottom", trigger = "hover",
                                                   #options = NULL)
@@ -120,8 +119,8 @@ shinyUI(fluidPage(
                                     ),
                                     position = "left")
                                   ),
-                         tabPanel("User selection",
-                                  p(strong("Please select QC metrics:")),
+                         tabPanel("User Selection",
+                                  p(strong("Select QC metrics:")),
                                   wellPanel(
                                     fluidRow(
                                       column(10,
@@ -131,22 +130,22 @@ shinyUI(fluidPage(
                                   ),
                                   wellPanel(
                                     radioButtons("selectGuideSetOrMeanSD",
-                                                 "If you want to select mean and standard deviation yourself please select them here. Otherwise please choose the guide set button.",
-                                                 choices = c("I want to select mean and standard deviation myself","I want to select the guide set")
+                                                 "If QC metric mean and standard deviation is prespecified, enter them here. Otherwise, choose the guide set button.",
+                                                 choices = c("Mean and standard deviation prespecified","Mean and standard deviation estimated from guide set")
                                                  ),
                                     conditionalPanel(
-                                      condition = "input.selectGuideSetOrMeanSD == 'I want to select mean and standard deviation myself'",
-                                      p("please select the mean and standard deviation"),
+                                      condition = "input.selectGuideSetOrMeanSD == 'Mean and standard deviation prespecified'",
+                                      p("Enter mean and standard deviation"),
                                       uiOutput("selectMeanSD")
                                     ),
                                     conditionalPanel(
-                                      condition = "input.selectGuideSetOrMeanSD == 'I want to select the guide set'",
-                                      p("Please select a guide set to estimate control limits"),
+                                      condition = "input.selectGuideSetOrMeanSD == 'Mean and standard deviation estimated from guide set'",
+                                      p("Define a guide set to estimate mean and standard deviation"),
                                       uiOutput("selectGuideSet")
                                     )
                                   ),
                                   wellPanel(
-                                    p("Please select a precursor or select all"),
+                                    p("Select a precursor or select all"),
                                     uiOutput("pepSelect")
                                   )
                                   )
@@ -155,7 +154,7 @@ shinyUI(fluidPage(
 ######################################################################################################
              tabPanel("Create Decision Rules", theme = "bootstrap.css",
                       fluidPage(
-                        p(strong("Please create your decision rule:")),
+                        p(strong("Create your decision rule:")),
                         wellPanel(
                           fluidRow(
                             p(strong("RED FLAG"), style="color:black; background-color: red;",align = "center",style="font-size:125%;"),
@@ -222,7 +221,7 @@ shinyUI(fluidPage(
                                   plotlyOutput("box_plot", height = 2000)
                          ),
 
-                         tabPanel("Overall Performance: Heatmaps",
+                         tabPanel("Overall Performance: Decision-maps",
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                    tags$div("It may take a while to load the plots, please wait...",
