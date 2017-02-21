@@ -410,25 +410,16 @@ metrics_heat.map <- function(prodata,data.metrics, method,peptideThresholdRed,pe
   #color_palette <- colorRampPalette(c("green", "yellow", "red"))(3)
   data <- heatmap.DataFrame(prodata, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type,listMean, listSD, guidset_selected)
 
-  p <- ggplot(data,aes(time,metric, group = bin, fill = bin))
-
-  p <- p + scale_fill_manual(values=c("Acceptable" = "green","Unacceptable" = "red","Poor" = "yellow")
-                            )
+  p <- ggplot(data,aes(time,metric, group = flag, fill = flag))
+  p <- p + scale_fill_manual(values=c("Acceptable" = "blue","Unacceptable" = "red","Poor" = "yellow")
+                             )
+  
   p <- p + geom_tile(colour="white",size=.1)
   p <- p + coord_equal()
-  #p <- p + theme_minimal(base_size = 10, base_family = "Trebuchet MS")
   p <- p + removeGrid()
   p <- p + rotateTextX()
-
   p <- p + ggtitle(title,subtitle = "")
-
   p <- p + labs(x=NULL, y=NULL)
-  #p <- p + theme(plot.title=element_text(hjust=0))
-  #p <- p + theme(axis.ticks=element_blank())
-
-  #p <- p +  theme(legend.title=element_text(size=16))
-  #p <- p +  theme(legend.text=element_text(size=12))
-  #p<-p + scale_fill_manual(values = color_palette, name = "")
   p <- p +  theme(axis.text=element_text(size=12))
 
    p

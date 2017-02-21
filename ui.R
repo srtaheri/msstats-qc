@@ -4,12 +4,13 @@ library(plotly)
 library(markdown)
 library(shinythemes)
 shinyUI(fluidPage(
-  theme = shinytheme("yeti"),
+  #theme = shinytheme("yeti"),
   shinyjs::useShinyjs(),
-  titlePanel(title=p(strong("MSstatsQC"),align = "center",style="color:#444444;",style="font-size:170%;",
+  titlePanel(title=p(strong("MSstatsQC"),align = "center",style="color:darkblue;",style="font-size:170%;",
                style="font-family:inherit;"),windowTitle = "MSstatsQC"),
   navbarPage(h4("System suitability monitoring tools for quantitative mass spectrometry based proteomic
-                experiments"),
+                experiments",style="color:darkblue;"),
+             ##888888
 #################################################################################################################
               tabPanel("Home",
                          tags$img(src='logo.png', height=220, width=220, style = "float: right"),
@@ -39,7 +40,7 @@ shinyUI(fluidPage(
                            cumulative sum (CUSUM) control charts. To successfully identify the time of change, change point analysis
                            is also included in this framework. Experiment specific control limits are provided with the control
                            charts to distinguish between random noise and systematic error. MSstatsQC can also help user on decision making.
-                           Decision regions (red, yellow and green) can be designed with 'Create Decision Rules' tab and results are available in 'Metric Summary' tab."),
+                           Decision regions (red, yellow and blue) can be designed with 'Create Decision Rules' tab and results are available in 'Metric Summary' tab."),
                        h5(strong("Using MSstatsQC")),
                        p("The steps for generating results are as follows:"),
                        p("INCLUDE CHEATSHEET WORKFLOW!!!"),
@@ -89,21 +90,21 @@ shinyUI(fluidPage(
 
                                     sidebarPanel(
                                       wellPanel(
-                                        p("Please upload your data (Comma-separated (*.csv) QC file format)"),
-                                        p("To see acceptable sample data, look at", strong("Help"),"tab"),
+                                        p("Upload your data (Comma-separated (*.csv) QC file format)"),
+                                        p("To see acceptable example data, look at", strong("Help"),"tab"),
                                         fileInput("filein", "Upload file")
                                       ),
 
                                       wellPanel(
-                                        p("If you want to run", strong("MSstatsQC"), "with sample data file, please click this button"),
-                                        actionButton("sample_button", "Run with sample data")
-                                        #bsTooltip("sample_button","If you want to run MSstatsQC with sample data file, please click this button", placement = "bottom", trigger = "hover",
+                                        p("If you want to run", strong("MSstatsQC"), "with example data file, click this button"),
+                                        actionButton("sample_button", "Run with example data")
+                                        #bsTooltip("sample_button","If you want to run MSstatsQC with example data file, click this button", placement = "bottom", trigger = "hover",
                                                   #options = NULL)
                                       ),
 
                                       wellPanel(
-                                        p("If you want to clean existing results, please click this button"),
-                                        actionButton("clear_button", "Clear the data and plots")
+                                        p("If you want to clean existing results, click this button"),
+                                        actionButton("clear_button", "Clear data and plots")
                                         #bsTooltip("clear_button","click this button to clear your data and all the tables and plots from the system.", placement = "bottom", trigger = "hover",
                                                   #options = NULL)
                                       ),
@@ -120,8 +121,8 @@ shinyUI(fluidPage(
                                     ),
                                     position = "left")
                                   ),
-                         tabPanel("User selection",
-                                  p(strong("Please select QC metrics:")),
+                         tabPanel("Option",
+                                  p(strong("Select QC metrics for all the subsequence analyses:")),
                                   wellPanel(
                                     fluidRow(
                                       column(10,
@@ -131,22 +132,23 @@ shinyUI(fluidPage(
                                   ),
                                   wellPanel(
                                     radioButtons("selectGuideSetOrMeanSD",
-                                                 "If you want to select mean and standard deviation yourself please select them here. Otherwise please choose the guide set button.",
+                                                 "If you want to select mean and standard deviation yourself select them here. Otherwise choose the guide set button.",
+                                                 #"define mean and standard deviation",
                                                  choices = c("I want to select mean and standard deviation myself","I want to select the guide set")
                                                  ),
                                     conditionalPanel(
                                       condition = "input.selectGuideSetOrMeanSD == 'I want to select mean and standard deviation myself'",
-                                      p("please select the mean and standard deviation"),
+                                      p("Select the mean and standard deviation"),
                                       uiOutput("selectMeanSD")
                                     ),
                                     conditionalPanel(
                                       condition = "input.selectGuideSetOrMeanSD == 'I want to select the guide set'",
-                                      p("Please select a guide set to estimate control limits"),
+                                      p("Select a guide set to estimate control limits"),
                                       uiOutput("selectGuideSet")
                                     )
                                   ),
                                   wellPanel(
-                                    p("Please select a precursor or select all"),
+                                    p("Select a precursor or select all"),
                                     uiOutput("pepSelect")
                                   )
                                   )
@@ -155,13 +157,13 @@ shinyUI(fluidPage(
 ######################################################################################################
              tabPanel("Create Decision Rules", theme = "bootstrap.css",
                       fluidPage(
-                        p(strong("Please create your decision rule:")),
+                        p(strong("Create your decision rule:")),
                         wellPanel(
                           fluidRow(
                             p(strong("RED FLAG"), style="color:black; background-color: red;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is UNACCEPTABLE when:"),align = "center"),
-                            p("1. Greater than the selected % of peptides are", strong("out of control"),"and"),
-                            p("2. Greater than the selected # of QC metrics are", strong("out of control."))
+                            p("1. greater than the selected % of peptides are", strong("out of control"),"and"),
+                            p("2. greater than the selected # of QC metrics are", strong("out of control."))
                           ),
                           fluidRow(
                             column(2,
@@ -182,8 +184,8 @@ shinyUI(fluidPage(
                           fluidRow(
                             p(strong("YELLOW FLAG"), style="color:black; background-color: yellow;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is POOR when:"),align = "center"),
-                            p("1. Greater than the selected % of peptides are", strong("out of control"),"and"),
-                            p("2. Greater than the selected # of QC metrics are", strong("out of control.")),
+                            p("1. greater than the selected % of peptides are", strong("out of control"),"and"),
+                            p("2. greater than the selected # of QC metrics are", strong("out of control.")),
                             p("Warning:The limits should be less than or equal to the the RED FLAG limits")
                           ),
                           fluidRow(
@@ -202,7 +204,7 @@ shinyUI(fluidPage(
                         ),
                         wellPanel(
                           fluidRow(
-                            p(strong("GREEN FLAG"), style="color:black; background-color: green;",align = "center",style="font-size:125%;"),
+                            p(strong("BLUE FLAG"), style="color:black; background-color: blue;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is ACCEPTABLE when:"),align = "center"),
                             p("RED FLAG and YELLOW FLAG limits are not exceeded.")
                           )
@@ -229,7 +231,7 @@ shinyUI(fluidPage(
                                                             id="loadmessage")),
                                   sidebarLayout(
                                     sidebarPanel(
-                                      checkboxGroupInput("heatmap_controlChart_select", "Please select your control chart",
+                                      checkboxGroupInput("heatmap_controlChart_select", "Select your control chart",
                                                          choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR"),
                                       htmlOutput("heatmap_txt")
                                     ),
@@ -245,7 +247,7 @@ shinyUI(fluidPage(
                                                               id="loadmessage")),
                                     sidebarLayout(
                                       sidebarPanel(
-                                        checkboxGroupInput("summary_controlChart_select", "Please select your control chart",
+                                        checkboxGroupInput("summary_controlChart_select", "Select your control chart",
                                                            choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR"),
                                         htmlOutput("summary_decision_txt")
                                       ),

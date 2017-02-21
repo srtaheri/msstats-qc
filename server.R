@@ -28,7 +28,7 @@ shinyServer(function(input,output,session) {
     file1 <- input$filein
     data$df <- input_checking(read.csv(file=file1$datapath, sep=",", header=TRUE, stringsAsFactors=TRUE))
     validate(
-      need(!is.null(data$df), "Please upload your data"),
+      need(!is.null(data$df), "Upload your data"),
       need(is.data.frame(data$df), data$df)
     )
     #data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
@@ -38,7 +38,7 @@ shinyServer(function(input,output,session) {
   observeEvent(input$sample_button, {
     data$df <- input_checking(read.csv("./Datasets/Sampledata_CPTAC_Study_9_1_Site54.csv"))
     validate(
-      need(!is.null(data$df), "Please upload your data"),
+      need(!is.null(data$df), "Upload your data"),
       need(is.data.frame(data$df), data$df)
     )
     
@@ -54,7 +54,7 @@ shinyServer(function(input,output,session) {
   output$pepSelect <- renderUI({
     prodata <- data$df
     validate(
-      need(!is.null(prodata), "Please upload your data"),
+      need(!is.null(prodata), "Upload your data"),
       need(is.data.frame(prodata), prodata)
     )
     selectInput("pepSelection","Choose peptide"
@@ -65,7 +65,7 @@ shinyServer(function(input,output,session) {
   ######Show table of data #####################################################################################################
    output$prodata_table <- renderDataTable({
      validate(
-       need(!is.null(data$df), "Please upload your data"),
+       need(!is.null(data$df), "Upload your data"),
        need(is.data.frame(data$df), data$df)
      )
      data$df
@@ -134,9 +134,9 @@ shinyServer(function(input,output,session) {
   output$XmR_tabset <- renderUI({
     
     validate(
-      need(!is.null(data$df), "Please upload your data first"),
+      need(!is.null(data$df), "Upload your data first"),
       need(is.data.frame(data$df), data$df),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"First select QC metrics and create a decision rule")
     )
     is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
@@ -166,9 +166,9 @@ shinyServer(function(input,output,session) {
   #################################################################################################################
   output$CUSUM_tabset <- renderUI({
     validate(
-      need(!is.null(data$df), "Please upload your data first"),
+      need(!is.null(data$df), "Upload your data first"),
       need(is.data.frame(data$df), data$df),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"First select QC metrics and create a decision rule")
     )
     is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
@@ -192,9 +192,9 @@ shinyServer(function(input,output,session) {
   #################################################################################################################
   output$CP_tabset <- renderUI({
     validate(
-      need(!is.null(data$df), "Please upload your data first"),
+      need(!is.null(data$df), "Upload your data first"),
       need(is.data.frame(data$df), data$df),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"First select QC metrics and create a decision rule")
     )
     is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "I want to select the guide set") {
@@ -227,9 +227,9 @@ shinyServer(function(input,output,session) {
   output$box_plot <- renderPlotly({
     prodata <- data$df
     validate(
-      need(!is.null(prodata), "Please upload your data"),
+      need(!is.null(prodata), "Upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"First select QC metrics and create a decision rule")
     )
     metrics_box.plot(prodata, data.metrics = input$user_selected_metrics)
   })
@@ -239,9 +239,9 @@ shinyServer(function(input,output,session) {
 
     prodata <- data$df
     validate(
-      need(!is.null(prodata), "Please upload your data"),
+      need(!is.null(prodata), "Upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"First select QC metrics and create a decision rule")
     )
     
     is_guidset_selected <- FALSE
@@ -280,9 +280,9 @@ shinyServer(function(input,output,session) {
    output$summary_decision_txt <- renderUI({
      prodata <- data$df
      validate(
-       need(!is.null(prodata), "Please upload your data"),
+       need(!is.null(prodata), "Upload your data"),
        need(is.data.frame(prodata), prodata),
-       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+       need(!is.null(input$user_selected_metrics),"First select QC metrics and create a decision rule")
      )
      peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
      metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
@@ -320,9 +320,9 @@ shinyServer(function(input,output,session) {
   output$heatmap_txt <- renderUI({
     prodata <- data$df
     validate(
-      need(!is.null(prodata), "Please upload your data"),
+      need(!is.null(prodata), "Upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"First select QC metrics and create a decision rule")
     )
     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
     metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
@@ -362,9 +362,9 @@ shinyServer(function(input,output,session) {
   output$heat_map <- renderPlot({
     prodata <- data$df
     validate(
-      need(!is.null(prodata), "Please upload your data"),
+      need(!is.null(prodata), "Upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule"),
+      need(!is.null(input$user_selected_metrics),"First select QC metrics and create a decision rule"),
       need(!is.null(prodata$AcquiredTime),"To view heatmaps, the dataset should include Acquired Time column.")
     )
 
