@@ -413,14 +413,12 @@ metrics_heat.map <- function(prodata,data.metrics, method,peptideThresholdRed,pe
   p <- ggplot(data,aes(time,metric, group = flag, fill = flag))
   p <- p + scale_fill_manual(values=c("Acceptable" = "blue","Unacceptable" = "red","Poor" = "yellow")
                              )
-  
   p <- p + geom_tile(colour="white",size=.1)
   p <- p + coord_equal()
   p <- p + removeGrid()
   p <- p + rotateTextX()
   p <- p + ggtitle(title,subtitle = "")
   p <- p + labs(x=NULL, y=NULL)
-  p <- p +  theme(axis.text=element_text(size=12))
-
-   p
+  p <- p +  theme(axis.text=element_text(size=12),legend.title = element_blank())
+  p
 }

@@ -350,7 +350,6 @@ heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,p
                           metric = met,
                           flag = flag
                          )
-  #print(dataFrame)
 
   return(dataFrame)
 }
@@ -527,8 +526,10 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
                                            rep("Metric mean",max_QCno),
                                            rep("Metric dispersion",max_QCno)
                             ),
-                            metric = rep(metric,max_QCno)
-                            ,flag = rep(0,max_QCno)
+                            metric = rep(metric,max_QCno),
+
+                            flag = rep(0,max_QCno)
+
                             )
 
 
@@ -546,6 +547,7 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
   }
 
     if(type == 2) {
+
       return(plot.data[-1,])
     }
     return(plot.data)
@@ -560,6 +562,7 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
   metricCounterAboveYellowBelowRed = 0
   
   for (metric in data.metrics) {
+
   QCno    <- 1:nrow(prodata)
   y <- rep(0,nrow(prodata))
   counter <- rep(0,nrow(prodata))
@@ -588,6 +591,7 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
   }
   if(length(aboveYellowBelowRed) > 0) {
     metricCounterAboveYellowBelowRed = metricCounterAboveYellowBelowRed + 1
+
   }
   }
   return(c(metricCounterAboveRed,metricCounterAboveYellowBelowRed))
@@ -600,19 +604,11 @@ decisionRule_warning_message_XmR <- function(prodata, data.metrics, method, pept
                                       L, U, type = 1,listMean,listSD, guidset_selected)
   XmRCounterAboveRed1 <- a1[1]
   XmRCounterAboveYellow1 <- a1[2]
-  
-  print("xmr type1")
-  print(XmRCounterAboveRed1)
-  print(XmRCounterAboveYellow1)
 
   a2 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,
                                        L, U, type = 2,listMean,listSD, guidset_selected)
   XmRCounterAboveRed2 <- a2[1]
   XmRCounterAboveYellow2 <- a2[2]
-  
-  print("xmr type2")
-  print(XmRCounterAboveRed2)
-  print(XmRCounterAboveYellow2)
 
   if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 > metricThresholdRed) return({paste("XmR RED FLAG: System performance is UNACCEPTABLE")})
   if(XmRCounterAboveRed1 > metricThresholdRed && XmRCounterAboveRed2 <= metricThresholdRed) return({paste("XmR RED FLAG: System performance is UNACCEPTABLE")})
@@ -630,18 +626,11 @@ decisionRule_warning_message_CUSUM <- function(prodata, data.metrics, method, pe
                                        L, U, type = 1,listMean,listSD, guidset_selected)
   CUSUMCounterAboveRed1 <- a1[1]
   CUSUMCounterAboveYellow1 <- a1[2]
-  print("type1 cusum")
-  print(CUSUMCounterAboveRed1)
-  print(CUSUMCounterAboveYellow1)
-  
+
   a2 <- number.Of.Out.Of.Range.Metrics(prodata,data.metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,
                                        L, U, type = 2,listMean,listSD, guidset_selected)
   CUSUMCounterAboveRed2 <- a2[1]
   CUSUMCounterAboveYellow2 <-a2[2]
-  
-  print("type2 cusum")
-  print(CUSUMCounterAboveRed2)
-  print(CUSUMCounterAboveYellow2)
 
   if(CUSUMCounterAboveRed1 > metricThresholdRed && CUSUMCounterAboveRed2 > metricThresholdRed) return({paste("CUSUM RED FLAG: System performance is UNACCEPTABLE")})
   if(CUSUMCounterAboveRed1 > metricThresholdRed && CUSUMCounterAboveRed2 <= metricThresholdRed) return({paste("CUSUM RED FLAG: System performance is UNACCEPTABLE")})
@@ -649,5 +638,7 @@ decisionRule_warning_message_CUSUM <- function(prodata, data.metrics, method, pe
   if(CUSUMCounterAboveYellow1 > metricThresholdYellow && CUSUMCounterAboveYellow2 > metricThresholdYellow) return({"CUSUM Yellow FLAG: System performance is POOR"})
   if(CUSUMCounterAboveYellow1 <= metricThresholdYellow && CUSUMCounterAboveYellow2 > metricThresholdYellow) return({"CUSUM Yellow FLAG: System performance is POOR"})
   if(CUSUMCounterAboveYellow1 > metricThresholdYellow && CUSUMCounterAboveYellow2 <= metricThresholdYellow) return({"CUSUM Yellow FLAG: System performance is POOR"})
+
   return({"CUSUM BLUE FLAG: System performance is acceptable"})
+
   }
