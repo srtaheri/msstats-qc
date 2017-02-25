@@ -141,15 +141,15 @@ shinyUI(fluidPage(
 
                                                  "If you want to select mean and standard deviation yourself select them here. Otherwise choose the guide set button.",
                                                  #"define mean and standard deviation",
-                                                 choices = c("I want to select mean and standard deviation myself","I want to select the guide set")
+                                                 choices = c("Mean and standard deviation estimated by the user","Mean and standard deviation estimated from guide set")
                                                  ),
                                     conditionalPanel(
-                                      condition = "input.selectGuideSetOrMeanSD == 'I want to select mean and standard deviation myself'",
+                                      condition = "input.selectGuideSetOrMeanSD == 'Mean and standard deviation estimated by the user'",
                                       p("Select the mean and standard deviation"),
                                       uiOutput("selectMeanSD")
                                     ),
                                     conditionalPanel(
-                                      condition = "input.selectGuideSetOrMeanSD == 'I want to select the guide set'",
+                                      condition = "input.selectGuideSetOrMeanSD == 'Mean and standard deviation estimated from guide set'",
                                       p("Select a guide set to estimate control limits"),
 
                                       uiOutput("selectGuideSet")
