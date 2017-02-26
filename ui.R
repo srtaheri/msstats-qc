@@ -126,7 +126,7 @@ shinyUI(fluidPage(
                                     position = "left")
                                   ),
 
-                         tabPanel("Option",
+                         tabPanel("Options",
                                   p(strong("Select QC metrics for all the subsequence analyses:")),
 
                                   wellPanel(
