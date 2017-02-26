@@ -27,12 +27,33 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
   )
   precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   plots <- list()
-
+  annot_list <- list()
   if(precursorSelection == "all peptides") {
     results <- lapply(c(1:nlevels(prodata$Precursor)), function(j) {
       metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = normalization,selectMean,selectSD, guidset_selected)
       plots[[2*j-1]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title1, type = 1,selectMean,selectSD, guidset_selected)
       plots[[2*j]] <<- do.plot(prodata, metricData, precursors[j],L,U, plot.method, y.title2, type = 2,selectMean,selectSD, guidset_selected)
+      if(j==1) {
+        plots[[2*j-1]] <<- plots[[2*j-1]] %>% layout(annotations = list(
+          list(x = 0.5 , y = 1.05, text = "Mean", showarrow = F, xref='paper', yref='paper'),
+          list(x = 0.5 , y = -0.1, text = precursors[j], showarrow = F, xref='paper', yref='paper')
+        ))
+        plots[[2*j]] <<- plots[[2*j]] %>% 
+          layout(
+            annotations = list(
+              list(x = 0.5 , y = 1.05, text = "Dispersion", showarrow = F, xref='paper', yref='paper'),
+              list(x = 0.5 , y = -0.1, text = precursors[j], showarrow = F, xref='paper', yref='paper')
+            ))
+      } else {
+        plots[[2*j-1]] <<- plots[[2*j-1]] %>% layout(annotations = list(
+          list(x = 0.5 , y = -0.1, text = precursors[j], showarrow = F, xref='paper', yref='paper')
+        ))
+        plots[[2*j]] <<- plots[[2*j]] %>% 
+          layout(
+            annotations = list(
+              list(x = 0.5 , y = -0.1, text = precursors[j], showarrow = F, xref='paper', yref='paper')
+            ))
+      }
     })
 
     do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>%
@@ -41,10 +62,25 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
 
   else {
     metricData <- getMetricData(prodata, precursorSelection, L, U, metric = metric, normalization,selectMean,selectSD, guidset_selected)
-    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title1, type = 1,selectMean,selectSD, guidset_selected)
-    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2,selectMean,selectSD, guidset_selected)
+    plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title1, type = 1,selectMean,selectSD, guidset_selected) %>%
+      layout(annotations = list(
+        list(x = 0.2 , y = 1.05, text = "Mean", showarrow = F, xref='paper', yref='paper'),
+        list(x = 0.5 , y = -0.1, text = precursorSelection, showarrow = F, xref='paper', yref='paper')
+      ))
+    plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2,selectMean,selectSD, guidset_selected) %>%
+      layout(
+        annotations = list(
+          list(x = 0.8 , y = 1.05, text = "Dispersion", showarrow = F, xref='paper', yref='paper'),
+          list(x = 0.5 , y = -0.1, text = precursorSelection, showarrow = F, xref='paper', yref='paper')
+        ))
 
     subplot(plot1,plot2)
+    # %>%
+    #   layout(annotations = list(
+    #     list(x = 0.2 , y = 1.05, text = "Mean", showarrow = F, xref='paper', yref='paper'),
+    #     list(x = 0.8 , y = 1.05, text = "Dispersion", showarrow = F, xref='paper', yref='paper'),
+    #     list(x = 0.5 , y = -0.1, text = precursorSelection, showarrow = F, xref='paper', yref='paper'))
+    #   )
     #plot1
 
   }
