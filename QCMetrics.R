@@ -582,7 +582,7 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
   if(type == 2) {
     pr.y <- pr.y[-1]
   }
-  print(pr.y)
+  
   aboveYellow <- which(pr.y > peptideThresholdYellow)
   aboveYellowBelowRed <- which(pr.y > peptideThresholdYellow & pr.y <= peptideThresholdRed)
 
