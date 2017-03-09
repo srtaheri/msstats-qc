@@ -217,7 +217,7 @@ shinyServer(function(input,output,session) {
   })
   ######################################################### height and width in Summary tab ########################################
   my_height <- reactive({
-    my_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*230
+    my_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*240
   })
 
   heatmap_width <- reactive({
@@ -279,86 +279,86 @@ shinyServer(function(input,output,session) {
   }, height = my_height )
 
   ################## decision message for XmR in summary tab #########
-   output$summary_decision_txt <- renderUI({
-     prodata <- data$df
-     validate(
-       need(!is.null(prodata), "Please upload your data"),
-       need(is.data.frame(prodata), prodata),
-       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
-     )
-     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
-     metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
-     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
-     metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
-
-     is_guidset_selected <- FALSE
-     if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
-       is_guidset_selected <- TRUE
-     }
-     listMean <- list()
-     listSD <- list()
-     for(metric in input$user_selected_metrics){
-       listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
-       listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
-     }
-     if("XmR" %in% input$summary_controlChart_select && "CUSUM" %in% input$summary_controlChart_select) {
-       HTML(paste(
-         decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                            input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),"\n\n",
-         decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                          input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
-         sep = "<br/>"
-       ))
-     }else if("CUSUM" %in% input$summary_controlChart_select) {
-       decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                          input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-     }else if("XmR" %in% input$summary_controlChart_select) {
-       decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                        input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-     }else {
-     }
-  })
+  #  output$summary_decision_txt <- renderUI({
+  #    prodata <- data$df
+  #    validate(
+  #      need(!is.null(prodata), "Please upload your data"),
+  #      need(is.data.frame(prodata), prodata),
+  #      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+  #    )
+  #    peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
+  #    metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
+  #    peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
+  #    metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
+  # 
+  #    is_guidset_selected <- FALSE
+  #    if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
+  #      is_guidset_selected <- TRUE
+  #    }
+  #    listMean <- list()
+  #    listSD <- list()
+  #    for(metric in input$user_selected_metrics){
+  #      listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
+  #      listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
+  #    }
+  #    if("XmR" %in% input$summary_controlChart_select && "CUSUM" %in% input$summary_controlChart_select) {
+  #      HTML(paste(
+  #        decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+  #                                           input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),"\n\n",
+  #        decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+  #                                         input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
+  #        sep = "<br/>"
+  #      ))
+  #    }else if("CUSUM" %in% input$summary_controlChart_select) {
+  #      decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+  #                                         input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+  #    }else if("XmR" %in% input$summary_controlChart_select) {
+  #      decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+  #                                       input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+  #    }else {
+  #    }
+  # })
   ################## decision message for XmR in heatmap tab #########
-  output$heatmap_txt <- renderUI({
-    prodata <- data$df
-    validate(
-      need(!is.null(prodata), "Please upload your data"),
-      need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
-    )
-    peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
-    metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
-    peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
-    metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
-
-    is_guidset_selected <- FALSE
-    if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
-      is_guidset_selected <- TRUE
-    }
-    listMean <- list()
-    listSD <- list()
-    for(metric in input$user_selected_metrics){
-      listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
-      listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
-    }
-    if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
-      HTML(paste(
-        decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                         input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
-        decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                         input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
-        sep = "<br/><br/>"
-      ))
-    }else if("CUSUM" %in% input$heatmap_controlChart_select) {
-      decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                       input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-    }else if("XmR" %in% input$heatmap_controlChart_select) {
-      decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-                                       input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-    }else {
-    }
-
-  })
+  # output$heatmap_txt <- renderUI({
+  #   prodata <- data$df
+  #   validate(
+  #     need(!is.null(prodata), "Please upload your data"),
+  #     need(is.data.frame(prodata), prodata),
+  #     need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+  #   )
+  #   peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
+  #   metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
+  #   peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
+  #   metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
+  # 
+  #   is_guidset_selected <- FALSE
+  #   if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
+  #     is_guidset_selected <- TRUE
+  #   }
+  #   listMean <- list()
+  #   listSD <- list()
+  #   for(metric in input$user_selected_metrics){
+  #     listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
+  #     listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
+  #   }
+  #   if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
+  #     HTML(paste(
+  #       decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+  #                                        input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
+  #       decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+  #                                        input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
+  #       sep = "<br/><br/>"
+  #     ))
+  #   }else if("CUSUM" %in% input$heatmap_controlChart_select) {
+  #     decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+  #                                      input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+  #   }else if("XmR" %in% input$heatmap_controlChart_select) {
+  #     decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
+  #                                      input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
+  #   }else {
+  #   }
+  # 
+  # })
   ############################# heat_map in Summary tab #############################################
 
   output$heat_map <- renderPlot({

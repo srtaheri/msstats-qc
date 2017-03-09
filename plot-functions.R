@@ -25,7 +25,7 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
   validate(
     need(!is.null(prodata), "Please upload your data")
   )
-  precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+  precursors <- levels(prodata$Precursor)
   plots <- list()
   annot_list <- list()
   if(precursorSelection == "all peptides") {
@@ -78,14 +78,6 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
         )
 
     subplot(plot1,plot2)
-    # %>%
-    #   layout(annotations = list(
-    #     list(x = 0.2 , y = 1.05, text = "Mean", showarrow = F, xref='paper', yref='paper'),
-    #     list(x = 0.8 , y = 1.05, text = "Dispersion", showarrow = F, xref='paper', yref='paper'),
-    #     list(x = 0.5 , y = -0.1, text = precursorSelection, showarrow = F, xref='paper', yref='paper'))
-    #   )
-    #plot1
-
   }
 }
 #################################################################################################################
@@ -99,7 +91,7 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
 #DESCRIPTION : draw one plot (which is either Individual Value or Moving Range based on the type user chooses) for each metric and method
 do.plot <- function(prodata, metricData, precursorSelection, L, U, plot.method,  y.title, type,selectMean,selectSD, guidset_selected) {
   if(plot.method=="CUSUM") {
-    CUSUM.plot(prodata, metricData, precursorSelection, L, U,  y.title, type)
+    CUSUM.plot(prodata, metricData, precursorSelection, y.title, type)
   } else if(plot.method=="CP") {
     CP.plot(prodata, metricData, precursorSelection, y.title, type)
   } else if(plot.method=="XmR") {
@@ -114,8 +106,8 @@ do.plot <- function(prodata, metricData, precursorSelection, L, U, plot.method, 
 #          "ytitle" is the title of the plot which is either Individual Value or Moving Range
 #          "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
 #DESCRIPTION: draws one CUSUM plot based on type for each given metric
-CUSUM.plot <- function(prodata, metricData, precursorSelection, L, U,  ytitle, type) {
-  plot.data <- CUSUM.data.prepare(prodata, metricData, precursorSelection, L, U, type)
+CUSUM.plot <- function(prodata, metricData, precursorSelection,  ytitle, type) {
+  plot.data <- CUSUM.data.prepare(prodata, metricData, precursorSelection, type)
   plot.data1 <- data.frame(
     QCno = rep(plot.data$QCno,2),
     CUSUMValue = c(plot.data$CUSUM.poz, plot.data$CUSUM.neg),
@@ -265,7 +257,7 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U,listMean,listSD,guidset_se
 
   dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U,listMean,listSD,guidset_selected)
   #write.csv(file="dataRadar.csv",dat)
-  
+  #print(dat)
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby),
                   group = group, colour = group, fill=group)) +
     coord_polar() +

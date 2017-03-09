@@ -59,7 +59,7 @@ find_custom_metrics <- function(prodata) {
 #        "L" and "U" are lower and upper bound of guide set that user choose in Data Import tab.
 #        "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
 #DESCRIPTION : returns a data frame for CUSUM that contains all the information needed to plot CUSUM
-CUSUM.data.prepare <- function(prodata, metricData, precursorSelection, L, U, type) {
+CUSUM.data.prepare <- function(prodata, metricData, precursorSelection, type) {
 
   k=0.5
   CUSUM.outrange.thld <- 5
@@ -119,28 +119,28 @@ CUSUM.data.prepare <- function(prodata, metricData, precursorSelection, L, U, ty
 #        "type" is either 1 or 2. one is "Individual Value" plot and other "Moving Range" plot
 #DESCRIPTION : returns a data frame for CP that contains all the information needed to plot Change Point
 CP.data.prepare <- function(prodata, metricData, type) {
-
-  Et <-  numeric(length(metricData)-1) # this is Ct in type 1, and Dt in type 2.
-  SS<- numeric(length(metricData)-1)
-  SST<- numeric(length(metricData)-1)
+  length_metricData <- length(metricData)
+  Et <-  numeric(length_metricData-1) # this is Ct in type 1, and Dt in type 2.
+  SS<- numeric(length_metricData-1)
+  SST<- numeric(length_metricData-1)
   tho.hat <- 0
 
   if(type == 1) {
     ## Change point analysis for mean (Single step change model)
-    for(i in 1:(length(metricData)-1)) {
-      Et[i]=(length(metricData)-i)*(((1/(length(metricData)-i))*sum(metricData[(i+1):length(metricData)]))-0)^2 #change point function
+    for(i in 1:(length_metricData - 1)) {
+      Et[i]=(length_metricData-i)*(((1/(length_metricData-i))*sum(metricData[(i+1):length_metricData]))-0)^2 #change point function
     }
-    QCno=1:(length(metricData)-1)
+    QCno=1:(length_metricData - 1)
   } else if(type == 2) {
     ## Change point analysis for variance (Single step change model)
-    for(i in 1:length(metricData)) {
+    for(i in 1:length_metricData) {
       SS[i]=metricData[i]^2
     }
-    for(i in 1:length(metricData)) {
-      SST[i]=sum(SS[i:length(metricData)])
-      Et[i]=((SST[i]/2)-((length(metricData)-i+1)/2)*log(SST[i]/(length(metricData)-i+1))-(length(metricData)-i+1)/2) #change point function
+    for(i in 1:length_metricData) {
+      SST[i]=sum(SS[i:length_metricData])
+      Et[i]=((SST[i]/2)-((length_metricData-i+1)/2)*log(SST[i]/(length_metricData-i+1))-(length_metricData-i+1)/2) #change point function
     }
-    QCno=1:length(metricData)
+    QCno=1:length_metricData
   }
   tho.hat = which(Et==max(Et)) # change point estimate
   plot.data <- data.frame(QCno,Et,tho.hat)
@@ -237,7 +237,7 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type,selectMean,selectSD
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
     counter[1:length(metricData)] <- counter[1:length(metricData)]+1
-    plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
+    plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], type)
 
     sub.poz <- plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]
     sub.neg <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
@@ -378,7 +378,7 @@ heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,p
 #
 #   for(j in 1:length(precursors)) {
 #     metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
-#     plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
+#     plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], type)
 #     if(CUSUM.type == "poz")
 #       QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno))
 #     else
@@ -387,8 +387,7 @@ heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,p
 #   return(QCno.out.range)
 # }
 ###############################################################################################################
-XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group,selectMean,selectSD, guidset_selected) {
-  #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
+XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group,XmR_type,selectMean,selectSD, guidset_selected) {
   precursors <- prodata$Precursor
   precursors2 <- substring(precursors, first = 1, last = 3)
   QCno.length <- c()
@@ -402,24 +401,28 @@ XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group,selectMean,se
     QCno.out.range.neg <- c(QCno.out.range.neg,length(plot.data[plot.data$t <= plot.data$LCL, ]$QCno))
   }
   #pr <- Compute.QCno.OutOfRangePeptide.XmR(prodata,L,U,metric = metric,type = type, XmR.type,selectMean,selectSD, guidset_selected)
-  dat.poz <- data.frame(peptides = precursors2,
-             OutRangeQCno  = QCno.out.range.poz,
-             group         = rep(group,length(precursors)),
-             orderby       = seq(1:length(precursors)),
-             metric        = rep(metric, length(precursors)),
-             tool          = rep("XmR",length(precursors)),
-             probability   = QCno.out.range.poz/QCno.length
-             )
-  dat.neg <- data.frame(peptides = precursors2,
-                        OutRangeQCno  = QCno.out.range.neg,
-                        group         = rep(group,length(precursors)),
-                        orderby       = seq(1:length(precursors)),
-                        metric        = rep(metric, length(precursors)),
-                        tool          = rep("XmR",length(precursors)),
-                        probability   = QCno.out.range.neg/QCno.length
-  )
+  if(XmR_type == "poz") {
+    dat <- data.frame(peptides = precursors2,
+                          OutRangeQCno  = QCno.out.range.poz,
+                          group         = rep(group,length(precursors)),
+                          orderby       = seq(1:length(precursors)),
+                          metric        = rep(metric, length(precursors)),
+                          tool          = rep("XmR",length(precursors)),
+                          probability   = QCno.out.range.poz/QCno.length
+    )
+  } else {
+    dat <- data.frame(peptides = precursors2,
+                          OutRangeQCno  = QCno.out.range.neg,
+                          group         = rep(group,length(precursors)),
+                          orderby       = seq(1:length(precursors)),
+                          metric        = rep(metric, length(precursors)),
+                          tool          = rep("XmR",length(precursors)),
+                          probability   = QCno.out.range.neg/QCno.length
+    )
+  }
 
-  return(list(dat.poz,dat.neg))
+   return(dat)
+  #return(list(dat.poz,dat.neg))
 }
 ################################################################################################
 XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,listMean,listSD,guidset_selected) {
@@ -428,15 +431,20 @@ XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,listMean,listSD,
                     probability   = c()
                     )
   for (metric in data.metrics) {
-    a1 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Metric mean increase",selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
-    data.1 <- a1[[1]]
-    data.2 <- a1[[2]]
+    data.1 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Metric mean increase",XmR_type = "poz",
+                                     selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
+    data.2 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 1,group = "Metric mean decrease",XmR_type = "neg",
+                                     selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
 
-    a2 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Metric dispersion increase",selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
-    data.3 <- a2[[1]]
-    data.4 <- a2[[2]]
+
+    data.3 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Metric dispersion increase",XmR_type = "poz",
+                                     selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
+    data.4 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Metric dispersion decrease",XmR_type = "neg",
+                                     selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
+    
     dat <- rbind(dat, data.1, data.2, data.3, data.4)
   }
+
   return(dat)
 }
 #################################################################################################################
@@ -450,7 +458,7 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U, metric,type,group, CUSUM.type,
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L = L, U = U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
     QCno.length <- c(QCno.length,length(metricData))
-    plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], L, U, type)
+    plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], type)
     if(CUSUM.type == "poz")
       QCno.out.range <- c(QCno.out.range,length(plot.data[plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h, ]$QCno))
     else
@@ -480,6 +488,8 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,listMean,listS
    data.4 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 2, group = "Metric dispersion decrease", CUSUM.type = "neg",selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
    dat <- rbind(dat, data.1, data.2, data.3, data.4)
   }
+  # print("dat cusum")
+  # print(dat)
   return(dat)
 }
 #######################################################################################################
@@ -507,7 +517,7 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
     for(precursor in precursors) {
       metricData <- getMetricData(prodata, precursor, L = L, U = U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
       counter[1:length(metricData)] <- counter[1:length(metricData)]+1
-      plot.data <- CUSUM.data.prepare(prodata, metricData, precursor, L, U, type)
+      plot.data <- CUSUM.data.prepare(prodata, metricData, precursor, type)
       sub <- plot.data[(plot.data$CUSUM.poz >= h | plot.data$CUSUM.poz <= -h) | (plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h), ]
       #sub2 <- plot.data[plot.data$CUSUM.neg >= h | plot.data$CUSUM.neg <= -h, ]
       #sub <- rbind(sub1,sub2)

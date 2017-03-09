@@ -240,8 +240,8 @@ shinyUI(fluidPage(
                                   sidebarLayout(
                                     sidebarPanel(
                                       checkboxGroupInput("heatmap_controlChart_select", "Select your control chart",
-                                                         choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR"),
-                                      htmlOutput("heatmap_txt")
+                                                         choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR")
+                                      #htmlOutput("heatmap_txt")
                                     ),
                                     mainPanel(plotOutput("heat_map")
                                     )
@@ -256,8 +256,8 @@ shinyUI(fluidPage(
                                     sidebarLayout(
                                       sidebarPanel(
                                         checkboxGroupInput("summary_controlChart_select", "Select your control chart",
-                                                           choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR"),
-                                        htmlOutput("summary_decision_txt")
+                                                           choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR")
+                                        #htmlOutput("summary_decision_txt")
                                       ),
                                       mainPanel(
                                         plotOutput("plot_summary")
