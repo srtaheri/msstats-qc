@@ -217,9 +217,29 @@ shinyServer(function(input,output,session) {
   })
   ######################################################### height and width in Summary tab ########################################
   my_height <- reactive({
-    my_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*240
+    if(length(input$user_selected_metrics) < 5) {
+      my_height <- ceiling(length(input$summary_controlChart_select))*600
+    }else if(length(input$user_selected_metrics) < 9) {
+      my_height <- ceiling(length(input$summary_controlChart_select))*1200
+    }else {
+      my_height <- 1500
+    }
+    
   })
-
+  # my_width <- reactive({
+  #   if(length(input$user_selected_metrics) < 5) {
+  #     my_height <- ceiling(ceiling(input$user_selected_metrics))*50
+  #   }else if(length(input$user_selected_metrics) < 9) {
+  #     my_height <- ceiling((input$user_selected_metrics)%%4)*50
+  #   }else {
+  #     my_height <- 1500
+  #   }
+  #   
+  # })
+  heatmap_height <- reactive({
+    heatmap_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*230
+  })
+  
   heatmap_width <- reactive({
     prodata <- data$df
     heatmap_width <- nrow(prodata[prodata$Precursor == prodata$Precursor[1],])*20
@@ -276,7 +296,7 @@ shinyServer(function(input,output,session) {
     }
     if(length(plots) > 0)
       do.call("grid.arrange", c(plots, ncol = 1))
-  }, height = my_height )
+  }, height = my_height)
 
   ################## decision message for XmR in summary tab #########
   #  output$summary_decision_txt <- renderUI({
@@ -360,7 +380,6 @@ shinyServer(function(input,output,session) {
   # 
   # })
   ############################# heat_map in Summary tab #############################################
-
   output$heat_map <- renderPlot({
     prodata <- data$df
     validate(
@@ -369,7 +388,7 @@ shinyServer(function(input,output,session) {
       need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule"),
       need(!is.null(prodata$AcquiredTime),"To view heatmaps, the dataset should include Acquired Time column.")
     )
-
+    
     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100
     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
@@ -406,8 +425,8 @@ shinyServer(function(input,output,session) {
     }
     if(length(plots) > 0)
       do.call("grid.arrange", c(plots, ncol = 1))
-
-  }, height = my_height, width = heatmap_width)
+    
+  }, height = heatmap_height, width = heatmap_width)
 
   ############################################################################################################################
 })

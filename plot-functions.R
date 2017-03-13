@@ -36,47 +36,57 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
       if(j==1) {
         plots[[2*j-1]] <<- plots[[2*j-1]] %>% layout(annotations = list(
           list(x = 0.5 , y = 1.05, text = "Mean", showarrow = F, xref='paper', yref='paper'),
-          list(x = 0.5 , y = -0.1, text = precursors[j], showarrow = F, xref='paper', yref='paper')
+          list(x = 0.38 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper'),
+          list(x = 0.3, y = -0.2, text = "QCno - ", showarrow = F, xref = 'paper',yref='paper'),
+          list(x = -0.12, y = 1, text = "YLABEL", showarrow = F, xref = 'paper',yref='paper')
         ))
         plots[[2*j]] <<- plots[[2*j]] %>% 
           layout(
             annotations = list(
               list(x = 0.5 , y = 1.05, text = "Dispersion", showarrow = F, xref='paper', yref='paper'),
-              list(x = 0.5 , y = -0.1, text = precursors[j], showarrow = F, xref='paper', yref='paper')
+              list(x = 0.65 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper'),
+              list(x = 0.5, y = -0.2, text = "QCno - ", showarrow = F, xref = 'paper',yref='paper')
             ))
       } else {
         plots[[2*j-1]] <<- plots[[2*j-1]] %>% layout(annotations = list(
-          list(x = 0.5 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper')
+          list(x = 0.38 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper'),
+          list(x = 0.3, y = -0.2, text = "QCno - ", showarrow = F, xref = 'paper',yref='paper'),
+          list(x = -0.13, y = 1, text = "YLABEL", showarrow = F, xref = 'paper',yref='paper')
         ))
         plots[[2*j]] <<- plots[[2*j]] %>% 
           layout(
             annotations = list(
-              list(x = 0.5 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper')
+              list(x = 0.64 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper'),
+              list(x = 0.5 , y = -0.2, text = "QCno - ", showarrow = F, xref='paper', yref='paper')
             ))
       }
     })
-
+    
     do.call(subplot,c(plots,nrows=nlevels(prodata$Precursor))) %>%
       layout(autosize = F, width = 1400, height = nlevels(prodata$Precursor)*200)
   }
-
+  
   else {
     metricData <- getMetricData(prodata, precursorSelection, L, U, metric = metric, normalization,selectMean,selectSD, guidset_selected)
     plot1 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title1, type = 1,selectMean,selectSD, guidset_selected) %>%
       layout(
         annotations = list(
-        list(x = 0.2 , y = 1.05, text = "Mean", showarrow = F, xref='paper', yref='paper'),
-        list(x = 0.5 , y = -0.1, text = precursorSelection, showarrow = F, xref='paper', yref='paper')
-      )
+          list(x = 0.2 , y = 1.05, text = "Mean", showarrow = F, xref='paper', yref='paper'),
+          list(x = 0.45 , y = -0.09, text = precursorSelection, showarrow = F, xref='paper', yref='paper'),
+          list(x = 0.3 , y = -0.09, text = "QCno - ", showarrow = F, xref='paper', yref='paper'),
+          list(x = -0.13 , y = 1, text = "YLABEL", showarrow = F, xref='paper', yref='paper')
+        )
       )
     plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2,selectMean,selectSD, guidset_selected) %>%
       layout(
         annotations = list(
           list(x = 0.8 , y = 1.05, text = "Dispersion", showarrow = F, xref='paper', yref='paper'),
-          list(x = 0.5 , y = -0.1, text = precursorSelection, showarrow = F, xref='paper', yref='paper')
+          list(x = 0.8 , y = -0.09, text = precursorSelection, showarrow = F, xref='paper', yref='paper'),
+          list(x = 0.5 , y = -0.09, text = "QCno - ", showarrow = F, xref='paper', yref='paper')
+          
         )
-        )
-
+      )
+    
     subplot(plot1,plot2)
   }
 }
@@ -114,11 +124,11 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection,  ytitle, type) {
     Annotations = rep(plot.data$Annotations,2),
     outRangeInRange = c(as.character(plot.data$outRangeInRangePoz), as.character(plot.data$outRangeInRangeNeg))
   )
-  
+  print(plot.data1)
   pal <- c("lightslateblue","red","blue","red")
   pal <- setNames(pal,c("InRangeCUSUM-","OutRangeCUSUM-","InRangeCUSUM+","OutRangeCUSUM+"))
-
-  plot_ly(plot.data1, x = ~QCno, y = ~CUSUMValue,showlegend = FALSE)%>%
+  
+  plot_ly(plot.data1, x = ~QCno, y = ~CUSUMValue,showlegend = FALSE, text = ~Annotations)%>%
     
     add_markers(x = ~QCno, y = ~CUSUMValue, color = ~outRangeInRange,
                type="scatter",mode="markers", colors = pal , showlegend = FALSE) %>%
@@ -127,6 +137,7 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection,  ytitle, type) {
     add_lines(y = -CUSUM.outrange.thld, color = I("red"), name = "CUSUM thld", showlegend = FALSE) %>%
     add_lines(data = plot.data, x = ~QCno, y = ~CUSUM.poz, color = I("cornflowerblue"),name = "CUSUM+", showlegend = FALSE) %>%
     add_lines(data = plot.data, x = ~QCno, y = ~CUSUM.neg, color = I("lightskyblue"), name = "CUSUM-",showlegend = FALSE)
+    
 }
 #########################################################################################################################
 # INPUTS : "prodata" is the data user uploads.
@@ -138,7 +149,7 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection,  ytitle, type) {
 CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursorSelection,]
   ## Create variables
-  plot.data <- CP.data.prepare(prodata, metricData, type)
+   plot.data <- CP.data.prepare(prodata, metricData, type)
 
     plot_ly(plot.data, x = ~QCno, y = ~Et,showlegend = FALSE)%>% #,text=precursor.data$Annotations)
       add_lines(x = ~tho.hat, color = I("red"))%>%
@@ -216,6 +227,7 @@ CUSUM.Summary.plot <- function(prodata, data.metrics, L, U,listMean,listSD, guid
    gg <- gg + geom_hline(yintercept=0, alpha=0.5)
    gg <- gg + stat_smooth(method="loess", aes(x=dat$QCno, y=dat$pr.y, colour = group, group = group))
    gg <- gg + geom_point(data = tho.hat.df, aes(x = tho.hat.df$tho.hat, y = tho.hat.df$y, colour = "Change point"))
+   #gg <- gg + geom_point(aes(x = c(16,6),y = c(1.1,-1.1), colour = "Change point"))
    gg <- gg + scale_color_manual(breaks = c("Metric mean increase",
                                             "Metric mean decrease",
                                             "Metric dispersion increase",
@@ -345,11 +357,15 @@ metrics_box.plot <- function(prodata, data.metrics) {
     metric <- data.metrics[i]
     precursor.data <- substring(reorder(prodata$Precursor,prodata[,metric]), first = 1, last = 3)
     plots[[i]] <- plot_ly(prodata, y = prodata[,metric], color = precursor.data, type = "box") %>%
-      layout(yaxis = list(title = metric),showlegend = FALSE)
+      layout(
+        annotations = list(
+          list(x = 0.5 , y = 1, text = metric, showarrow = F, xref='paper', yref='paper')
+        ),showlegend = FALSE)
+      #layout(yaxis = list(title = metric),showlegend = FALSE)
   }
-
+  height <- (length(data.metrics))*300
   p <- do.call(subplot,c(plots,nrows=length(plots))) %>%
-    layout(autosize = F, width = 700, height = 1000)
+    layout(autosize = F, width = 700, height = height)
   return(p)
 }
 #####################################################################################################
