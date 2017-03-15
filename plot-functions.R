@@ -124,7 +124,7 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection,  ytitle, type) {
     Annotations = rep(plot.data$Annotations,2),
     outRangeInRange = c(as.character(plot.data$outRangeInRangePoz), as.character(plot.data$outRangeInRangeNeg))
   )
-  print(plot.data1)
+  #print(plot.data1)
   pal <- c("lightslateblue","red","blue","red")
   pal <- setNames(pal,c("InRangeCUSUM-","OutRangeCUSUM-","InRangeCUSUM+","OutRangeCUSUM+"))
   
@@ -148,10 +148,16 @@ CUSUM.plot <- function(prodata, metricData, precursorSelection,  ytitle, type) {
 #DESCRIPTION: draws one CP plot based on type for each given metric
 CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
   precursor.data <- prodata[prodata$Precursor==precursorSelection,]
-  ## Create variables
+  if(type == 1) {Annotations = precursor.data$Annotations[-1]}
+  if(type == 2) {Annotations = precursor.data$Annotations}
    plot.data <- CP.data.prepare(prodata, metricData, type)
-
-    plot_ly(plot.data, x = ~QCno, y = ~Et,showlegend = FALSE)%>% #,text=precursor.data$Annotations)
+   plot.data1 <- data.frame(
+     QCno = plot.data$QCno,
+     Et = plot.data$Et,
+     tho.hat = plot.data$tho.hat,
+     Annotations = Annotations
+   )
+    plot_ly(plot.data1, x = ~QCno, y = ~Et,showlegend = FALSE, text = ~Annotations)%>% #,text=precursor.data$Annotations)
       add_lines(x = ~tho.hat, color = I("red"))%>%
       add_lines(x = ~QCno, y = ~Et, color = I("cornflowerblue"))%>%
       add_markers(x = ~QCno, y = ~Et, color = I("blue"))
@@ -167,10 +173,19 @@ CP.plot <- function(prodata, metricData, precursorSelection, ytitle, type) {
 XmR.plot <- function(prodata, metricData, precursorSelection, L, U, ytitle, type,selectMean,selectSD, guidset_selected) {
   precursor.data <- prodata[prodata$Precursor==precursorSelection,]
   plot.data <- XmR.data.prepare(prodata, metricData, L, U, type,selectMean,selectSD, guidset_selected)
+  plot.data1 <- data.frame(
+    QCno = plot.data$QCno,
+    t = plot.data$t,
+    UCL = plot.data$UCL,
+    LCL = plot.data$LCL,
+    InRangeOutRange = plot.data$InRangeOutRange,
+    Annotations = precursor.data$Annotations
+  )
+
   pal <- c("blue","red")
   pal <- setNames(pal,c("InRange","OutRange"))
   
-  plot_ly(plot.data, x = ~QCno, y = ~t ,showlegend = FALSE) %>%
+  plot_ly(plot.data1, x = ~QCno, y = ~t ,showlegend = FALSE, text = ~Annotations) %>%
     add_trace(x = ~QCno, y = ~t, color = ~InRangeOutRange, type="scatter",
               mode="markers", colors = pal , showlegend = FALSE) %>%
     add_lines(x = ~QCno, y = ~t, color = I("cornflowerblue"), showlegend = FALSE) %>%

@@ -144,6 +144,7 @@ CP.data.prepare <- function(prodata, metricData, type) {
   }
   tho.hat = which(Et==max(Et)) # change point estimate
   plot.data <- data.frame(QCno,Et,tho.hat)
+  #print(plot.data)
   return(plot.data)
 }
 ###################################################################################################
