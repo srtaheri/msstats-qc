@@ -143,8 +143,14 @@ CP.data.prepare <- function(prodata, metricData, type) {
     QCno=1:length_metricData
   }
   tho.hat = which(Et==max(Et)) # change point estimate
+  print("QCno")
+  print(QCno)
+  print("Et")
+  print(Et)
+  print("tho.hat")
+  print(tho.hat)
   plot.data <- data.frame(QCno,Et,tho.hat)
-  #print(plot.data)
+  
   return(plot.data)
 }
 ###################################################################################################
@@ -330,14 +336,16 @@ XmR.Summary.DataFrame <- function(prodata, data.metrics, L, U,listMean, listSD, 
   return(dat)
 }
 ############################################################################################
-heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,peptideThresholdYellow, L, U, type,listMean, listSD, guidset_selected) {
+heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,peptideThresholdYellow,
+                              L, U, type,listMean, listSD, guidset_selected) {
   time <- c()
   val <- c()
   met <- c()
   flag <- c()
 
   for (metric in data.metrics) {
-    df <- Decision.DataFrame.prepare(prodata, metric, method, peptideThresholdRed,peptideThresholdYellow, L, U,type,selectMean=listMean[[metric]],selectSD=listSD[[metric]], guidset_selected)
+    df <- Decision.DataFrame.prepare(prodata, metric, method, peptideThresholdRed,peptideThresholdYellow,
+                                     L, U,type,selectMean=listMean[[metric]],selectSD=listSD[[metric]], guidset_selected)
     time_df <- as.character(df$AcquiredTime)
     val_df <- df$pr.y
     met_df <- rep(metric,length(val_df))
@@ -495,7 +503,8 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,listMean,listS
   return(dat)
 }
 #######################################################################################################
-Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThresholdRed, peptideThresholdYellow, L, U,type,selectMean,selectSD, guidset_selected) {
+Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThresholdRed,peptideThresholdYellow,
+                                       L, U,type,selectMean,selectSD, guidset_selected) {
   h <- 5
   AcquiredTime <- prodata$AcquiredTime
   QCno    <- 1:nrow(prodata)
@@ -568,7 +577,9 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
 
 }
 #######################################################################################################
- number.Of.Out.Of.Range.Metrics <- function(prodata,data.metrics,method, peptideThresholdRed, peptideThresholdYellow, L, U, type,listMean,listSD, guidset_selected) {
+ number.Of.Out.Of.Range.Metrics <- function(prodata,data.metrics,method, peptideThresholdRed,
+                                            peptideThresholdYellow, L, U, type,listMean,listSD,
+                                            guidset_selected) {
   #change this part
   metricCounterAboveRed = 0
   metricCounterAboveYellowBelowRed = 0
