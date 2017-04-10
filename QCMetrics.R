@@ -361,9 +361,10 @@ heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,p
   dataFrame <- data.frame(time = time,
                           value = val,
                           metric = met,
-                          flag = flag
+                          flag = flag,
+                          QCno = df$QCno
                          )
-
+  
   return(dataFrame)
 }
 ############################################################################################

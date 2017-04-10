@@ -387,11 +387,11 @@ metrics_box.plot <- function(prodata, data.metrics) {
 metrics_heat.map <- function(prodata,data.metrics, method,peptideThresholdRed,peptideThresholdYellow,
                              L, U, type, title,listMean, listSD, guidset_selected) {
 
-  #color_palette <- colorRampPalette(c("green", "yellow", "red"))(3)
   data <- heatmap.DataFrame(prodata, data.metrics,method,peptideThresholdRed,peptideThresholdYellow,
                             L, U, type,listMean, listSD, guidset_selected)
-  #print(data)
-  p <- ggplot(data,aes(time,metric, group = flag, fill = flag))
+
+  #p <- ggplot(data,aes(time,metric, group = flag, fill = flag)) # x axis is by date
+  p <- ggplot(data,aes(QCno,metric, group = flag, fill = flag)) # x axis is by number
   p <- p + scale_fill_manual(values=c("Acceptable" = "blue","Unacceptable" = "red","Poor" = "yellow")
                              )
   p <- p + geom_tile(colour="white",size=.1)
