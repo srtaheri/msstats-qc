@@ -390,7 +390,7 @@ metrics_heat.map <- function(prodata,data.metrics, method,peptideThresholdRed,pe
   #color_palette <- colorRampPalette(c("green", "yellow", "red"))(3)
   data <- heatmap.DataFrame(prodata, data.metrics,method,peptideThresholdRed,peptideThresholdYellow,
                             L, U, type,listMean, listSD, guidset_selected)
-  print(data)
+  #print(data)
   p <- ggplot(data,aes(time,metric, group = flag, fill = flag))
   p <- p + scale_fill_manual(values=c("Acceptable" = "blue","Unacceptable" = "red","Poor" = "yellow")
                              )

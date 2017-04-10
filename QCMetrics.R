@@ -143,15 +143,16 @@ CP.data.prepare <- function(prodata, metricData, type) {
     QCno=1:length_metricData
   }
   tho.hat = which(Et==max(Et)) # change point estimate
-  print("QCno")
-  print(QCno)
-  print("Et")
-  print(Et)
-  print("tho.hat")
-  print(tho.hat)
+  # print("QCno")
+  # print(QCno)
+  # print("Et")
+  # print(Et)
+  # print("tho.hat")
+  # print(tho.hat)
   plot.data <- data.frame(QCno,Et,tho.hat)
-  
+
   return(plot.data)
+  #print(plot.data)
 }
 ###################################################################################################
 #INPUT : "prodata" is the data user uploads.
@@ -163,18 +164,19 @@ get_CP_tho.hat <- function(prodata, L, U, data.metrics,listMean,listSD, guidset_
   precursors <- levels(prodata$Precursor)
   for(metric in data.metrics) {
     for (j in 1:nlevels(prodata$Precursor)) {
-      
+
       metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = TRUE,selectMean = listMean[[metric]],selectSD = listSD[[metric]], guidset_selected)
-      
+
       mix <- rbind(
         data.frame(tho.hat = CP.data.prepare(prodata, metricData, type = 1)$tho.hat[1], metric = metric, group = "Individual Value", y=1.1),
         data.frame(tho.hat = CP.data.prepare(prodata, metricData, type = 2)$tho.hat[1], metric = metric, group = "Moving Range", y=-1.1)
       )
+
       tho.hat <- rbind(tho.hat, mix)
 
     }
   }
-  
+
   return(tho.hat)
 }
 ###################################################################################################
@@ -244,7 +246,7 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type,selectMean,selectSD
 
   for(j in 1:length(precursors)) {
     metricData <- getMetricData(prodata, precursors[j], L, U, metric = metric, normalization = T,selectMean,selectSD, guidset_selected)
-    
+
     counter[1:length(metricData)] <- counter[1:length(metricData)]+1
     plot.data <- CUSUM.data.prepare(prodata, metricData, precursors[j], type)
 
@@ -257,7 +259,7 @@ CUSUM.Summary.prepare <- function(prodata, metric, L, U,type,selectMean,selectSD
   max_QCno <- max(which(counter!=0))
   pr.y.poz = y.poz[1:max_QCno]/counter[1:max_QCno]
   pr.y.neg = y.neg[1:max_QCno]/counter[1:max_QCno]
-  
+
   plot.data <- data.frame(QCno = rep(1:max_QCno,2),
                           pr.y = c(pr.y.poz, pr.y.neg),
                           group = ifelse(rep(type==1,2*max_QCno),
@@ -452,7 +454,7 @@ XmR.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,listMean,listSD,
                                      selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
     data.4 <- XmR.Radar.Plot.prepare(prodata,L,U,metric = metric, type = 2,group = "Metric dispersion decrease",XmR_type = "neg",
                                      selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
-    
+
     dat <- rbind(dat, data.1, data.2, data.3, data.4)
   }
 
@@ -499,7 +501,7 @@ CUSUM.Radar.Plot.DataFrame <- function(prodata, data.metrics, L,U,listMean,listS
    data.4 <- CUSUM.Radar.Plot.prepare(prodata,L,U, metric = metric, type = 2, group = "Metric dispersion decrease", CUSUM.type = "neg",selectMean = listMean[[metric]],selectSD = listSD[[metric]],guidset_selected)
    dat <- rbind(dat, data.1, data.2, data.3, data.4)
   }
-  
+
   return(dat)
 }
 #######################################################################################################
@@ -606,7 +608,7 @@ Decision.DataFrame.prepare <- function(prodata, metric, method, peptideThreshold
   if(type == 2) {
     pr.y <- pr.y[-1]
   }
-  
+
   aboveYellow <- which(pr.y > peptideThresholdYellow)
   aboveYellowBelowRed <- which(pr.y > peptideThresholdYellow & pr.y <= peptideThresholdRed)
 
