@@ -411,12 +411,12 @@ shinyServer(function(input,output,session) {
       p1 <- metrics_heat.map(prodata,
                              data.metrics = input$user_selected_metrics, method = method,
                              peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
-                             title = "Decision-map (Changes in mean of QC metric)",
+                             title = "Decision-map : X",
                              listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
       p2 <- metrics_heat.map(prodata,
                              data.metrics = input$user_selected_metrics, method = method,
                              peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
-                             title = "Decision-map (Changes in variability of QC metric)",
+                             title = "Decision-map : mR",
                              listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
       plots[[i]]   <- p1
       plots[[i+1]] <- p2
