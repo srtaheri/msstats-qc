@@ -382,6 +382,7 @@ shinyServer(function(input,output,session) {
   ############################# heat_map in Summary tab #############################################
   output$heat_map <- renderPlot({
     prodata <- data$df
+    
     validate(
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata),
