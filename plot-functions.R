@@ -399,7 +399,7 @@ metrics_heat.map <- function(prodata,data.metrics, method,peptideThresholdRed,pe
   p <- p + removeGrid()
   p <- p + rotateTextX()
   p <- p + ggtitle(title,subtitle = "")
-  p <- p + labs(x=NULL, y=NULL)
+  p <- p + labs(x="Time", y=NULL)
   p <- p +  theme(axis.text=element_text(size=12),legend.title = element_blank())
   p
 }
