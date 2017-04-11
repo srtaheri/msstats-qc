@@ -56,13 +56,13 @@ shinyUI(fluidPage(
                          br(),
                          ("6)	Check with heatmaps, metric summary plots and change point analysis for better reasoning"),
                          br(),
-                         ("7)	Navigate results and download them for your QC reports"),
+                         ("7)	Navigate results and download them for your reports"),
                          br(),
                          br(),
 
                          br(),
                          br(),
-                         h5 ("Project Team: "),
+                         h5 ("Project team: "),
                          h5("Eralp Dogu,",span("eralp.dogu@gmail.com",style = "color:blue")),
                          h5("Sara Taheri,",span("mohammadtaheri.s@husky.neu.edu",style = "color:blue")),
                          h5("Olga Vitek,",span("o.vitek@neu.edu",style = "color:blue")),
@@ -83,9 +83,9 @@ shinyUI(fluidPage(
 
               ),
 ########################################################################################################
-              tabPanel("Data Import and Selection",
+              tabPanel("Data import and selection",
                        tabsetPanel(
-                         tabPanel("Data Import",
+                         tabPanel("Data import",
                                   sidebarLayout(
 
                                     sidebarPanel(
@@ -127,7 +127,7 @@ shinyUI(fluidPage(
                                   ),
 
                          tabPanel("Options",
-                                  p(strong("Select QC metrics for all the subsequence analyses:")),
+                                  p(strong("Select metrics for all further analyses:")),
 
                                   wellPanel(
                                     fluidRow(
@@ -163,7 +163,7 @@ shinyUI(fluidPage(
                        )
                        ),
 ######################################################################################################
-             tabPanel("Create Decision Rules", theme = "bootstrap.css",
+             tabPanel("Create decision rules", theme = "bootstrap.css",
                       fluidPage(
                         p(strong("Create your decision rule:")),
                         wellPanel(
@@ -171,7 +171,7 @@ shinyUI(fluidPage(
                             p(strong("RED FLAG"), style="color:black; background-color: red;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is UNACCEPTABLE when:"),align = "center"),
                             p("1. greater than the selected % of peptides are", strong("out of control"),"and"),
-                            p("2. greater than the selected # of QC metrics are", strong("out of control."))
+                            p("2. greater than the selected # of metrics are", strong("out of control."))
                           ),
                           fluidRow(
                             column(2,
@@ -182,7 +182,7 @@ shinyUI(fluidPage(
                                  numericInput('threshold_peptide_red', '', value = 70, min = 0, max = 100, step = 1)
                             ),
                             column(5,
-                                 p(strong("# out of control QC metrics: ")),
+                                 p(strong("# out of control metrics: ")),
                                  uiOutput("metricThresholdRed")
                             )
                           )
@@ -193,7 +193,7 @@ shinyUI(fluidPage(
                             p(strong("YELLOW FLAG"), style="color:black; background-color: yellow;",align = "center",style="font-size:125%;"),
                             p(strong("System performance is POOR when:"),align = "center"),
                             p("1. greater than the selected % of peptides are", strong("out of control"),"and"),
-                            p("2. greater than the selected # of QC metrics are", strong("out of control.")),
+                            p("2. greater than the selected # of metrics are", strong("out of control.")),
                             p("Warning:The limits should be less than or equal to the the RED FLAG limits")
                           ),
                           fluidRow(
@@ -224,7 +224,7 @@ shinyUI(fluidPage(
               tabPanel("Metric Summary",
                        tabsetPanel(
 
-                         tabPanel("Descriptives: Boxplots for QC Metrics",
+                         tabPanel("Descriptives : boxplots for metrics",
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                    tags$div("It may take a while to load the plots, please wait...",
@@ -232,7 +232,7 @@ shinyUI(fluidPage(
                                   plotlyOutput("box_plot", height = 2000)
                          ),
 
-                         tabPanel("Overall Performance: Decision-maps",
+                         tabPanel("Overall performance : decision maps",
                                   tags$head(tags$style(type="text/css")),
                                   conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                    tags$div("It may take a while to load the plots, please wait...",
@@ -240,7 +240,7 @@ shinyUI(fluidPage(
                                   sidebarLayout(
                                     sidebarPanel(
                                       checkboxGroupInput("heatmap_controlChart_select", "Select your control chart",
-                                                         choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR")
+                                                         choices = c("CUSUM charts" = "CUSUM","XmR chart" = "XmR"), selected = "XmR")
                                       #htmlOutput("heatmap_txt")
                                     ),
                                     mainPanel(plotOutput("heat_map")
@@ -248,7 +248,7 @@ shinyUI(fluidPage(
                                   )
                          ),
 
-                           tabPanel("Detailed Performance: Plot summaries",
+                           tabPanel("Detailed performance: plot summaries",
                                     tags$head(tags$style(type="text/css")),
                                     conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                                      tags$div("It may take a while to load the plots, please wait...",
@@ -256,7 +256,7 @@ shinyUI(fluidPage(
                                     sidebarLayout(
                                       sidebarPanel(
                                         checkboxGroupInput("summary_controlChart_select", "Select your control chart",
-                                                           choices = c("CUSUM Charts" = "CUSUM","XmR Chart" = "XmR"), selected = "XmR")
+                                                           choices = c("CUSUM charts" = "CUSUM","XmR chart" = "XmR"), selected = "XmR")
                                         #htmlOutput("summary_decision_txt")
                                       ),
                                       mainPanel(
@@ -267,15 +267,15 @@ shinyUI(fluidPage(
                        )
                        ),
 ###################################################################################################
-              navbarMenu("Control Charts",
-                         tabPanel("XmR Control Charts",
+              navbarMenu("Control charts",
+                         tabPanel("XmR control charts",
                                   uiOutput("XmR_tabset")
                                   ),
 
-                         tabPanel("CUSUMm and CUSUMv Control Charts",
+                         tabPanel("CUSUMm and CUSUMv control charts",
                                   uiOutput("CUSUM_tabset")
                                   ),
-                         tabPanel("Change Point Analysis for Mean and Variability",
+                         tabPanel("Change point analysis for mean and variability",
                                   uiOutput("CP_tabset")
                                   )
               ),
@@ -283,23 +283,23 @@ shinyUI(fluidPage(
               tabPanel("Help",
                        tabsetPanel(
                          tabPanel("Metrics"
-                                  ,h5(strong("Retention Time")),
+                                  ,h5(strong("Retention time")),
                                   p("Retention time is the time it takes a solute to travel through the column. The retention time is assigned to
                                     the corresponding solute peak. The retention time is a measure of the amount of time a solute spends in a column.
                                     It is the sum of the time spent in the stationary phase and the mobile phase."
                                     ,a("visit for more info",href="http://www.britannica.com/science/retention-time")),
                                   br(),
-                                  h5(strong("Total Peak Area")),
+                                  h5(strong("Total peak area")),
                                   p("Total Peak Area is the sum of all integrated signals for a certain peptide."),
                                   br(),
-                                  h5(strong("Full Width at Half Maximum (FWHM)")),
+                                  h5(strong("Full width at half maximum (FWHM)")),
                                   p("Full width at half maximum 'FWHM' is an expression of the extent of a
                                     function given by the difference between the two extreme values
                                     of the independent variable at which the dependent variable is equal
                                     to half of its maximum value."
                                     ,a("visit for more info",href="https://en.wikipedia.org/wiki/Full_width_at_half_maximum")),
                                   br(),
-                                  h5(strong("Peak Assymetry")),
+                                  h5(strong("Peak assymetry")),
                                   p("Peak Assymetry is a measure of symetry for a peak. Calculated by taking 2*a/(a+b). Optimal value is around 1 for a Gaussian peak.")
                                   ),
 
@@ -328,11 +328,11 @@ shinyUI(fluidPage(
                                   a("visit for more info",href="https://en.wikipedia.org/wiki/CUSUM")),
 
                                   br(),
-                                  h5(strong("Change Point Analysis")),
+                                  h5(strong("Change point analysis")),
                                   h5("Can identify the exact time of a change in the mean and dispersion of suitability metric. "),
-                                  h5("Likelihood functions are plotted and the QC sample which maximizes the functions is considered as a candidate change point."),
+                                  h5("Likelihood functions are plotted and the sample which maximizes the functions is considered as a candidate change point."),
                                   p("A change in the process parameters triggers a control chart to generate an out of
-                                    control signal. The QC sample at which the signal is issued is considered as the
+                                    control signal. The sample at which the signal is issued is considered as the
                                     stopping time and after the signal search for an assignable cause is recommended.
                                     However, the signal does not always designate that the special cause actually occurred
                                     at that certain time. A remedy to this problem is to use follow-up change
