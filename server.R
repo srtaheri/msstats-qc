@@ -138,7 +138,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(data$df), "Please upload your data first"),
       need(is.data.frame(data$df), data$df),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule")
     )
     is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
