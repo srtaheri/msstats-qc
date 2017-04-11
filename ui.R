@@ -221,7 +221,7 @@ shinyUI(fluidPage(
                       )
                       ),
 #####################################################################################################
-              tabPanel("Metric Summary",
+              tabPanel("Metric summary",
                        tabsetPanel(
 
                          tabPanel("Descriptives : boxplots for metrics",
