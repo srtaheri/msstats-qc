@@ -170,7 +170,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(data$df), "Please upload your data first"),
       need(is.data.frame(data$df), data$df),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule")
     )
     is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
@@ -196,7 +196,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(data$df), "Please upload your data first"),
       need(is.data.frame(data$df), data$df),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule")
     )
     is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
@@ -251,7 +251,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule")
     )
     metrics_box.plot(prodata, data.metrics = input$user_selected_metrics)
   })
@@ -263,7 +263,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+      need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule")
     )
     
     is_guidset_selected <- FALSE
@@ -304,7 +304,7 @@ shinyServer(function(input,output,session) {
   #    validate(
   #      need(!is.null(prodata), "Please upload your data"),
   #      need(is.data.frame(prodata), prodata),
-  #      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+  #      need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule")
   #    )
   #    peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
   #    metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
@@ -344,7 +344,7 @@ shinyServer(function(input,output,session) {
   #   validate(
   #     need(!is.null(prodata), "Please upload your data"),
   #     need(is.data.frame(prodata), prodata),
-  #     need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule")
+  #     need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule")
   #   )
   #   peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
   #   metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
@@ -386,7 +386,7 @@ shinyServer(function(input,output,session) {
     validate(
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata),
-      need(!is.null(input$user_selected_metrics),"Please first select QC metrics and create a decision rule"),
+      need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule"),
       need(!is.null(prodata$AcquiredTime),"To view heatmaps, the dataset should include Acquired Time column.")
     )
     

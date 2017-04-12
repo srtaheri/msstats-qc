@@ -36,28 +36,28 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
       if(j==1) {
         plots[[2*j-1]] <<- plots[[2*j-1]] %>% layout(annotations = list(
           list(x = 0.5 , y = 1.05, text = "Mean", showarrow = F, xref='paper', yref='paper'),
-          list(x = 0.38 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper'),
-          list(x = 0.3, y = -0.2, text = "QCno - ", showarrow = F, xref = 'paper',yref='paper')
+          list(x = 0.35 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper'),
+          list(x = 0.3, y = -0.2, text = "Time : ", showarrow = F, xref = 'paper',yref='paper')
           #,list(x = -0.12, y = 1, text = "YLABEL", showarrow = F, xref = 'paper',yref='paper')
         ))
         plots[[2*j]] <<- plots[[2*j]] %>% 
           layout(
             annotations = list(
-              list(x = 0.5 , y = 1.05, text = "Dispersion", showarrow = F, xref='paper', yref='paper'),
+              list(x = 0.5 , y = 1.05, text = "Variability", showarrow = F, xref='paper', yref='paper'),
               list(x = 0.65 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper'),
-              list(x = 0.5, y = -0.2, text = "QCno - ", showarrow = F, xref = 'paper',yref='paper')
+              list(x = 0.5, y = -0.2, text = "Time : ", showarrow = F, xref = 'paper',yref='paper')
             ))
       } else {
         plots[[2*j-1]] <<- plots[[2*j-1]] %>% layout(annotations = list(
           list(x = 0.38 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper'),
-          list(x = 0.3, y = -0.2, text = "QCno - ", showarrow = F, xref = 'paper',yref='paper')
+          list(x = 0.3, y = -0.2, text = "Time : ", showarrow = F, xref = 'paper',yref='paper')
           #,list(x = -0.13, y = 1, text = "YLABEL", showarrow = F, xref = 'paper',yref='paper')
         ))
         plots[[2*j]] <<- plots[[2*j]] %>% 
           layout(
             annotations = list(
               list(x = 0.64 , y = -0.2, text = precursors[j], showarrow = F, xref='paper', yref='paper'),
-              list(x = 0.5 , y = -0.2, text = "QCno - ", showarrow = F, xref='paper', yref='paper')
+              list(x = 0.5 , y = -0.2, text = "Time : ", showarrow = F, xref='paper', yref='paper')
             ))
       }
     })
@@ -73,16 +73,16 @@ render.QC.chart <- function(prodata, precursorSelection, L, U, metric, plot.meth
         annotations = list(
           list(x = 0.2 , y = 1.05, text = "Mean", showarrow = F, xref='paper', yref='paper'),
           list(x = 0.45 , y = -0.09, text = precursorSelection, showarrow = F, xref='paper', yref='paper'),
-          list(x = 0.3 , y = -0.09, text = "QCno - ", showarrow = F, xref='paper', yref='paper')
+          list(x = 0.3 , y = -0.09, text = "Time : ", showarrow = F, xref='paper', yref='paper')
           #,list(x = -0.13 , y = 1, text = "YLABEL", showarrow = F, xref='paper', yref='paper')
         )
       )
     plot2 <- do.plot(prodata, metricData, precursorSelection,L,U, plot.method,  y.title2, type = 2,selectMean,selectSD, guidset_selected) %>%
       layout(
         annotations = list(
-          list(x = 0.8 , y = 1.05, text = "Dispersion", showarrow = F, xref='paper', yref='paper'),
+          list(x = 0.8 , y = 1.05, text = "Variability", showarrow = F, xref='paper', yref='paper'),
           list(x = 0.8 , y = -0.09, text = precursorSelection, showarrow = F, xref='paper', yref='paper'),
-          list(x = 0.5 , y = -0.09, text = "QCno - ", showarrow = F, xref='paper', yref='paper')
+          list(x = 0.5 , y = -0.09, text = "Time : ", showarrow = F, xref='paper', yref='paper')
           
         )
       )
