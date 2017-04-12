@@ -1,7 +1,7 @@
 COL.BEST.RET <- "Retention Time"
 COL.FWHM <- "Full Width at Half Maximum"
 COL.TOTAL.AREA <- "Total Peak Area"
-COL.PEAK.ASS <- "Peak Assymetry"
+COL.PEAK.ASS <- "Peak assymetry"
 #########################################################################################
 # here we put a selection of most column names that users use. The first element of each vector should be the best name that
 # we suggest users to use and  which our code is based on. for example "Retention Time" and "Full Width at Half Maximum" which are the first element
@@ -146,7 +146,7 @@ input.sanity.check <- function(prodata, processout, finalfile) {
     #prodata.first <- prodata[,1:which(colnames(prodata)=="Annotations")]
     #prodata.first[,"Peak Assymetry"]<- peakAss
     #prodata <- cbind(prodata.first, prodata[,(which(colnames(prodata)=="MaxEndTime")+1):ncol(prodata), drop = FALSE])
-    prodata[,"Peak Assymetry"] <- peakAss
+    prodata[,"Peak assymetry"] <- peakAss
   }
 
   return(prodata)

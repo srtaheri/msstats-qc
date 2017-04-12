@@ -290,7 +290,7 @@ shinyUI(fluidPage(
                                     ,a("visit for more info",href="http://www.britannica.com/science/retention-time")),
                                   br(),
                                   h5(strong("Total peak area")),
-                                  p("Total Peak Area is the sum of all integrated signals for a certain peptide."),
+                                  p("Total peak area is the sum of all integrated signals for a certain peptide."),
                                   br(),
                                   h5(strong("Full width at half maximum (FWHM)")),
                                   p("Full width at half maximum 'FWHM' is an expression of the extent of a
@@ -300,7 +300,7 @@ shinyUI(fluidPage(
                                     ,a("visit for more info",href="https://en.wikipedia.org/wiki/Full_width_at_half_maximum")),
                                   br(),
                                   h5(strong("Peak assymetry")),
-                                  p("Peak Assymetry is a measure of symetry for a peak. Calculated by taking 2*a/(a+b). Optimal value is around 1 for a Gaussian peak.")
+                                  p("Peak assymetry is a measure of symetry for a peak. Calculated by taking 2*a/(a+b). Optimal value is around 1 for a Gaussian peak.")
                                   ),
 
                          tabPanel("Plots"
