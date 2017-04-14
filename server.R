@@ -1,5 +1,5 @@
 options(shiny.maxRequestSize=100*1024^2)
- 
+
 library(shiny)
 library(shinyBS)
 library(shinyjs)
@@ -43,7 +43,7 @@ shinyServer(function(input,output,session) {
       need(!is.null(data$df), "Please upload your data"),
       need(is.data.frame(data$df), data$df)
     )
-    
+
     #data$metrics <- c(COL.BEST.RET, COL.TOTAL.AREA, COL.FWHM, COL.PEAK.ASS, find_custom_metrics(data$df))
     data$metrics <- c(find_custom_metrics(data$df))
   }, priority = 20)
@@ -88,7 +88,7 @@ shinyServer(function(input,output,session) {
            })
   })
 
-  
+
   output$selectGuideSet <- renderUI({
     fluidRow(
       column(6,
@@ -119,7 +119,7 @@ shinyServer(function(input,output,session) {
        need(!is.null(numOfMetrics),"loading..."),
        need(!is.null(threshold_metric_red),"loading...")
      )
-    
+
     numericInput('threshold_metric_yellow', '', value = threshold_metric_red , min = 0, max = threshold_metric_red, step = 1)
   })
 
@@ -134,7 +134,7 @@ shinyServer(function(input,output,session) {
   ################################################################# plots ###################################################
   #################################################################################################################
   output$XmR_tabset <- renderUI({
-    
+
     validate(
       need(!is.null(data$df), "Please upload your data first"),
       need(is.data.frame(data$df), data$df),
@@ -224,7 +224,7 @@ shinyServer(function(input,output,session) {
     }else {
       my_height <- 1500
     }
-    
+
   })
   # my_width <- reactive({
   #   if(length(input$user_selected_metrics) < 5) {
@@ -234,12 +234,12 @@ shinyServer(function(input,output,session) {
   #   }else {
   #     my_height <- 1500
   #   }
-  #   
+  #
   # })
   heatmap_height <- reactive({
     heatmap_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*230
   })
-  
+
   heatmap_width <- reactive({
     prodata <- data$df
     heatmap_width <- nrow(prodata[prodata$Precursor == prodata$Precursor[1],])*20
@@ -265,7 +265,7 @@ shinyServer(function(input,output,session) {
       need(is.data.frame(prodata), prodata),
       need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule")
     )
-    
+
     is_guidset_selected <- FALSE
     if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
       is_guidset_selected <- TRUE
@@ -291,7 +291,7 @@ shinyServer(function(input,output,session) {
       }
       plots[[i]]   <- p1
       plots[[i+1]] <- p2
-      
+
       i <- i+2
     }
     if(length(plots) > 0)
@@ -310,7 +310,7 @@ shinyServer(function(input,output,session) {
   #    metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
   #    peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
   #    metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
-  # 
+  #
   #    is_guidset_selected <- FALSE
   #    if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
   #      is_guidset_selected <- TRUE
@@ -350,7 +350,7 @@ shinyServer(function(input,output,session) {
   #   metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
   #   peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
   #   metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
-  # 
+  #
   #   is_guidset_selected <- FALSE
   #   if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
   #     is_guidset_selected <- TRUE
@@ -377,19 +377,19 @@ shinyServer(function(input,output,session) {
   #                                      input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
   #   }else {
   #   }
-  # 
+  #
   # })
   ############################# heat_map in Summary tab #############################################
   output$heat_map <- renderPlot({
     prodata <- data$df
-    
+
     validate(
       need(!is.null(prodata), "Please upload your data"),
       need(is.data.frame(prodata), prodata),
       need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule"),
       need(!is.null(prodata$AcquiredTime),"To view heatmaps, the dataset should include Acquired Time column.")
     )
-    
+
     peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100
     peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100
     if(is.null(prodata$AcquiredTime)) return(NULL)
@@ -405,28 +405,28 @@ shinyServer(function(input,output,session) {
      listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
      listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
     }
-    
+
     plots <- list()
     i <- 1
     for(method in input$heatmap_controlChart_select) {
       p1 <- metrics_heat.map(prodata,
                              data.metrics = input$user_selected_metrics, method = method,
                              peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 1,
-                             title = "Decision-map : CUSUMm",
+                             title = "Decision-map : mean",
                              listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
       p2 <- metrics_heat.map(prodata,
                              data.metrics = input$user_selected_metrics, method = method,
                              peptideThresholdRed, peptideThresholdYellow,input$L, input$U, type = 2,
-                             title = "Decision-map : CUSUMv",
+                             title = "Decision-map : variability",
                              listMean = listMean, listSD = listSD, guidset_selected = is_guidset_selected)
       plots[[i]]   <- p1
       plots[[i+1]] <- p2
-      
+
       i <- i+2
     }
     if(length(plots) > 0)
       do.call("grid.arrange", c(plots, ncol = 1))
-    
+
   }, height = heatmap_height, width = heatmap_width)
 
   ############################################################################################################################

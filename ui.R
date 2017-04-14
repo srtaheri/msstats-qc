@@ -43,7 +43,6 @@ shinyUI(fluidPage(
                            Decision regions (red, yellow and blue) can be designed with 'Create Decision Rules' tab and results are available in 'Metric Summary' tab."),
                        h5(strong("Using MSstatsQC")),
                        p("The steps for generating results are as follows:"),
-                       p("INCLUDE CHEATSHEET WORKFLOW!!!"),
                          ("1) Import your SST/QC data "),
                          br(),
                          ("2)	Determine the guide set to estimate metric mean and variance "),
