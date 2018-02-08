@@ -14,7 +14,7 @@ best_colnames <- list(
   c("MinStartTime","min start time","Min Start Time"),
   c("MaxEndTime", "max end time","Max End Time"),
   c("Precursor","PeptideSequence"),
-  c("Annotations","anotations")
+  c("Annotations","anotations","anotation")
 )
 #### camelCaseSplit function ##############################################################################################
 camelCaseSplit <- function(x) {
@@ -62,11 +62,11 @@ a <- clearString(x)
     return(x)
   }
 }
-
+#############################################################################################################
 input.sanity.check <- function(prodata, processout, finalfile) {
   error_message <- ""
 
-  # get the column names and change them to the column names that we want (For ecample we want Retention Time but a user might use RT, this function auotomatically change RT to Retention Time)
+  # get the column names and change them to the column names that we want (For example we want Retention Time but a user might use RT, this function auotomatically change RT to Retention Time)
   colnames(prodata) <- unlist(lapply(colnames(prodata), function(x)guessColumnName(x)))
 
 
@@ -77,6 +77,7 @@ input.sanity.check <- function(prodata, processout, finalfile) {
   required_column_names <- c("Precursor","Annotations")
   if(!("Annotations" %in% colnames(prodata))) {
     prodata[,"Annotations"] <- NA
+    error_message <- paste(error_message, "Please create a column named Annotation and put all your metrics after this column.To see an example of a sample data click on the {Run with example data} button.\n\n")
   }
   provided_column_names <- colnames(prodata)
   # if(!all(required_column_names %in% provided_column_names)) {
@@ -88,41 +89,17 @@ input.sanity.check <- function(prodata, processout, finalfile) {
 
   # check that all columns other than Precursor and Acquired Time and Annotations are numeric.
   AfterannoColNum <- (which(colnames(prodata)=="Annotations")) + 1
-
-  for(i in  AfterannoColNum:ncol(prodata)) {
-    if(is.numeric(prodata[,i]) == FALSE) {
-      error_message <- paste(error_message, "All the values of", colnames(prodata)[i], "should be numeric and positive.\n\n")
+  if(AfterannoColNum < ncol(prodata)) {
+    for(i in  AfterannoColNum:ncol(prodata)) {
+      if(is.numeric(prodata[,i]) == FALSE) {
+        error_message <- paste(error_message, "All the values of", colnames(prodata)[i], "should be numeric and positive.\n\n")
+      }
     }
   }
-   # if(!is.numeric(prodata[,COL.BEST.RET]) || !all(prodata[,COL.BEST.RET] > 0)) {
-   #   error_message <- paste(error_message, "All the values of Retention Time should be numeric and positive.\n\n")
-   #   #return(error_message)
-   # }
-
-
-   # if(!is.numeric(prodata[,COL.FWHM]) || !all(prodata[,COL.FWHM] > 0)) {
-   #   error_message <- paste(error_message,"All the values of Full Width at Half Maximum should be numeric and positive.\n\n")
-   #   #return(error_message)
-   # }
-
-  # if(!is.numeric(prodata[,COL.TOTAL.AREA]) || !all(prodata[,COL.TOTAL.AREA] > 0)) {
-  #   error_message <- paste(error_message,"All the values of Total Peak Area should be numeric and positive.\n\n")
-  #   #return(error_message)
-  # }
-
-
-  # if(!is.numeric(prodata$MaxEndTime) || !all(prodata$MaxEndTime > 0)) {
-  #   error_message <- paste(error_message,"All the values of Max End Time should be numeric and positive.\n\n")
-  #   #return(error_message)
-  # }
-
-  # if(!is.numeric(prodata$MinStartTime) || !all(prodata$MinStartTime > 0)) {
-  #   error_message <- paste(error_message,"All the values of Min End Time should be numeric and positive. \n\n")
-  #   #return(error_message)
-  # }
 
   if(error_message != "") {
-    return(paste(error_message, "Please check the values to make sure all the inputs are numeric and positive and then try again."))
+    #return(paste(error_message, "Please check the values to make sure all the inputs are numeric and positive and then try again."))
+    return(paste(error_message))
   }
   # for custom metrics we are checking them to be numeric in QCMetrics in "find_custom_metrics" function and only accepting numeric columns after Annotation
 

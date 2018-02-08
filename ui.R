@@ -92,6 +92,7 @@ shinyUI(fluidPage(
                                         p("Upload your data (Comma-separated (*.csv) QC file format)"),
 
                                         p("To see acceptable example data, look at", strong("Help"),"tab"),
+                                        #p("If your data contains min start time and max end time, the app will add a peak assymetry column automatically."),
 
                                         fileInput("filein", "Upload file")
                                       ),

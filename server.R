@@ -56,7 +56,7 @@ shinyServer(function(input,output,session) {
   output$pepSelect <- renderUI({
     prodata <- data$df
     validate(
-      need(!is.null(prodata), "Please upload your data"),
+      need(!is.null(prodata), "Please upload your data.\n\n If your data contains min start time and max end time columns,the App will add a peak assymetry column automatically.\n\n Your data should contain a column named Annotation. Put all your metrics after this column.To see an example of a sample data click on the {Run with example data} button."),
       need(is.data.frame(prodata), prodata)
     )
     selectInput("pepSelection","Choose peptide"
@@ -67,7 +67,7 @@ shinyServer(function(input,output,session) {
   ######Show table of data #####################################################################################################
    output$prodata_table <- renderDataTable({
      validate(
-       need(!is.null(data$df), "Please upload your data"),
+       need(!is.null(data$df), "Please upload your data.\n\n If your data contains min start time and max end time columns, the App will add a peak assymetry column automatically.\n\n Your data should contain a column named Annotation. Put all your metrics after this column.To see an example of a sample data click on the {Run with example data} button."),
        need(is.data.frame(data$df), data$df)
      )
      data$df
