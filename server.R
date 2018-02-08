@@ -229,13 +229,13 @@ shinyServer(function(input,output,session) {
   my_width <- reactive({
     l = length(input$user_selected_metrics)
     if(l == 1) {
-      my_width = 400
+      my_width = 300
     }else if(l == 2) {
       my_width = 800
     }else if(l == 3) {
       my_width = 1200
     }
-    my_width <- 1600
+    my_width <- 1500
 
   })
   heatmap_height <- reactive({

@@ -191,9 +191,11 @@ XmR.data.prepare <- function(prodata, metricData, L,U, type,selectMean,selectSD,
   UCL <- 0
   LCL <- 0
   InRangeOutRange <- rep(0,length(metricData))
-
+  print(metricData)
+  print(length(metricData))
   for(i in 2:length(metricData)) {
     t[i]=abs(metricData[i]-metricData[i-1]) # Compute moving range of metricData
+    print(t[i])
   }
 
   QCno=1:length(metricData)

@@ -8,9 +8,9 @@ COL.PEAK.ASS <- "Peak assymetry"
 # of each vector in the list, are our suggestion so we wrote them in the fisrt place.
 best_colnames <- list(
   c("AcquiredTime","Acquired.Time","time","creation date"),
-  c("Retention time","BestRetentionTime" ,"Best.RT","best retention time", "retention time","rt","best ret time","intensity","Best RT"),
-  c("Full width at half maximum","MaxFWHM","fwhm","max.fwhm", "Max FWHM"),
-  c("Total peak area","Total Area","TotalArea","total area","TA","T.Area"),
+  #c("Retention time","BestRetentionTime" ,"Best.RT","best retention time", "retention time","rt","best ret time","intensity","Best RT"),
+  #c("Full width at half maximum","MaxFWHM","fwhm","max.fwhm", "Max FWHM"),
+  #c("Total peak area","Total Area","TotalArea","total area","TA","T.Area"),
   c("MinStartTime","min start time","Min Start Time"),
   c("MaxEndTime", "max end time","Max End Time"),
   c("Precursor","PeptideSequence"),
