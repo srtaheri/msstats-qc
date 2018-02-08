@@ -42,10 +42,10 @@ find_custom_metrics <- function(prodata) {
 
     prodata <- prodata[, which(colnames(prodata)=="Annotations"):ncol(prodata),drop = FALSE]
     nums <- sapply(prodata, is.numeric)
-    other.metrics <- colnames(prodata[,nums])[1:ifelse(length(colnames(prodata[,nums]))<11,
+    other.metrics <- colnames(prodata[,nums])[1:ifelse(length(colnames(prodata[,nums]))<31,
                                                        length(colnames(prodata[,nums])),
-                                                       10)
-                                              ] # limiting custom metrics up to 10 metrics and not more
+                                                       30)
+                                              ] # limiting custom metrics up to 30 metrics and not more
     if(any(is.na(other.metrics))) {
       return(c())
     }
@@ -403,7 +403,7 @@ heatmap.DataFrame <- function(prodata, data.metrics,method,peptideThresholdRed,p
 ###############################################################################################################
 XmR.Radar.Plot.prepare <- function(prodata,L,U, metric, type,group,XmR_type,selectMean,selectSD, guidset_selected) {
   precursors <- levels(prodata$Precursor)
-  precursors2 <- substring(precursors, first = 1, last = 3)
+  precursors2 <- substring(precursors, first = 1, last = 10)
   QCno.length <- c()
   QCno.out.range.poz <- c()
   QCno.out.range.neg <- c()
@@ -466,7 +466,8 @@ CUSUM.Radar.Plot.prepare <- function(prodata,L,U, metric,type,group, CUSUM.type,
   #precursors <- levels(reorder(prodata$Precursor,prodata[,COL.BEST.RET]))
   h <- 5
   precursors <- levels(prodata$Precursor)
-  precursors2 <- substring(precursors, first = 1, last = 3)
+  precursors2 <- substring(precursors, first = 1, last = 10)
+  
   QCno.length <- c()
   QCno.out.range <- c()
   for(j in 1:length(precursors)) {

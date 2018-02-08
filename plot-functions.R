@@ -284,7 +284,7 @@ XmR.Radar.Plot <- function(prodata, data.metrics, L,U,listMean,listSD,guidset_se
 
   dat <- XmR.Radar.Plot.DataFrame(prodata, data.metrics, L,U,listMean,listSD,guidset_selected)
   #write.csv(file="dataRadar.csv",dat)
-  #print(dat)
+  dat$peptides
   ggplot(dat, aes(y = OutRangeQCno, x = reorder(peptides,orderby),
                   group = group, colour = group, fill=group)) +
     coord_polar() +
@@ -370,8 +370,9 @@ metrics_box.plot <- function(prodata, data.metrics) {
   plots <- list()
   for(i in 1:length(data.metrics)) {
     metric <- data.metrics[i]
-    precursor.data <- substring(reorder(prodata$Precursor,prodata[,metric]), first = 1, last = 3)
-    plots[[i]] <- plot_ly(prodata, y = prodata[,metric], color = precursor.data, type = "box") %>%
+    #precursors <- reorder(prodata$Precursor,prodata[,metric])
+    precursor.data <- substring(reorder(prodata$Precursor,prodata[,metric]), first = 1, last = 10)
+    plots[[i]] <- plot_ly(prodata, y = prodata[,metric],color = precursor.data, type = "box") %>%
       layout(
         annotations = list(
           list(x = 0.5 , y = 1, text = metric, showarrow = F, xref='paper', yref='paper')
@@ -380,7 +381,7 @@ metrics_box.plot <- function(prodata, data.metrics) {
   }
   height <- (length(data.metrics))*300
   p <- do.call(subplot,c(plots,nrows=length(plots))) %>%
-    layout(autosize = F, width = 700, height = height)
+    layout(autosize = F, width = 1000, height = height)
   return(p)
 }
 #####################################################################################################

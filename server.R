@@ -218,31 +218,35 @@ shinyServer(function(input,output,session) {
   ######################################################### height and width in Summary tab ########################################
   my_height <- reactive({
     if(length(input$user_selected_metrics) < 5) {
-      my_height <- ceiling(length(input$summary_controlChart_select))*600
+      my_height <- ceiling(length(input$summary_controlChart_select))*700
     }else if(length(input$user_selected_metrics) < 9) {
-      my_height <- ceiling(length(input$summary_controlChart_select))*1200
+      my_height <- ceiling(length(input$summary_controlChart_select))*1300
     }else {
       my_height <- 1500
     }
 
   })
-  # my_width <- reactive({
-  #   if(length(input$user_selected_metrics) < 5) {
-  #     my_height <- ceiling(ceiling(input$user_selected_metrics))*50
-  #   }else if(length(input$user_selected_metrics) < 9) {
-  #     my_height <- ceiling((input$user_selected_metrics)%%4)*50
-  #   }else {
-  #     my_height <- 1500
-  #   }
-  #
-  # })
+  my_width <- reactive({
+    l = length(input$user_selected_metrics)
+    if(l == 1) {
+      my_width = 400
+    }else if(l == 2) {
+      my_width = 800
+    }else if(l == 3) {
+      my_width = 1200
+    }
+    my_width <- 1600
+
+  })
   heatmap_height <- reactive({
     heatmap_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*230
+    heatmap_height
+    #heatmap_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*400
   })
 
   heatmap_width <- reactive({
     prodata <- data$df
-    heatmap_width <- nrow(prodata[prodata$Precursor == prodata$Precursor[1],])*20
+    heatmap_width <- nrow(prodata[prodata$Precursor == prodata$Precursor[1],])*30
     heatmap_width
   })
   ########################################################## box plot in Metric Summary tab ##########################################
@@ -296,7 +300,7 @@ shinyServer(function(input,output,session) {
     }
     if(length(plots) > 0)
       do.call("grid.arrange", c(plots, ncol = 1))
-  }, height = my_height)
+  }, height = my_height, width = my_width)
 
   ################## decision message for XmR in summary tab #########
   #  output$summary_decision_txt <- renderUI({
