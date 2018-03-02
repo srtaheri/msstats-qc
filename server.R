@@ -250,12 +250,16 @@ shinyServer(function(input,output,session) {
   heatmap_height <- reactive({
     l <- length(input$user_selected_metrics)
     k <- length(input$heatmap_controlChart_select)
-    heatmap_height <- ceiling(k)*ceiling(l)*200
-    
+    if(l == 1) {
+      heatmap_height <- ceiling(k)*300
+    }else {
+      heatmap_height <- ceiling(k)*ceiling(l)*200
+    }
   })
   
   heatmap_width <- reactive({
     heatmap_width <- 1000
+    print(heatmap_width)
   })
   ########################################################## box plot in Metric Summary tab ##########################################
   output$box_plot <- renderPlotly({
