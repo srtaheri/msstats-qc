@@ -126,9 +126,29 @@ shinyServer(function(input,output,session) {
   output$metricSelection <- renderUI({
     checkboxGroupInput("user_selected_metrics","",
                        choices = c(data$metrics),
-                       #selected = c(COL.PEAK.ASS,COL.BEST.RET,
-                       #            COL.FWHM, COL.TOTAL.AREA),
                        inline = TRUE)
+  })
+  
+  output$metricSelectionErrorMsg <- renderUI({
+  AfterannoColNum <- (which(colnames(data$df)=="Annotations")) + 1
+  null_columns <- c()
+  message <- c("This/these metrics contain NA:")
+  if(AfterannoColNum < ncol(data$df)) {
+    colNames <- colnames(data$df)
+    for(i in  AfterannoColNum:ncol(data$df)) {
+      if(sum(is.na(data$df[,i])) > 0) {
+        null_columns <- c(null_columns,colNames[i])
+      }
+    }
+  }
+  message <- HTML(paste(strong(message)))
+  for(i in 1:length(null_columns)) {
+    message <- HTML(paste(message,null_columns[i], sep = '<br/>'))
+  }
+  if(length(message) > 0) {
+    HTML(paste(message,strong("You cannot select this/these metrics for further analysis."), sep = '<br/>'))
+  }
+  
   })
 
   ################################################################# plots ###################################################

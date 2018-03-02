@@ -65,6 +65,7 @@ a <- clearString(x)
 #############################################################################################################
 input.sanity.check <- function(prodata, processout, finalfile) {
   error_message <- ""
+  null_columns <- c()
 
   # get the column names and change them to the column names that we want (For example we want Retention Time but a user might use RT, this function auotomatically change RT to Retention Time)
   colnames(prodata) <- unlist(lapply(colnames(prodata), function(x)guessColumnName(x)))
@@ -90,13 +91,17 @@ input.sanity.check <- function(prodata, processout, finalfile) {
   # check that all columns other than Precursor and Acquired Time and Annotations are numeric.
   AfterannoColNum <- (which(colnames(prodata)=="Annotations")) + 1
   if(AfterannoColNum < ncol(prodata)) {
+    #colNames <- colnames(prodata)
     for(i in  AfterannoColNum:ncol(prodata)) {
       if(is.numeric(prodata[,i]) == FALSE) {
         error_message <- paste(error_message, "All the values of", colnames(prodata)[i], "should be numeric and positive.\n\n")
       }
+      #if(sum(is.na(prodata[,i])) > 0) {
+        #null_columns <- c(null_columns,colNames[i])
+        #}
     }
   }
-
+  
   if(error_message != "") {
     #return(paste(error_message, "Please check the values to make sure all the inputs are numeric and positive and then try again."))
     return(paste(error_message))

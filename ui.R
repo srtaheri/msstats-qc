@@ -132,7 +132,9 @@ shinyUI(fluidPage(
                                   wellPanel(
                                     fluidRow(
                                       column(10,
-                                             uiOutput("metricSelection")
+                                             uiOutput("metricSelection"),
+                                             htmlOutput("metricSelectionErrorMsg")
+                                             
                                       )
                                     )
                                   ),
