@@ -65,7 +65,7 @@ shinyServer(function(input,output,session) {
                 )
   })
   ######Show table of data #####################################################################################################
-   output$prodata_table <- renderDataTable({
+   output$prodata_table <- renderDataTable({  
      validate(
        need(!is.null(data$df), "Please upload your data.\n\n If your data contains min start time and max end time columns, the App will add a peak assymetry column automatically.\n\n Your data should contain a column named Annotation. Put all your metrics after this column.To see an example of a sample data click on the {Run with example data} button."),
        need(is.data.frame(data$df), data$df)
@@ -217,15 +217,23 @@ shinyServer(function(input,output,session) {
   })
   ######################################################### height and width in Summary tab ########################################
   my_height <- reactive({
-    if(length(input$user_selected_metrics) < 5) {
-      my_height <- ceiling(length(input$summary_controlChart_select))*700
-    }else if(length(input$user_selected_metrics) < 9) {
-      my_height <- ceiling(length(input$summary_controlChart_select))*1300
+    l <- length(input$user_selected_metrics)
+    k <- length(input$summary_controlChart_select)
+    if(l < 5) {
+      my_height <- ceiling(k)*700
+    }else if(l < 9) {
+      my_height <- ceiling(k)*1300
+    }else if(l <15) {
+      my_height <- ceiling(k)*1700
+    }else if(l < 20) {
+      my_height <- ceiling(k)*2000
+    }else if(l < 25) {
+      my_height <- ceiling(k)*2300
     }else {
-      my_height <- 1500
+      my_height <- ceiling(k)*2600
     }
-
   })
+  
   my_width <- reactive({
     l = length(input$user_selected_metrics)
     if(l == 1) {
@@ -236,18 +244,18 @@ shinyServer(function(input,output,session) {
       my_width = 1200
     }
     my_width <- 1500
-
+    
   })
+  
   heatmap_height <- reactive({
-    heatmap_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*230
-    heatmap_height
-    #heatmap_height <- ceiling(length(input$user_selected_metrics)*length(input$summary_controlChart_select))*400
+    l <- length(input$user_selected_metrics)
+    k <- length(input$heatmap_controlChart_select)
+    heatmap_height <- ceiling(k)*ceiling(l)*200
+    
   })
-
+  
   heatmap_width <- reactive({
-    prodata <- data$df
-    heatmap_width <- nrow(prodata[prodata$Precursor == prodata$Precursor[1],])*30
-    heatmap_width
+    heatmap_width <- 1000
   })
   ########################################################## box plot in Metric Summary tab ##########################################
   output$box_plot <- renderPlotly({
@@ -301,88 +309,6 @@ shinyServer(function(input,output,session) {
     if(length(plots) > 0)
       do.call("grid.arrange", c(plots, ncol = 1))
   }, height = my_height, width = my_width)
-
-  ################## decision message for XmR in summary tab #########
-  #  output$summary_decision_txt <- renderUI({
-  #    prodata <- data$df
-  #    validate(
-  #      need(!is.null(prodata), "Please upload your data"),
-  #      need(is.data.frame(prodata), prodata),
-  #      need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule")
-  #    )
-  #    peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
-  #    metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
-  #    peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
-  #    metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
-  #
-  #    is_guidset_selected <- FALSE
-  #    if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
-  #      is_guidset_selected <- TRUE
-  #    }
-  #    listMean <- list()
-  #    listSD <- list()
-  #    for(metric in input$user_selected_metrics){
-  #      listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
-  #      listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
-  #    }
-  #    if("XmR" %in% input$summary_controlChart_select && "CUSUM" %in% input$summary_controlChart_select) {
-  #      HTML(paste(
-  #        decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-  #                                           input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),"\n\n",
-  #        decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-  #                                         input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
-  #        sep = "<br/>"
-  #      ))
-  #    }else if("CUSUM" %in% input$summary_controlChart_select) {
-  #      decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-  #                                         input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-  #    }else if("XmR" %in% input$summary_controlChart_select) {
-  #      decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-  #                                       input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-  #    }else {
-  #    }
-  # })
-  ################## decision message for XmR in heatmap tab #########
-  # output$heatmap_txt <- renderUI({
-  #   prodata <- data$df
-  #   validate(
-  #     need(!is.null(prodata), "Please upload your data"),
-  #     need(is.data.frame(prodata), prodata),
-  #     need(!is.null(input$user_selected_metrics),"Please first select metrics and create a decision rule")
-  #   )
-  #   peptideThresholdRed <- (as.numeric(input$threshold_peptide_red))/100 #this is the percentage of peptide user chooses for red flag
-  #   metricThresholdRed <- as.numeric(input$threshold_metric_red) #this is the number of metric user chooses for red flag
-  #   peptideThresholdYellow <- (as.numeric(input$threshold_peptide_yellow))/100 #this is the percentage of peptide user chooses for yellow flag
-  #   metricThresholdYellow <- as.numeric(input$threshold_metric_yellow) #this is the number of metric user chooses for yellow flag
-  #
-  #   is_guidset_selected <- FALSE
-  #   if(input$selectGuideSetOrMeanSD == "Mean and standard deviation estimated from guide set") {
-  #     is_guidset_selected <- TRUE
-  #   }
-  #   listMean <- list()
-  #   listSD <- list()
-  #   for(metric in input$user_selected_metrics){
-  #     listMean[[metric]] <- input[[paste0("selectMean@",metric)]]
-  #     listSD[[metric]] <- input[[paste0("selectSD@",metric)]]
-  #   }
-  #   if("XmR" %in% input$heatmap_controlChart_select && "CUSUM" %in% input$heatmap_controlChart_select) {
-  #     HTML(paste(
-  #       decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-  #                                        input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
-  #       decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-  #                                        input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected),
-  #       sep = "<br/><br/>"
-  #     ))
-  #   }else if("CUSUM" %in% input$heatmap_controlChart_select) {
-  #     decisionRule_warning_message_CUSUM(prodata,input$user_selected_metrics,method = "CUSUM", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-  #                                      input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-  #   }else if("XmR" %in% input$heatmap_controlChart_select) {
-  #     decisionRule_warning_message_XmR(prodata,input$user_selected_metrics,method = "XmR", peptideThresholdRed,peptideThresholdYellow,metricThresholdRed,metricThresholdYellow,
-  #                                      input$L, input$U, type = 2,listMean = listMean,listSD = listSD, guidset_selected = is_guidset_selected)
-  #   }else {
-  #   }
-  #
-  # })
   ############################# heat_map in Summary tab #############################################
   output$heat_map <- renderPlot({
     prodata <- data$df

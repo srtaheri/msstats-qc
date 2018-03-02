@@ -143,16 +143,9 @@ CP.data.prepare <- function(prodata, metricData, type) {
     QCno=1:length_metricData
   }
   tho.hat = which(Et==max(Et)) # change point estimate
-  # print("QCno")
-  # print(QCno)
-  # print("Et")
-  # print(Et)
-  # print("tho.hat")
-  # print(tho.hat)
   plot.data <- data.frame(QCno,Et,tho.hat)
 
   return(plot.data)
-  #print(plot.data)
 }
 ###################################################################################################
 #INPUT : "prodata" is the data user uploads.
@@ -191,11 +184,8 @@ XmR.data.prepare <- function(prodata, metricData, L,U, type,selectMean,selectSD,
   UCL <- 0
   LCL <- 0
   InRangeOutRange <- rep(0,length(metricData))
-  print(metricData)
-  print(length(metricData))
   for(i in 2:length(metricData)) {
     t[i]=abs(metricData[i]-metricData[i-1]) # Compute moving range of metricData
-    print(t[i])
   }
 
   QCno=1:length(metricData)
