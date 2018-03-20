@@ -161,7 +161,7 @@ input_checking <- function(data){
   processout <- rbind(processout, as.matrix(c(" "," ","MSstatsqc - dataProcess function"," "),ncol=1))
 
   data <- input.sanity.check(data, processout, finalfile)
-
+  data <- data[complete.cases(data),] #work with complete cases
 
   return(data)
 }
