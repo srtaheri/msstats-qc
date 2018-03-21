@@ -16,11 +16,6 @@ source("helper-functions.R")
 source("QCMetrics.R")
 
 shinyServer(function(input,output,session) {
-  # COL.BEST.RET <- "Retention Time"
-  # COL.FWHM <- "Full Width at Half Maximum"
-  # COL.TOTAL.AREA <- "Total Peak Area"
-  # COL.PEAK.ASS <- "Peak Assymetry"
-
 
   #### Read data  ##################################################################################################
   data <- reactiveValues(df = NULL, metrics = NULL)
