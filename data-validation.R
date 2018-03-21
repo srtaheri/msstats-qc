@@ -110,6 +110,7 @@ input.sanity.check <- function(prodata, processout, finalfile) {
 
   # if there is any missing value in data replace it with NA
   prodata[prodata==""] <- NA
+  levels(prodata$Annotations) = c(levels(prodata$Annotations), "Not Available")
   prodata["Annotations"][is.na(prodata["Annotations"])] <- "Not Available"
   # some times numeric values of some users are like 333,222 which is not acceptable and we convert it to 333222 by replacing "," to ""
   # prodata[,"Full Width at Half Maximum"] <- as.numeric(gsub(",","",prodata[,"Full Width at Half Maximum"]))
